@@ -103,7 +103,7 @@ func (ue *UeContext) handleRRCReconfiguration(msg *rrcies.RRCReconfiguration) er
 	}
 
 	ies := msg.CriticalExtensions.RrcReconfiguration.NonCriticalExtension
-	if ies.DedicatedNAS_MessageList == nil || len(ies.DedicatedNAS_MessageList) == 0 {
+	if ies == nil || len(ies.DedicatedNAS_MessageList) == 0 {
 		ue.Warn("DLInformationTransfer has no NAS message")
 		return nil
 	}

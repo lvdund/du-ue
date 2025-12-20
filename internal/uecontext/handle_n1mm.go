@@ -87,11 +87,13 @@ func (ue *UeContext) handleAuthenticationReject(message *nas.AuthenticationRejec
 	_ = message
 	ue.Error("Authentication of UE failed")
 	ue.SetState(UE_STATE_DEREGISTERED)
+	ue.ResetSecurityContext()
 }
 
 func (ue *UeContext) handleRegistrationReject(message *nas.RegistrationReject) {
 	ue.handleCause5GMM(&message.GmmCause)
 	ue.SetState(UE_STATE_DEREGISTERED)
+	ue.ResetSecurityContext()
 }
 
 func (ue *UeContext) handleGmmStatus(message *nas.GmmStatus) {

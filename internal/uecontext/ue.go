@@ -123,7 +123,7 @@ func (ue *UeContext) SetState(state uint8) {
 	ue.state = state
 }
 
-func (ue *UeContext) resetSecurityContext() {
+func (ue *UeContext) ResetSecurityContext() {
 	ue.mutex.Lock()
 	defer ue.mutex.Unlock()
 	ue.secCtx = nil
