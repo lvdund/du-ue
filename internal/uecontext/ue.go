@@ -22,6 +22,13 @@ const (
 	UE_STATE_REGISTERED
 )
 
+// 5GSM PDU Session States
+const (
+	SM5G_PDU_SESSION_INACTIVE uint8 = iota
+	SM5G_PDU_SESSION_ACTIVE_PENDING
+	SM5G_PDU_SESSION_ACTIVE
+)
+
 type UeContext struct {
 	*logger.Logger
 	id uint16
@@ -47,6 +54,16 @@ type UeContext struct {
 	ReceiveFromDuChannel chan []byte
 	SendToDuChannel      chan []byte
 	IsReadyConn          chan bool
+
+	PduSessions map[uint8]*PduSession
+}
+
+type PduSession struct {
+	Id         uint8
+	PduAddress string
+	Dnn        string
+	SNssai     *nas.SNssai
+	State      uint8 // 5GSM_PDU_SESSION_INACTIVE, ACTIVE_PENDING, ACTIVE
 }
 
 func CreateUe(
@@ -54,14 +71,15 @@ func CreateUe(
 	ctx context.Context,
 ) *UeContext {
 	ue := &UeContext{
-		id:     1, // Fixed ID for single UE
-		mcc:    conf.PLMN.MCC,
-		mnc:    conf.PLMN.MNC,
-		msin:   conf.MSIN,
-		secCap: conf.GetUESecurityCapability(),
-		state:  UE_STATE_DEREGISTERED,
-		Logger: logger.InitLogger("", map[string]string{"mod": "ue", "msin": conf.MSIN}),
-		ctx:    ctx,
+		id:          1, // Fixed ID for single UE
+		mcc:         conf.PLMN.MCC,
+		mnc:         conf.PLMN.MNC,
+		msin:        conf.MSIN,
+		secCap:      conf.GetUESecurityCapability(),
+		state:       UE_STATE_DEREGISTERED,
+		Logger:      logger.InitLogger("", map[string]string{"mod": "ue", "msin": conf.MSIN}),
+		ctx:         ctx,
+		PduSessions: make(map[uint8]*PduSession),
 	}
 
 	// init AuthContext
