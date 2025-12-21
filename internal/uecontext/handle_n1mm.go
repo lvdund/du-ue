@@ -1,6 +1,8 @@
 package uecontext
 
 import (
+	"time"
+
 	"github.com/reogac/nas"
 
 	"du_ue/internal/uecontext/sec"
@@ -61,6 +63,9 @@ func (ue *UeContext) handleNas_n1mm(nasMsg *nas.NasMessage) {
 	case nas.GmmStatusMsgType:
 		ue.Error("Receive Status 5GMM")
 		ue.handleGmmStatus(gmm.GmmStatus)
+	case nas.DlNasTransportMsgType:
+		ue.Info("Receive DL NAS Transport")
+		ue.handleDlNasTransport(gmm.DlNasTransport)
 
 	default:
 		ue.Warn("Received unknown NAS message 0x%x", nasMsg.Gmm.MsgType)
@@ -230,6 +235,19 @@ func (ue *UeContext) handleRegistrationAccept(message *nas.RegistrationAccept) {
 	nasCtx := ue.getNasContext() // must be non-nil
 	responsePdu, _ := nas.EncodeMm(nasCtx, response)
 	ue.Send_UlInformationTransfer_To_Du(responsePdu)
+
+	ue.Info("Registration Complete sent")
+
+	// After registration is complete, trigger PDU Session Establishment
+	go func() {
+		// Small delay to ensure Registration Complete is processed first
+		time.Sleep(100 * time.Millisecond)
+
+		ue.Info("Auto-triggering default PDU Session establishment")
+		if err := ue.TriggerDefaultPduSession(); err != nil {
+			ue.Error("Failed to trigger default PDU session: %v", err)
+		}
+	}()
 }
 
 func (ue *UeContext) handleIdentityRequest(message *nas.IdentityRequest) {

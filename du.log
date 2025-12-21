@@ -1,0 +1,50 @@
+[90m4:02PM[0m [32mINF[0m [1mStarting DU-UE Simulator[0m
+4:02PM [32mINFO[0m Connection configured with PPID=62                	 du_id=1 mod=f1ap_client
+4:02PM [32mINFO[0m SCTP connection established to CU-CP              	 du_id=1 mod=f1ap_client
+4:02PM [32mINFO[0m Sending F1 Setup Request                          	 du_id=1 mod=f1ap_client
+[90m4:02PM[0m [32mINF[0m [1mDU-UE Simulator is running. Press Ctrl+C to stop.[0m
+4:02PM [32mINFO[0m Handling F1AP message, length: 46                 	 du_id=1 mod=f1ap_client
+4:02PM [32mINFO[0m Received F1 Setup Response                        	 du_id=1 mod=f1ap_client
+4:02PM [32mINFO[0m F1 Setup Response received 0                     	 du_id=1 mod=f1ap_client
+4:02PM [32mINFO[0m ==== Started listening for RRC messages from UE ===	 du_id=1 mod=du
+4:02PM TRACE milenage key=8baf473f2f8fd09487cccbd7097c6862                                   	 mod=milenage
+4:02PM TRACE milenage opc=8e27b6af0e692e750f32667a3b14605d                                   	 mod=milenage
+4:02PM [32mINFO[0m Initializing RRC connection                       	 mod=ue msin=0000000001
+4:02PM [32mINFO[0m Sending RRCSetupRequest to DU                     	 mod=ue msin=0000000001
+4:02PM [32mINFO[0m Waiting for RRCSetup from DU...                   	 mod=ue msin=0000000001
+4:02PM [32mINFO[0m Received RRC message from UE, length: 7, [2 26 43 60 77 94 96]      	 du_id=1 mod=du
+4:02PM [32mINFO[0m Sending Initial UL RRC Message Transfer           	 du_id=1 mod=du
+4:02PM [32mINFO[0m Successfully sent Initial UL RRC Message Transfer to CU-CP	 du_id=1 mod=du
+4:02PM [32mINFO[0m Handling F1AP message, length: 46                 	 du_id=1 mod=f1ap_client
+4:02PM [32mINFO[0m Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+4:02PM [32mINFO[0m DL RRC Message Transfer: CU-UE-ID=2, DU-UE-ID=0, SRB-ID=0	 du_id=1 mod=du
+4:02PM [32mINFO[0m Forwarding RRC message to UE, length: 6          	 du_id=1 mod=du
+4:02PM [32mINFO[0m Handling RRCSetup message, length: 6 bytes       	 mod=ue msin=0000000001
+4:02PM [32mINFO[0m Received RRCSetup from DU                         	 mod=ue msin=0000000001
+4:02PM [32mINFO[0m Initiating Registration                           	 mod=ue msin=0000000001
+4:02PM [32mINFO[0m Created NAS Registration Request, length: 23 bytes	 mod=ue msin=0000000001
+4:02PM [32mINFO[0m Sending RRCSetupComplete to DU (with NAS Registration Request embedded)	 mod=ue msin=0000000001
+4:02PM [32mINFO[0m ==== RRC connection Initialized ====              	 mod=ue msin=0000000001
+4:02PM [32mINFO[0m UE context initialized after F1 Setup             	 du_id=1 mod=du
+4:02PM [32mINFO[0m UE context and channels initialized after F1 Setup	 du_id=1 mod=du
+4:02PM [32mINFO[0m Started listening for RRC messages from DU        	 mod=ue msin=0000000001
+4:02PM [32mINFO[0m Received RRC message from UE, length: 29, [4 2 0 23 126 0 65 121 0 13 1 153 249 7 0 0 0 0 0 0 0 0 16 46 2 240 240 64 32]      	 du_id=1 mod=du
+4:02PM [32mINFO[0m Sending UL RRC Message Transfer                   	 du_id=1 mod=du
+4:02PM [32mINFO[0m Handling F1AP message, length: 47                 	 du_id=1 mod=f1ap_client
+4:02PM [32mINFO[0m Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+4:02PM [32mINFO[0m DL RRC Message Transfer: CU-UE-ID=0, DU-UE-ID=1, SRB-ID=0	 du_id=1 mod=du
+4:02PM [32mINFO[0m Forwarding RRC message to UE, length: 7          	 du_id=1 mod=du
+4:02PM [32mINFO[0m Handle RRC message, length: 7 bytes, [10 16 4 126 0 68 22]          	 mod=ue msin=0000000001
+4:02PM [32mINFO[0m Received DLInformationTransfer                    	 mod=ue msin=0000000001
+4:02PM [32mINFO[0m Extracted NAS message from DLInformationTransfer, length: 4	 mod=ue msin=0000000001
+4:02PM [31mERROR[0m Receive Registration Reject                       	 mod=ue msin=0000000001
+4:02PM [31mERROR[0m UE received a 5GMM Failure, cause: Congestion             	 mod=ue msin=0000000001
+4:02PM [32mINFO[0m Handling F1AP message, length: 47                 	 du_id=1 mod=f1ap_client
+4:02PM [32mINFO[0m Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+4:02PM [32mINFO[0m DL RRC Message Transfer: CU-UE-ID=0, DU-UE-ID=1, SRB-ID=0	 du_id=1 mod=du
+4:02PM [32mINFO[0m Forwarding RRC message to UE, length: 7          	 du_id=1 mod=du
+4:02PM [32mINFO[0m Handle RRC message, length: 7 bytes, [10 16 4 126 0 68 12]          	 mod=ue msin=0000000001
+4:02PM [32mINFO[0m Received DLInformationTransfer                    	 mod=ue msin=0000000001
+4:02PM [32mINFO[0m Extracted NAS message from DLInformationTransfer, length: 4	 mod=ue msin=0000000001
+4:02PM [31mERROR[0m Receive Registration Reject                       	 mod=ue msin=0000000001
+4:02PM [31mERROR[0m UE received a 5GMM Failure, cause: Tracking area not allowed             	 mod=ue msin=0000000001
