@@ -43,7 +43,7 @@ func (ue *UeContext) triggerInitPduSessionRequestInner(
 
 	// Set PTI and Session ID
 	n1Sm.SetPti(1) // Always use PTI = 1 for initial request
-	n1Sm.SetSessionId(pduSession.id)
+	n1Sm.SetSessionId(pduSession.Id)
 
 	// Encode N1 SM message
 	n1SmPdu, err := nas.EncodeSm(n1Sm)
@@ -54,15 +54,15 @@ func (ue *UeContext) triggerInitPduSessionRequestInner(
 
 	// Send via UL NAS Transport
 	requestType := nas.UlNasTransportRequestTypeInitialRequest
-	ue.sendN1Sm(n1SmPdu, pduSession.id, &requestType, params)
+	ue.sendN1Sm(n1SmPdu, pduSession.Id, &requestType, params)
 }
 
 // triggerInitPduSessionReleaseRequest initiates PDU Session Release
 func (ue *UeContext) triggerInitPduSessionReleaseRequest(pduSession *PduSession) {
-	ue.Info("Initiating Release of PDU Session %d", pduSession.id)
+	ue.Info("Initiating Release of PDU Session %d", pduSession.Id)
 
 	if pduSession.GetState() != PDUSessionActive {
-		ue.Warn("Skipping releasing PDU Session ID %d as it's not active", pduSession.id)
+		ue.Warn("Skipping releasing PDU Session ID %d as it's not active", pduSession.Id)
 		return
 	}
 
@@ -72,15 +72,15 @@ func (ue *UeContext) triggerInitPduSessionReleaseRequest(pduSession *PduSession)
 	// Build PDU Session Release Request
 	n1Sm := new(nas.PduSessionReleaseRequest)
 	n1Sm.SetPti(1)
-	n1Sm.SetSessionId(pduSession.id)
+	n1Sm.SetSessionId(pduSession.Id)
 
 	n1SmPdu, _ := nas.EncodeSm(n1Sm)
-	ue.sendN1Sm(n1SmPdu, pduSession.id, nil, nil)
+	ue.sendN1Sm(n1SmPdu, pduSession.Id, nil, nil)
 }
 
 // triggerInitPduSessionReleaseComplete sends PDU Session Release Complete
 func (ue *UeContext) triggerInitPduSessionReleaseComplete(pduSession *PduSession) {
-	ue.Info("Initiating PDU Session Release Complete for PDU Session: %d", pduSession.id)
+	ue.Info("Initiating PDU Session Release Complete for PDU Session: %d", pduSession.Id)
 
 	if pduSession.GetState() == PDUSessionInactive {
 		ue.Warn("Unable to send PDU Session Release Complete for a PDU Session which is inactive")
@@ -90,14 +90,14 @@ func (ue *UeContext) triggerInitPduSessionReleaseComplete(pduSession *PduSession
 	// Build PDU Session Release Complete
 	n1Sm := new(nas.PduSessionReleaseComplete)
 	n1Sm.SetPti(1) // Must be same as received command message
-	n1Sm.SetSessionId(pduSession.id)
+	n1Sm.SetSessionId(pduSession.Id)
 
 	n1SmPdu, _ := nas.EncodeSm(n1Sm)
-	ue.sendN1Sm(n1SmPdu, pduSession.id, nil, nil)
+	ue.sendN1Sm(n1SmPdu, pduSession.Id, nil, nil)
 
 	// Mark session as inactive and release
 	pduSession.SetState(PDUSessionInactive)
-	ue.releasePduSession(pduSession.id)
+	ue.releasePduSession(pduSession.Id)
 }
 
 // TriggerDefaultPduSession triggers PDU session with default parameters
@@ -216,13 +216,13 @@ func (ue *UeContext) sendN1Sm(
 	}
 
 	if requestType != nil {
-		ulNasTransport.RequestType = requestType  
+		ulNasTransport.RequestType = requestType
 	}
 
 	// Add optional parameters from params map
 	if params != nil {
 		if dnn, ok := (*params)["dnn"].(string); ok && dnn != "" {
-			ulNasTransport.Dnn = nas.NewDnn(dnn)  
+			ulNasTransport.Dnn = nas.NewDnn(dnn)
 		}
 	}
 

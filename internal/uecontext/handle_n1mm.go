@@ -73,10 +73,6 @@ func (ue *UeContext) handleNas_n1mm(nasMsg *nas.NasMessage) {
 		ue.Info("Receive DL NAS Transport")
 		ue.handleDlNasTransport(gmm.DlNasTransport)
 
-	case nas.DlNasTransportMsgType:
-		ue.Info("Receive DL NAS Transport")
-		ue.handleDlNasTransport(gmm.DlNasTransport)
-
 	default:
 		ue.Warn("Received unknown NAS message 0x%x", nasMsg.Gmm.MsgType)
 	}
@@ -287,26 +283,4 @@ func (ue *UeContext) handleIdentityRequest(message *nas.IdentityRequest) {
 	} else {
 		ue.Send_UlInformationTransfer_To_Du(nasPdu)
 	}
-}
-
-func (ue *UeContext) handleDlNasTransport(message *nas.DlNasTransport) {
-	if uint8(message.PayloadContainerType) != nas.PayloadContainerTypeN1SMInfo {
-		ue.Error("Error in DL NAS Transport, Payload Container Type not expected value")
-		return
-	}
-
-	if message.PduSessionId == nil {
-		ue.Error("Error in DL NAS Transport, PDU Session ID is missing")
-		return
-	}
-
-	// Decode the packed 5GSM message from the Payload Container
-	nasMsg, err := nas.Decode(nil, message.PayloadContainer)
-	if err != nil {
-		ue.Error("Error in DL NAS Transport, fail to decode N1Sm: %v", err)
-		return
-	}
-
-	// Route to 5GSM handler
-	ue.handleNas_n1sm(&nasMsg)
 }

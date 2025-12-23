@@ -5,6 +5,8 @@ import (
 	"sync"
 
 	"du_ue/internal/common/logger"
+
+	"github.com/reogac/nas"
 )
 
 // PDU Session States
@@ -19,14 +21,20 @@ const (
 // PduSession represents a single PDU session
 type PduSession struct {
 	*logger.Logger
-	id    uint8  // PDU Session ID (1-15)
+	Id    uint8  // PDU Session ID (1-15)
 	state uint8  // Current state
-	ueIP  string // UE IP address
+	ueIP  string // UE IP address (formatted string)
 
 	// Session parameters
-	dnn            string
-	pduSessionType uint8
-	sscMode        uint8
+	PduAddress                           string   // Raw hex string or similar? Handled by setIp logic usually.
+	Dnn                                  *nas.Dnn // Changed from string to *nas.Dnn to match handler logic
+	pduSessionType                       uint8
+	SscMode                              uint8 // Exported for handler
+	SNssai                               *nas.SNssai
+	SessionAmbr                          *nas.SessionAmbr
+	AuthorizedQosRules                   *nas.QosRules
+	AuthorizedQosFlowDescriptions        *nas.QosFlowDescriptions
+	ExtendedProtocolConfigurationOptions *nas.ExtendedProtocolConfigurationOptions
 
 	// Transaction
 	pti uint8 // Procedure Transaction Identity
@@ -40,16 +48,30 @@ type PduSession struct {
 // NewPduSession creates a new PDU Session
 func NewPduSession(ue *UeContext, sessionId uint8) *PduSession {
 	return &PduSession{
-		id:     sessionId,
-		state:  PDUSessionInactive,
-		pti:    1, // Start with PTI = 1
-		ue:     ue,
+		Id:    sessionId,
+		state: PDUSessionInactive,
+		pti:   1, // Start with PTI = 1
+		ue:    ue,
 		Logger: logger.InitLogger("", map[string]string{
 			"mod":   "pdu_session",
 			"msin":  ue.msin,
 			"pduId": fmt.Sprintf("%d", sessionId),
 		}),
 	}
+}
+
+func (ps *PduSession) SetSNssai(sst uint8, sd string) error {
+	if ps.SNssai == nil {
+		ps.SNssai = &nas.SNssai{}
+	}
+	return ps.SNssai.Set(sst, sd)
+}
+
+func (ps *PduSession) SetMappedSNssai(sst uint8, sd string) error {
+	if ps.SNssai == nil {
+		ps.SNssai = &nas.SNssai{}
+	}
+	return ps.SNssai.SetMapped(sst, sd)
 }
 
 // GetState returns current state (thread-safe)

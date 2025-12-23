@@ -22,17 +22,6 @@ const (
 	UE_STATE_REGISTERED
 )
 
-// 5GSM PDU Session States
-const (
-	SM5G_PDU_SESSION_INACTIVE uint8 = iota
-	SM5G_PDU_SESSION_ACTIVE_PENDING
-	SM5G_PDU_SESSION_ACTIVE
-
-	// Aliases for compatibility
-	PDUSessionInactive = SM5G_PDU_SESSION_INACTIVE
-	PDUSessionActive   = SM5G_PDU_SESSION_ACTIVE
-)
-
 type UeContext struct {
 	*logger.Logger
 	id uint16
@@ -62,77 +51,6 @@ type UeContext struct {
 	IsReadyConn          chan bool
 
 	PduSessions map[uint8]*PduSession
-}
-
-type PduSession struct {
-	Id                                   uint8
-	PduAddress                           string
-	ueIP                                 string // Cached IP string for helpers
-	Dnn                                  *nas.Dnn
-	SNssai                               *nas.SNssai
-	SessionAmbr                          *nas.SessionAmbr
-	AuthorizedQosRules                   *nas.QosRules
-	AuthorizedQosFlowDescriptions        *nas.QosFlowDescriptions
-	ExtendedProtocolConfigurationOptions *nas.ExtendedProtocolConfigurationOptions
-	SscMode                              uint8
-	State                                uint8 // 5GSM_PDU_SESSION_INACTIVE, ACTIVE_PENDING, ACTIVE
-}
-
-// Helper methods from incoming branch requirements
-
-func (ue *UeContext) getPduSession(id uint8) *PduSession {
-	ue.mutex.Lock()
-	defer ue.mutex.Unlock()
-	if session, ok := ue.PduSessions[id]; ok {
-		return session
-	}
-	return nil
-}
-
-func (ue *UeContext) releasePduSession(id uint8) {
-	ue.mutex.Lock()
-	defer ue.mutex.Unlock()
-	delete(ue.PduSessions, id)
-}
-
-func (ps *PduSession) Info(format string, args ...interface{}) {
-	// Simple wrapper for now, ideally would use a logger but PduSession doesn't have one attached directly
-	// For now, relies on the caller logging or using this as a placeholder
-	// In a real implementation this might propagate to the parent UE logger
-	// For this fix, we just print to stdout to avoid compilation error if used for logging
-	fmt.Printf("[PDU-%d] "+format+"\n", append([]interface{}{ps.Id}, args...)...)
-}
-
-func (ps *PduSession) setIp(content []byte) {
-	// PDU Address content: [Address (4 or 16 bytes)]
-	// The type byte is stripped by PduAddress.Content()
-	if len(content) == 4 {
-		// IPv4
-		ps.ueIP = fmt.Sprintf("%d.%d.%d.%d", content[0], content[1], content[2], content[3])
-	} else if len(content) == 16 {
-		// IPv6
-		ps.ueIP = fmt.Sprintf("%x:%x:%x:%x:%x:%x:%x:%x",
-			content[0:2], content[2:4], content[4:6], content[6:8],
-			content[8:10], content[10:12], content[12:14], content[14:16])
-	}
-}
-
-func (ps *PduSession) SetSNssai(sst uint8, sd string) error {
-	if ps.SNssai == nil {
-		ps.SNssai = &nas.SNssai{}
-	}
-	return ps.SNssai.Set(sst, sd)
-}
-
-func (ps *PduSession) SetMappedSNssai(sst uint8, sd string) error {
-	if ps.SNssai == nil {
-		ps.SNssai = &nas.SNssai{}
-	}
-	return ps.SNssai.SetMapped(sst, sd)
-}
-
-func (ps *PduSession) SetState(state uint8) {
-	ps.State = state
 }
 
 func CreateUe(
