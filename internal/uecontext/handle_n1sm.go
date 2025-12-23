@@ -1,7 +1,6 @@
 package uecontext
 
 import (
-	"fmt"
 	"github.com/reogac/nas"
 )
 
@@ -44,58 +43,52 @@ func (ue *UeContext) handlePduSessionEstablishmentAccept(msg *nas.PduSessionEsta
 		return
 	}
 
-	sessionId := msg.GetSessionId()
-	ue.Info("PDU Session %d established successfully", sessionId)
+	ue.Info("Receiving PDU Session Establishment Accept")
 
-	// Validations from incoming branch
 	if msg.GetPti() != 1 {
-		ue.Warn("Warning: PDU Session Establishment Accept, PTI not the expected value (expected 1)")
+		ue.Error("Error in PDU Session Establishment Accept, PTI not the expected value")
+		return
 	}
 	if msg.SelectedPduSessionType != 1 {
-		ue.Warn("Warning: PDU Session Establishment Accept, PDU Session Type not the expected value (expected 1)")
+		ue.Error("Error in PDU Session Establishment Accept, PDU Session Type not the expected value")
+		return
 	}
 
-	// Log received info
+	// Update PDU Session information
+	pduSessionId := msg.GetSessionId()
+
+	// Helper method (to be implemented)
+	pduSession := ue.getPduSession(pduSessionId)
+	if pduSession == nil {
+		ue.Error("Receiving PDU Session Establishment Accept about an unknown PDU Session, id: %d", pduSessionId)
+		return
+	}
+
+	// Get PDU Address (IP)
 	if msg.PduAddress != nil {
-		ue.Info("  PDU Address: %v", msg.PduAddress.Content())
+		ueIp := msg.PduAddress
+		pduSession.setIp(ueIp.Content())
+		pduSession.Info("PDU address received: %s", pduSession.ueIP)
 	}
 
+	// Get QoS Rules (Kept log from local branch)
 	ue.Info("  QoS Rules: %v", msg.AuthorizedQosRules.Bytes)
 
+	// Get DNN
 	if msg.Dnn != nil {
-		ue.Info("  DNN: %s", msg.Dnn.String())
+		pduSession.Info("PDU session DNN: %s", msg.Dnn.String())
 	}
+
+	// Get S-NSSAI
 	if msg.SNssai != nil {
-		ue.Info("  S-NSSAI: SST=%d, SD=%s", msg.SNssai.Sst, msg.SNssai.GetSd())
+		sst := msg.SNssai.Sst
+		sd := msg.SNssai.GetSd()
+		pduSession.Info("PDU session NSSAI -- sst:%d sd:%s", sst, sd)
 	}
 
-	// Store session in UE context
-	// Using local logic because incoming logic uses missing setters
-	var pduAddr string
-	if msg.PduAddress != nil {
-		// PDU Address is typically 5 bytes: [PDU Type + 4 bytes IPv4]
-		content := msg.PduAddress.Content()
-		if len(content) >= 5 {
-			pduAddr = fmt.Sprintf("%d.%d.%d.%d", content[1], content[2], content[3], content[4])
-		}
-	}
-
-	var dnnStr string
-	if msg.Dnn != nil {
-		dnnStr = msg.Dnn.String()
-	}
-
-	newSession := &PduSession{
-		Id:         uint8(sessionId),
-		PduAddress: pduAddr,
-		Dnn:        dnnStr,
-		SNssai:     msg.SNssai,
-		State:      SM5G_PDU_SESSION_ACTIVE,
-	}
-
-	ue.mutex.Lock()
-	ue.PduSessions[uint8(sessionId)] = newSession
-	ue.mutex.Unlock()
+	// Change state to ACTIVE
+	pduSession.SetState(PDUSessionActive)
+	pduSession.Info("PDU Session established successfully")
 }
 
 // handlePduSessionEstablishmentReject processes PDU Session Establishment Reject
@@ -105,16 +98,19 @@ func (ue *UeContext) handlePduSessionEstablishmentReject(msg *nas.PduSessionEsta
 		return
 	}
 
-	sessionId := msg.GetSessionId()
-	cause := msg.GsmCause
-	
-	// Use the helper from incoming branch for better logging
-	ue.Error("PDU Session %d rejected, cause: %d (%s)", sessionId, cause, cause5GSMToString(cause))
+	pduSessionId := msg.GetSessionId()
+	ue.Error("Receiving PDU Session Establishment Reject for session id %d 5GSM Cause: %s",
+		pduSessionId, cause5GSMToString(uint8(msg.GsmCause)))
 
-	// Remove any pending session state if it exists
-	ue.mutex.Lock()
-	delete(ue.PduSessions, uint8(sessionId))
-	ue.mutex.Unlock()
+	pduSession := ue.getPduSession(pduSessionId)
+	if pduSession == nil {
+		ue.Error("Cannot retry PDU Session Request for PDU Session after Reject")
+		return
+	}
+
+	// Release the session
+	pduSession.SetState(PDUSessionInactive)
+	ue.releasePduSession(pduSessionId)
 }
 
 // handlePduSessionReleaseCommand processes PDU Session Release Command
@@ -124,26 +120,27 @@ func (ue *UeContext) handlePduSessionReleaseCommand(msg *nas.PduSessionReleaseCo
 		return
 	}
 
-	sessionId := msg.GetSessionId()
-	ue.Info("PDU Session %d release commanded", sessionId)
+	pduSessionId := msg.GetSessionId()
+	ue.Info("Receiving PDU Session Release Command for session id = %d", pduSessionId)
 
-	// Clean up session from UE context
-	ue.mutex.Lock()
-	delete(ue.PduSessions, uint8(sessionId))
-	ue.mutex.Unlock()
+	pduSession := ue.getPduSession(pduSessionId)
+	if pduSession == nil {
+		ue.Error("Unable to delete PDU Session from UE as the PDU Session was not found. Ignoring.")
+		return
+	}
 
-	// TODO: Send PDU Session Release Complete
-	// (Incoming branch had logic here, but required methods missing in ue.go)
+	// Send PDU Session Release Complete
+	ue.triggerInitPduSessionReleaseComplete(pduSession)
 }
 
-// handleCause5GSM processes 5GSM cause (From incoming branch)
+// handleCause5GSM processes 5GSM cause
 func (ue *UeContext) handleCause5GSM(cause *uint8) {
 	if cause != nil {
 		ue.Error("UE received a 5GSM Failure, cause: %s", cause5GSMToString(uint8(*cause)))
 	}
 }
 
-// cause5GSMToString converts 5GSM cause code to string (From incoming branch)
+// cause5GSMToString converts 5GSM cause code to string
 func cause5GSMToString(cause uint8) string {
 	// Common 5GSM causes from TS 24.501
 	switch cause {
