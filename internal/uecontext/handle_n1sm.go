@@ -4,11 +4,11 @@ import (
 	"github.com/reogac/nas"
 )
 
-// handleNas_n1sm handles 5G Session Management messages
+// handleNas_n1sm handles NAS Session Management messages
 func (ue *UeContext) handleNas_n1sm(nasMsg *nas.NasMessage) {
 	gsm := nasMsg.Gsm
 	if gsm == nil {
-		ue.Error("NAS message has no GSM content")
+		ue.Error("Err in DL NAS Transport, N1Sm is missing")
 		return
 	}
 
@@ -71,8 +71,11 @@ func (ue *UeContext) handlePduSessionEstablishmentAccept(msg *nas.PduSessionEsta
 		pduSession.Info("PDU address received: %s", pduSession.ueIP)
 	}
 
-	// Get QoS Rules (Kept log from local branch)
 	ue.Info("  QoS Rules: %v", msg.AuthorizedQosRules.Bytes)
+	// Get QoS Rules (comment out if field doesn't exist)
+	// if msg.AuthorizedQosRules != nil {
+	// 	pduSession.Info("PDU session QoS RULES received")
+	// }
 
 	// Get DNN
 	if msg.Dnn != nil {

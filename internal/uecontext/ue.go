@@ -47,6 +47,8 @@ type UeContext struct {
 	auth   AuthContext          // on-going authentication context
 	secCtx *sec.SecurityContext // current security context
 
+	sessions [16]*PduSession
+
 	mutex sync.Mutex
 	ctx   context.Context
 
