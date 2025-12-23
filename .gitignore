@@ -1,4 +1,8 @@
 .cursor/
 du_ue
-StormSIM/
-central-unit/
+StormSIM-main
+src
+docs
+du-ue-simulator
+central-unit
+.central-unit

@@ -14,25 +14,35 @@ func (ue *UeContext) handleNas_n1sm(nasMsg *nas.NasMessage) {
 
 	switch gsm.MsgType {
 	case nas.PduSessionEstablishmentAcceptMsgType:
+		ue.Info("Receive PDU Session Establishment Accept")
 		ue.handlePduSessionEstablishmentAccept(gsm.PduSessionEstablishmentAccept)
 
-	case nas.PduSessionReleaseCommandMsgType:
-		ue.handlePduSessionReleaseCommand(gsm.PduSessionReleaseCommand)
-
 	case nas.PduSessionEstablishmentRejectMsgType:
+		ue.Error("Receive PDU Session Establishment Reject")
 		ue.handlePduSessionEstablishmentReject(gsm.PduSessionEstablishmentReject)
 
+	case nas.PduSessionReleaseCommandMsgType:
+		ue.Info("Receive PDU Session Release Command")
+		ue.handlePduSessionReleaseCommand(gsm.PduSessionReleaseCommand)
+
 	case nas.GsmStatusMsgType:
-		ue.Error("Receive Status 5GSM")
-		ue.handleCause5GSM(&gsm.GsmStatus.GsmCause)
+		ue.Error("Receive 5GSM Status")
+		if gsm.GsmStatus != nil {
+			ue.handleCause5GSM(&gsm.GsmStatus.GsmCause)
+		}
 
 	default:
-		ue.Error("Receiving Unknown Dl NAS Transport message!! %d", gsm.MsgType)
+		ue.Warn("Unknown 5GSM message type: 0x%x", gsm.MsgType)
 	}
 }
 
 // handlePduSessionEstablishmentAccept processes PDU Session Establishment Accept
 func (ue *UeContext) handlePduSessionEstablishmentAccept(msg *nas.PduSessionEstablishmentAccept) {
+	if msg == nil {
+		ue.Error("PDU Session Establishment Accept is nil")
+		return
+	}
+
 	ue.Info("Receiving PDU Session Establishment Accept")
 
 	if msg.GetPti() != 1 {
@@ -46,6 +56,8 @@ func (ue *UeContext) handlePduSessionEstablishmentAccept(msg *nas.PduSessionEsta
 
 	// Update PDU Session information
 	pduSessionId := msg.GetSessionId()
+
+	// Helper method (to be implemented)
 	pduSession := ue.getPduSession(pduSessionId)
 	if pduSession == nil {
 		ue.Error("Receiving PDU Session Establishment Accept about an unknown PDU Session, id: %d", pduSessionId)
@@ -59,6 +71,7 @@ func (ue *UeContext) handlePduSessionEstablishmentAccept(msg *nas.PduSessionEsta
 		pduSession.Info("PDU address received: %s", pduSession.ueIP)
 	}
 
+	ue.Info("  QoS Rules: %v", msg.AuthorizedQosRules.Bytes)
 	// Get QoS Rules (comment out if field doesn't exist)
 	// if msg.AuthorizedQosRules != nil {
 	// 	pduSession.Info("PDU session QoS RULES received")
@@ -83,6 +96,11 @@ func (ue *UeContext) handlePduSessionEstablishmentAccept(msg *nas.PduSessionEsta
 
 // handlePduSessionEstablishmentReject processes PDU Session Establishment Reject
 func (ue *UeContext) handlePduSessionEstablishmentReject(msg *nas.PduSessionEstablishmentReject) {
+	if msg == nil {
+		ue.Error("PDU Session Establishment Reject is nil")
+		return
+	}
+
 	pduSessionId := msg.GetSessionId()
 	ue.Error("Receiving PDU Session Establishment Reject for session id %d 5GSM Cause: %s",
 		pduSessionId, cause5GSMToString(uint8(msg.GsmCause)))
@@ -100,6 +118,11 @@ func (ue *UeContext) handlePduSessionEstablishmentReject(msg *nas.PduSessionEsta
 
 // handlePduSessionReleaseCommand processes PDU Session Release Command
 func (ue *UeContext) handlePduSessionReleaseCommand(msg *nas.PduSessionReleaseCommand) {
+	if msg == nil {
+		ue.Error("PDU Session Release Command is nil")
+		return
+	}
+
 	pduSessionId := msg.GetSessionId()
 	ue.Info("Receiving PDU Session Release Command for session id = %d", pduSessionId)
 
