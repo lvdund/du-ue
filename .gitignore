@@ -1,8 +1,12 @@
 .cursor/
 du_ue
 StormSIM-main
-src
 docs
 du-ue-simulator
 central-unit
 .central-unit
+
+# Temporary unrelated files
+temp_*.go
+du-ue-sim
+src

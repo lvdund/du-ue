@@ -71,22 +71,102 @@ func (ue *UeContext) handlePduSessionEstablishmentAccept(msg *nas.PduSessionEsta
 		pduSession.Info("PDU address received: %s", pduSession.ueIP)
 	}
 
-	ue.Info("  QoS Rules: %v", msg.AuthorizedQosRules.Bytes)
-	// Get QoS Rules (comment out if field doesn't exist)
-	// if msg.AuthorizedQosRules != nil {
-	// 	pduSession.Info("PDU session QoS RULES received")
-	// }
+	// Get QoS Rules and store as AuthorizedQosRules
+	pduSession.AuthorizedQosRules = &msg.AuthorizedQosRules
+	ue.Info("  Authorized QoS Rules: %v", msg.AuthorizedQosRules.Bytes)
+
+	// Get Authorized QoS Flow Descriptions
+	if msg.AuthorizedQosFlowDescriptions != nil {
+		pduSession.AuthorizedQosFlowDescriptions = msg.AuthorizedQosFlowDescriptions
+		ue.Info("  Authorized QoS Flow Descriptions: %v", msg.AuthorizedQosFlowDescriptions.Bytes)
+	}
+
+	// Get Extended Protocol Configuration Options
+	if msg.ExtendedProtocolConfigurationOptions != nil {
+		pduSession.ExtendedProtocolConfigurationOptions = msg.ExtendedProtocolConfigurationOptions
+		for _, unit := range msg.ExtendedProtocolConfigurationOptions.Units() {
+			ue.Info("  PCO Unit: Id=0x%x Len=%d", unit.Id, len(unit.Content))
+		}
+	}
 
 	// Get DNN
 	if msg.Dnn != nil {
-		pduSession.Info("PDU session DNN: %s", msg.Dnn.String())
+		pduSession.Dnn = msg.Dnn
+		pduSession.Info("PDU session DNN: %s", pduSession.Dnn)
 	}
 
 	// Get S-NSSAI
 	if msg.SNssai != nil {
 		sst := msg.SNssai.Sst
 		sd := msg.SNssai.GetSd()
+		// Use helper to set (creates a deep copy logic via Set)
+		if err := pduSession.SetSNssai(sst, sd); err != nil {
+			ue.Error("Failed to set SNssai: %v", err)
+		}
 		pduSession.Info("PDU session NSSAI -- sst:%d sd:%s", sst, sd)
+
+		if msg.SNssai.Mapped != nil {
+			mappedSd := msg.SNssai.GetMappedSd()
+			if err := pduSession.SetMappedSNssai(msg.SNssai.Mapped.Sst, mappedSd); err != nil {
+				ue.Error("Failed to set Mapped SNssai: %v", err)
+			}
+			pduSession.Info("  Mapped NSSAI -- sst:%d sd:%s", msg.SNssai.Mapped.Sst, mappedSd)
+		}
+	}
+
+	// Get Session-AMBR
+	// SessionAmbr is Mandatory, so it is not a pointer in the message struct
+	pduSession.SessionAmbr = &msg.SessionAmbr
+	pduSession.Info("PDU session AMBR: %v", msg.SessionAmbr.Bytes)
+
+	// Get Selected SSC Mode (Mandatory)
+	// SSC modes: 1, 2, 3 (TS 23.501)
+	if msg.SelectedSscMode < 1 || msg.SelectedSscMode > 3 {
+		ue.Error("Error in PDU Session Establishment Accept, Invalid Selected SSC Mode: %d", msg.SelectedSscMode)
+		// We could release here, but for now we'll just log and verify the build
+	}
+	pduSession.SscMode = msg.SelectedSscMode
+	pduSession.Info("Selected SSC Mode: %d", pduSession.SscMode)
+
+	// Log Unhandled Optional IEs
+	if msg.GsmCause != nil {
+		ue.Info("  [Unhandled IE] 5GSM Cause: %d", *msg.GsmCause)
+	}
+	if msg.RqTimerValue != nil {
+		ue.Info("  [Unhandled IE] RQ Timer Value: %d", *msg.RqTimerValue)
+	}
+	if msg.AlwaysOnPduSessionIndication != nil {
+		ue.Info("  [Unhandled IE] Always-on PDU Session Indication: %d", *msg.AlwaysOnPduSessionIndication)
+	}
+	if len(msg.MappedEpsBearerContexts) > 0 {
+		ue.Info("  [Unhandled IE] Mapped EPS Bearer Contexts present")
+	}
+	if len(msg.EapMessage) > 0 {
+		ue.Info("  [Unhandled IE] EAP Message present")
+	}
+	if len(msg.GsmNetworkFeatureSupport) > 0 {
+		ue.Info("  [Unhandled IE] 5GSM Network Feature Support present")
+	}
+	if msg.ServingPlmnRateControl != nil {
+		ue.Info("  [Unhandled IE] Serving PLMN Rate Control: %d", *msg.ServingPlmnRateControl)
+	}
+	if len(msg.AtsssContainer) > 0 {
+		ue.Info("  [Unhandled IE] ATSSS Container present")
+	}
+	if msg.ControlPlaneOnlyIndication != nil {
+		ue.Info("  [Unhandled IE] Control Plane Only Indication: %d", *msg.ControlPlaneOnlyIndication)
+	}
+	if len(msg.IpHeaderCompressionConfiguration) > 0 {
+		ue.Info("  [Unhandled IE] IP Header Compression Configuration present")
+	}
+	if msg.EthernetHeaderCompressionConfiguration != nil {
+		ue.Info("  [Unhandled IE] Ethernet Header Compression Configuration: %d", *msg.EthernetHeaderCompressionConfiguration)
+	}
+	if len(msg.ServiceLevelAaContainer) > 0 {
+		ue.Info("  [Unhandled IE] Service Level AA Container present")
+	}
+	if len(msg.ReceivedMbsContainer) > 0 {
+		ue.Info("  [Unhandled IE] Received MBS Container present")
 	}
 
 	// Change state to ACTIVE
