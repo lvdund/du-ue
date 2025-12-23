@@ -24,6 +24,12 @@ func (ue *UeContext) HandleNasMsg(nasBytes []byte) {
 }
 
 func (ue *UeContext) handleNas_n1mm(nasMsg *nas.NasMessage) {
+	gsm := nasMsg.Gsm
+	if gsm != nil {
+		ue.handleNas_n1sm(nasMsg)
+		return
+	}
+
 	gmm := nasMsg.Gmm
 	if gmm == nil {
 		ue.Error("NAS message has no N1MM content")
@@ -62,6 +68,10 @@ func (ue *UeContext) handleNas_n1mm(nasMsg *nas.NasMessage) {
 		ue.Error("Receive Status 5GMM")
 		ue.handleGmmStatus(gmm.GmmStatus)
 
+	case nas.DlNasTransportMsgType:
+		ue.Info("Receive DL NAS Transport")
+		ue.handleDlNasTransport(gmm.DlNasTransport)
+
 	default:
 		ue.Warn("Received unknown NAS message 0x%x", nasMsg.Gmm.MsgType)
 	}
@@ -77,11 +87,13 @@ func (ue *UeContext) handleAuthenticationReject(message *nas.AuthenticationRejec
 	_ = message
 	ue.Error("Authentication of UE failed")
 	ue.SetState(UE_STATE_DEREGISTERED)
+	ue.ResetSecurityContext()
 }
 
 func (ue *UeContext) handleRegistrationReject(message *nas.RegistrationReject) {
 	ue.handleCause5GMM(&message.GmmCause)
 	ue.SetState(UE_STATE_DEREGISTERED)
+	ue.ResetSecurityContext()
 }
 
 func (ue *UeContext) handleGmmStatus(message *nas.GmmStatus) {
@@ -257,4 +269,26 @@ func (ue *UeContext) handleIdentityRequest(message *nas.IdentityRequest) {
 	} else {
 		ue.Send_UlInformationTransfer_To_Du(nasPdu)
 	}
+}
+
+func (ue *UeContext) handleDlNasTransport(message *nas.DlNasTransport) {
+	if uint8(message.PayloadContainerType) != nas.PayloadContainerTypeN1SMInfo {
+		ue.Error("Error in DL NAS Transport, Payload Container Type not expected value")
+		return
+	}
+
+	if message.PduSessionId == nil {
+		ue.Error("Error in DL NAS Transport, PDU Session ID is missing")
+		return
+	}
+
+	// Decode the packed 5GSM message from the Payload Container
+	nasMsg, err := nas.Decode(nil, message.PayloadContainer)
+	if err != nil {
+		ue.Error("Error in DL NAS Transport, fail to decode N1Sm: %v", err)
+		return
+	}
+
+	// Route to 5GSM handler
+	ue.handleNas_n1sm(&nasMsg)
 }
