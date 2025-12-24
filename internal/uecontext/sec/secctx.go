@@ -40,8 +40,8 @@ func NewSecurityContext(ksi *nas.KeySetIdentifier, kamf []byte, isAmf bool) *Sec
 		ngKsi:     *ksi,
 		isAmf:     isAmf,
 		kamf:      make([]byte, len(kamf)),
-		gppNas:    nas.NewNasContext(isAmf, nas.Bearer3GPP),
-		nonGppNas: nas.NewNasContext(isAmf, nas.BearerNon3GPP),
+		gppNas:    nas.NewNasContext(isAmf),
+		nonGppNas: nas.NewNasContext(isAmf),
 	}
 	copy(ctx.kamf, kamf)
 	return ctx

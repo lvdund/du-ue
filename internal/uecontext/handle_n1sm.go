@@ -25,11 +25,29 @@ func (ue *UeContext) handleNas_n1sm(nasMsg *nas.NasMessage) {
 		ue.Info("Receive PDU Session Release Command")
 		ue.handlePduSessionReleaseCommand(gsm.PduSessionReleaseCommand)
 
+	case nas.PduSessionAuthenticationCommandMsgType:
+		ue.Info("Receive PDU Session Authentication Command")
+		ue.handlePduSessionAuthenticationCommand(gsm.PduSessionAuthenticationCommand)
+
+	case nas.PduSessionAuthenticationResultMsgType:
+		ue.Info("Receive PDU Session Authentication Result")
+		ue.handlePduSessionAuthenticationResult(gsm.PduSessionAuthenticationResult)
+
+	case nas.PduSessionModificationCommandMsgType:
+		ue.Info("Receive PDU Session Modification Command")
+		ue.handlePduSessionModificationCommand(gsm.PduSessionModificationCommand)
+
+	case nas.PduSessionModificationRejectMsgType:
+		ue.Error("Receive PDU Session Modification Reject")
+		ue.handlePduSessionModificationReject(gsm.PduSessionModificationReject)
+
+	case nas.PduSessionReleaseRejectMsgType:
+		ue.Error("Receive PDU Session Release Reject")
+		ue.handlePduSessionReleaseReject(gsm.PduSessionReleaseReject)
+
 	case nas.GsmStatusMsgType:
-		ue.Error("Receive 5GSM Status")
-		if gsm.GsmStatus != nil {
-			ue.handleCause5GSM(&gsm.GsmStatus.GsmCause)
-		}
+		ue.Info("Receive 5GSM Status")
+		ue.handleGsmStatus(gsm.GsmStatus)
 
 	default:
 		ue.Warn("Unknown 5GSM message type: 0x%x", gsm.MsgType)
@@ -181,14 +199,53 @@ func (ue *UeContext) handlePduSessionEstablishmentReject(msg *nas.PduSessionEsta
 		return
 	}
 
+	ue.Info("Receiving PDU Session Establishment Reject")
+
+	// Check PTI
+	if msg.GetPti() != 1 {
+		ue.Error("Error in PDU Session Establishment Reject, PTI not the expected value")
+		return
+	}
+
 	pduSessionId := msg.GetSessionId()
-	ue.Error("Receiving PDU Session Establishment Reject for session id %d 5GSM Cause: %s",
-		pduSessionId, cause5GSMToString(uint8(msg.GsmCause)))
 
 	pduSession := ue.getPduSession(pduSessionId)
 	if pduSession == nil {
-		ue.Error("Cannot retry PDU Session Request for PDU Session after Reject")
+		ue.Error("Receiving PDU Session Establishment Reject about an unknown PDU Session, id: %d", pduSessionId)
 		return
+	}
+
+	ue.Error("Receiving PDU Session Establishment Reject for session id %d 5GSM Cause: %s",
+		pduSessionId, cause5GSMToString(uint8(msg.GsmCause)))
+
+	// Log Unhandled Optional IEs
+	if msg.BackOffTimerValue != nil {
+		// New Logic: Decode and store Back-off Timer
+		pduSession.BackOffTimer = DecodeGPRSTimer3(msg.BackOffTimerValue.Value)
+		ue.Info("  [Handled IE] Back-off Timer Value: %v (Decoded: %s)", *msg.BackOffTimerValue, pduSession.BackOffTimer)
+	}
+	if msg.AllowedSscMode != nil {
+		// New Logic: Store Allowed SSC Mode
+		pduSession.AllowedSscMode = *msg.AllowedSscMode
+		ue.Info("  [Handled IE] Allowed SSC Mode: %d", pduSession.AllowedSscMode)
+	}
+	if len(msg.EapMessage) > 0 {
+		ue.Info("  [Unhandled IE] EAP Message present")
+	}
+	if msg.GsmCongestionReAttemptIndicator != nil {
+		ue.Info("  [Unhandled IE] 5GSM Congestion Re-attempt Indicator: %d", *msg.GsmCongestionReAttemptIndicator)
+	}
+	if msg.ExtendedProtocolConfigurationOptions != nil {
+		ue.Info("  [Unhandled IE] Extended Protocol Configuration Options present")
+		for _, unit := range msg.ExtendedProtocolConfigurationOptions.Units() {
+			ue.Info("    PCO Unit: Id=0x%x Len=%d", unit.Id, len(unit.Content))
+		}
+	}
+	if msg.ReAttemptIndicator != nil {
+		ue.Info("  [Unhandled IE] Re-attempt Indicator: %d", *msg.ReAttemptIndicator)
+	}
+	if len(msg.ServiceLevelAaContainer) > 0 {
+		ue.Info("  [Unhandled IE] Service Level AA Container present")
 	}
 
 	// Release the session
@@ -203,13 +260,54 @@ func (ue *UeContext) handlePduSessionReleaseCommand(msg *nas.PduSessionReleaseCo
 		return
 	}
 
+	// Check PTI
+	// PTI is located in the SM Header
+	if msg.GetPti() == 0 {
+		ue.Warn("PDU Session Release Command with PTI=0 (reserved)")
+		// Proceeding anyway as it might be network initiated with PTI 0?
+		// But usually network initiated uses the PTI of the request if it's a response,
+		// or a specific value.
+		// For Release Command (Network Initiated), PTI typically identifies the procedure.
+		// Proceeding for now but logging warning.
+	}
+
 	pduSessionId := msg.GetSessionId()
-	ue.Info("Receiving PDU Session Release Command for session id = %d", pduSessionId)
+	// Log 5GSM Cause (Mandatory)
+	ue.Info("Receiving PDU Session Release Command for session id %d 5GSM Cause: %s",
+		pduSessionId, cause5GSMToString(msg.GsmCause))
 
 	pduSession := ue.getPduSession(pduSessionId)
 	if pduSession == nil {
 		ue.Error("Unable to delete PDU Session from UE as the PDU Session was not found. Ignoring.")
 		return
+	}
+
+	// Handle Optional IEs
+
+	// Back-off Timer
+	if msg.BackOffTimerValue != nil {
+		pduSession.BackOffTimer = DecodeGPRSTimer3(msg.BackOffTimerValue.Value)
+		ue.Info("  [Handled IE] Back-off Timer Value: %v (Decoded: %s)", *msg.BackOffTimerValue, pduSession.BackOffTimer)
+	}
+
+	// Log Unhandled Optional IEs
+	if len(msg.EapMessage) > 0 {
+		ue.Info("  [Unhandled IE] EAP Message present")
+	}
+	if msg.GsmCongestionReAttemptIndicator != nil {
+		ue.Info("  [Unhandled IE] 5GSM Congestion Re-attempt Indicator: %d", *msg.GsmCongestionReAttemptIndicator)
+	}
+	if msg.ExtendedProtocolConfigurationOptions != nil {
+		ue.Info("  [Unhandled IE] Extended Protocol Configuration Options present")
+		for _, unit := range msg.ExtendedProtocolConfigurationOptions.Units() {
+			ue.Info("    PCO Unit: Id=0x%x Len=%d", unit.Id, len(unit.Content))
+		}
+	}
+	if msg.AccessType != nil {
+		ue.Info("  [Unhandled IE] Access Type: %d", *msg.AccessType)
+	}
+	if len(msg.ServiceLevelAaContainer) > 0 {
+		ue.Info("  [Unhandled IE] Service Level AA Container present")
 	}
 
 	// Send PDU Session Release Complete
@@ -220,6 +318,183 @@ func (ue *UeContext) handlePduSessionReleaseCommand(msg *nas.PduSessionReleaseCo
 func (ue *UeContext) handleCause5GSM(cause *uint8) {
 	if cause != nil {
 		ue.Error("UE received a 5GSM Failure, cause: %s", cause5GSMToString(uint8(*cause)))
+	}
+}
+
+// handlePduSessionAuthenticationCommand handles PDU Session Authentication Command
+func (ue *UeContext) handlePduSessionAuthenticationCommand(msg *nas.PduSessionAuthenticationCommand) {
+	if msg == nil {
+		ue.Error("PDU Session Authentication Command is nil")
+		return
+	}
+
+	// Check PTI
+	if msg.GetPti() == 0 {
+		ue.Warn("PDU Session Authentication Command with PTI=0")
+	}
+
+	pduSessionId := msg.GetSessionId()
+	ue.Info("Receiving PDU Session Authentication Command for session id %d", pduSessionId)
+
+	// Log EAP Message (Mandatory)
+	ue.Info("  EAP Message Length: %d", len(msg.EapMessage))
+
+	// Log Optional IEs
+	if msg.ExtendedProtocolConfigurationOptions != nil {
+		ue.Info("  Extended Protocol Configuration Options present")
+		for _, unit := range msg.ExtendedProtocolConfigurationOptions.Units() {
+			ue.Info("    PCO Unit: Id=0x%x Len=%d", unit.Id, len(unit.Content))
+		}
+	}
+
+	// NOTE: We do not implement EAP handling, so we cannot respond.
+	// In a real scenario, we would process the EAP payload and send an Authentication Complete.
+}
+
+// handlePduSessionAuthenticationResult handles PDU Session Authentication Result
+func (ue *UeContext) handlePduSessionAuthenticationResult(msg *nas.PduSessionAuthenticationResult) {
+	if msg == nil {
+		ue.Error("PDU Session Authentication Result is nil")
+		return
+	}
+
+	// Check PTI
+	if msg.GetPti() == 0 {
+		ue.Warn("PDU Session Authentication Result with PTI=0")
+	}
+
+	pduSessionId := msg.GetSessionId()
+	ue.Info("Receiving PDU Session Authentication Result for session id %d", pduSessionId)
+
+	// Log EAP Message (Optional)
+	if len(msg.EapMessage) > 0 {
+		ue.Info("  EAP Message Length: %d", len(msg.EapMessage))
+	}
+
+	// Log Optional IEs
+	if msg.ExtendedProtocolConfigurationOptions != nil {
+		ue.Info("  Extended Protocol Configuration Options present")
+		for _, unit := range msg.ExtendedProtocolConfigurationOptions.Units() {
+			ue.Info("    PCO Unit: Id=0x%x Len=%d", unit.Id, len(unit.Content))
+		}
+	}
+}
+
+// handlePduSessionModificationCommand handles PDU Session Modification Command
+func (ue *UeContext) handlePduSessionModificationCommand(msg *nas.PduSessionModificationCommand) {
+	if msg == nil {
+		ue.Error("PDU Session Modification Command is nil")
+		return
+	}
+
+	// Check PTI
+	if msg.GetPti() == 0 {
+		ue.Warn("PDU Session Modification Command with PTI=0")
+	}
+
+	pduSessionId := msg.GetSessionId()
+	ue.Info("Receiving PDU Session Modification Command for session id %d", pduSessionId)
+
+	pduSession := ue.getPduSession(pduSessionId)
+	if pduSession == nil {
+		ue.Error("PDU Session Modification Command for unknown PDU Session ID %d", pduSessionId)
+		return
+	}
+
+	// Change state to MODIFICATION_PENDING
+	pduSession.SetState(PDUSessionModificationPending)
+
+	// Log Optional IEs
+	if msg.GsmCause != nil {
+		ue.Info("  5GSM Cause: %s", cause5GSMToString(*msg.GsmCause))
+	}
+
+	// Store Session AMBR
+	if msg.SessionAmbr != nil {
+		pduSession.SessionAmbr = msg.SessionAmbr
+		ue.Info("  Session AMBR: %v", msg.SessionAmbr.Bytes)
+	}
+
+	if msg.RqTimerValue != nil {
+		ue.Info("  RQ Timer Value: %d", *msg.RqTimerValue)
+	}
+
+	// Store Always-on PDU Session Indication
+	if msg.AlwaysOnPduSessionIndication != nil {
+		pduSession.AlwaysOnPduSessionIndication = *msg.AlwaysOnPduSessionIndication
+		ue.Info("  Always-on PDU Session Indication: %d", *msg.AlwaysOnPduSessionIndication)
+	}
+
+	// Store Authorized QoS Rules
+	if msg.AuthorizedQosRules != nil {
+		pduSession.AuthorizedQosRules = msg.AuthorizedQosRules
+		ue.Info("  Authorized QoS Rules present")
+	}
+
+	if len(msg.MappedEpsBearerContexts) > 0 {
+		ue.Info("  Mapped EPS Bearer Contexts present")
+	}
+
+	// Store Authorized QoS Flow Descriptions
+	if msg.AuthorizedQosFlowDescriptions != nil {
+		pduSession.AuthorizedQosFlowDescriptions = msg.AuthorizedQosFlowDescriptions
+		ue.Info("  Authorized QoS Flow Descriptions present")
+	}
+
+	// Decode/Log Extended Protocol Configuration Options
+	if msg.ExtendedProtocolConfigurationOptions != nil {
+		pduSession.ExtendedProtocolConfigurationOptions = msg.ExtendedProtocolConfigurationOptions
+		ue.Info("  Extended Protocol Configuration Options present")
+		for _, unit := range msg.ExtendedProtocolConfigurationOptions.Units() {
+			ue.Info("    PCO Unit: Id=0x%x Len=%d", unit.Id, len(unit.Content))
+		}
+	}
+
+	if len(msg.AtsssContainer) > 0 {
+		ue.Info("  ATSSS Container present")
+	}
+	if len(msg.IpHeaderCompressionConfiguration) > 0 {
+		ue.Info("  IP Header Compression Configuration present")
+	}
+	if len(msg.PortManagementInformationContainer) > 0 {
+		ue.Info("  Port Management Information Container present")
+	}
+	if msg.ServingPlmnRateControl != nil {
+		ue.Info("  Serving PLMN Rate Control: %d", *msg.ServingPlmnRateControl)
+	}
+	if msg.EthernetHeaderCompressionConfiguration != nil {
+		ue.Info("  Ethernet Header Compression Configuration: %d", *msg.EthernetHeaderCompressionConfiguration)
+	}
+	if len(msg.ReceivedMbsContainer) > 0 {
+		ue.Info("  Received MBS Container present")
+	}
+	if len(msg.ServiceLevelAaContainer) > 0 {
+		ue.Info("  Service Level AA Container present")
+	}
+
+	// Send PDU Session Modification Complete
+	ue.triggerInitPduSessionModificationComplete(pduSession)
+
+	// Change state back to ACTIVE
+	pduSession.SetState(PDUSessionActive)
+}
+
+// handleGsmStatus handles 5GSM Status
+func (ue *UeContext) handleGsmStatus(msg *nas.GsmStatus) {
+	if msg == nil {
+		ue.Error("5GSM Status is nil")
+		return
+	}
+
+	id := msg.GetSessionId()
+	pduSession := ue.getPduSession(id)
+
+	if pduSession != nil {
+		ue.Info("5GSM Status for PDU Session ID %d (IP: %s): %s",
+			id, pduSession.ueIP, cause5GSMToString(msg.GsmCause))
+	} else {
+		ue.Error("5GSM Status for unknown PDU Session ID %d: %s",
+			id, cause5GSMToString(msg.GsmCause))
 	}
 }
 
@@ -305,5 +580,86 @@ func cause5GSMToString(cause uint8) string {
 		return "Protocol error, unspecified"
 	default:
 		return "Unknown cause"
+	}
+}
+
+// handlePduSessionReleaseReject handles PDU Session Release Reject
+func (ue *UeContext) handlePduSessionReleaseReject(msg *nas.PduSessionReleaseReject) {
+	if msg == nil {
+		ue.Error("PDU Session Release Reject is nil")
+		return
+	}
+
+	// Check PTI
+	if msg.GetPti() == 0 {
+		ue.Warn("PDU Session Release Reject with PTI=0")
+	}
+
+	pduSessionId := msg.GetSessionId()
+	ue.Info("Receiving PDU Session Release Reject for session id %d", pduSessionId)
+
+	// Log Cause
+	ue.Error("  5GSM Cause: %s", cause5GSMToString(uint8(msg.GsmCause)))
+
+	pduSession := ue.getPduSession(pduSessionId)
+	if pduSession != nil {
+		// Revert state to ACTIVE if we were pending release
+		if pduSession.GetState() == PDUSessionInactivePending {
+			ue.Warn("  Reverting PDU Session %d state to ACTIVE due to Release Reject", pduSessionId)
+			pduSession.SetState(PDUSessionActive)
+		}
+	}
+
+	// Log Optional IEs
+	if msg.ExtendedProtocolConfigurationOptions != nil {
+		ue.Info("  Extended Protocol Configuration Options present")
+		for _, unit := range msg.ExtendedProtocolConfigurationOptions.Units() {
+			ue.Info("    PCO Unit: Id=0x%x Len=%d", unit.Id, len(unit.Content))
+		}
+	}
+}
+
+// handlePduSessionModificationReject handles PDU Session Modification Reject
+func (ue *UeContext) handlePduSessionModificationReject(msg *nas.PduSessionModificationReject) {
+	if msg == nil {
+		ue.Error("PDU Session Modification Reject is nil")
+		return
+	}
+
+	// Check PTI
+	if msg.GetPti() == 0 {
+		ue.Warn("PDU Session Modification Reject with PTI=0")
+	}
+
+	pduSessionId := msg.GetSessionId()
+	ue.Info("Receiving PDU Session Modification Reject for session id %d", pduSessionId)
+
+	// Log Cause
+	ue.Error("  5GSM Cause: %s", cause5GSMToString(uint8(msg.GsmCause)))
+
+	pduSession := ue.getPduSession(pduSessionId)
+	if pduSession != nil {
+		// Revert state to ACTIVE if we were modification pending
+		if pduSession.GetState() == PDUSessionModificationPending {
+			ue.Warn("  Reverting PDU Session %d state to ACTIVE due to Modification Reject", pduSessionId)
+			pduSession.SetState(PDUSessionActive)
+		}
+	}
+
+	// Log Optional IEs
+	if msg.ExtendedProtocolConfigurationOptions != nil {
+		ue.Info("  Extended Protocol Configuration Options present")
+		for _, unit := range msg.ExtendedProtocolConfigurationOptions.Units() {
+			ue.Info("    PCO Unit: Id=0x%x Len=%d", unit.Id, len(unit.Content))
+		}
+	}
+	if msg.BackOffTimerValue != nil {
+		ue.Info("  Back-off Timer Value present")
+	}
+	if msg.GsmCongestionReAttemptIndicator != nil {
+		ue.Info("  5GSM Congestion Re-attempt Indicator present")
+	}
+	if msg.ReAttemptIndicator != nil {
+		ue.Info("  Re-attempt Indicator present")
 	}
 }

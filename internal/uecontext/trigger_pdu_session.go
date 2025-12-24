@@ -231,7 +231,7 @@ func (ue *UeContext) sendN1Sm(
 
 	// Encode with security context
 	nasCtx := ue.getNasContext()
-	nasPdu, err := nas.EncodeMm(nasCtx, ulNasTransport)
+	nasPdu, err := nas.EncodeMm(nasCtx, ulNasTransport, true)
 	if err != nil {
 		ue.Error("Failed to encode UL NAS Transport: %v", err)
 		return
@@ -239,4 +239,22 @@ func (ue *UeContext) sendN1Sm(
 
 	ue.Info("Sending N1 SM message (session %d) via UL NAS Transport", pduSessionId)
 	ue.Send_UlInformationTransfer_To_Du(nasPdu)
+}
+
+// triggerInitPduSessionModificationComplete sends PDU Session Modification Complete
+func (ue *UeContext) triggerInitPduSessionModificationComplete(pduSession *PduSession) {
+ue.Info("Initiating PDU Session Modification Complete for PDU Session: %d", pduSession.Id)
+
+// Build PDU Session Modification Complete
+n1Sm := new(nas.PduSessionModificationComplete)
+n1Sm.SetPti(1) // Using 1 as we don't track PTI properly in simulator yet
+n1Sm.SetSessionId(pduSession.Id)
+
+n1SmPdu, err := nas.EncodeSm(n1Sm)
+if err != nil {
+ue.Error("Failed to encode PDU Session Modification Complete: %v", err)
+return
+}
+
+ue.sendN1Sm(n1SmPdu, pduSession.Id, nil, nil)
 }

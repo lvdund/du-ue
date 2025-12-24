@@ -17,7 +17,7 @@ func (ue *UeContext) HandleNasMsg(nasBytes []byte) {
 
 	var nasMsg nas.NasMessage
 	var err error
-	if nasMsg, err = nas.Decode(ue.getNasContext(), nasBytes); err != nil {
+	if nasMsg, err = nas.Decode(ue.getNasContext(), nasBytes, true); err != nil {
 		ue.Error("Decode Nas message failed: %s", err.Error())
 		return
 	}
@@ -163,7 +163,7 @@ func (ue *UeContext) handleAuthenticationRequest(message *nas.AuthenticationRequ
 		ue.secCtx = sec.NewSecurityContext(&ue.auth.ngKsi, ue.auth.kamf, false)
 	}
 
-	responsePdu, _ = nas.EncodeMm(nil, response)
+	responsePdu, _ = nas.EncodeMm(nil, response, true)
 	ue.Send_UlInformationTransfer_To_Du(responsePdu)
 }
 
@@ -222,7 +222,7 @@ func (ue *UeContext) handleSecurityModeCommand(message *nas.SecurityModeCommand)
 	}
 
 	response.SetSecurityHeader(nas.NasSecBothNew)
-	responsePdu, _ := nas.EncodeMm(nasCtx, response)
+	responsePdu, _ := nas.EncodeMm(nasCtx, response, true)
 	ue.Send_UlInformationTransfer_To_Du(responsePdu)
 }
 
@@ -241,7 +241,7 @@ func (ue *UeContext) handleRegistrationAccept(message *nas.RegistrationAccept) {
 	response := &nas.RegistrationComplete{}
 	response.SetSecurityHeader(nas.NasSecBoth)
 	nasCtx := ue.getNasContext() // must be non-nil
-	responsePdu, _ := nas.EncodeMm(nasCtx, response)
+	responsePdu, _ := nas.EncodeMm(nasCtx, response, true)
 	ue.Send_UlInformationTransfer_To_Du(responsePdu)
 
 	ue.Info("Registration Complete sent")
@@ -278,7 +278,7 @@ func (ue *UeContext) handleIdentityRequest(message *nas.IdentityRequest) {
 		rsp.SetSecurityHeader(nas.NasSecNone)
 	}
 
-	if nasPdu, err := nas.EncodeMm(nasCtx, rsp); err != nil {
+	if nasPdu, err := nas.EncodeMm(nasCtx, rsp, true); err != nil {
 		ue.Error("Error encoding identity response: %v", err)
 	} else {
 		ue.Send_UlInformationTransfer_To_Du(nasPdu)

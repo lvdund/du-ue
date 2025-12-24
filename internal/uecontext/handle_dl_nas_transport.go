@@ -18,7 +18,7 @@ func (ue *UeContext) handleDlNasTransport(message *nas.DlNasTransport) {
 	}
 
 	// Decode N1 SM message
-	nasMsg, err := nas.Decode(nil, message.PayloadContainer)
+	nasMsg, err := nas.Decode(ue.getNasContext(), message.PayloadContainer, true)
 	if err != nil {
 		ue.Error("Error in DL NAS Transport, fail to decode N1Sm: %v", err)
 		return

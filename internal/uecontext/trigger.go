@@ -17,7 +17,7 @@ func (ue *UeContext) TriggerInitRegistration() error {
 	msg.Ngksi.Id = 7
 	msg.SetSecurityHeader(nas.NasSecNone)
 
-	nasPdu, err := nas.EncodeMm(nil, msg)
+	nasPdu, err := nas.EncodeMm(nil, msg, true)
 	if err != nil {
 		ue.Error("Error encoding registration request: %v", err)
 		return err

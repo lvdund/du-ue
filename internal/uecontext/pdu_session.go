@@ -1,13 +1,43 @@
 package uecontext
 
 import (
+	"du_ue/internal/common/logger"
 	"fmt"
 	"sync"
-
-	"du_ue/internal/common/logger"
+	"time"
 
 	"github.com/reogac/nas"
 )
+
+// DecodeGPRSTimer3 decodes GPRS Timer 3 value (TS 24.008 10.5.7.4)
+// NOTE: The underlying NAS library (github.com/reogac/nas) provides the GprsTimer3 struct
+// but does not implement the logic to interpret the unit/value fields.
+// We implement this decoding manually here to bridge that gap.
+func DecodeGPRSTimer3(val uint8) time.Duration {
+	unit := (val & 0xE0) >> 5
+	timerValue := time.Duration(val & 0x1F)
+
+	switch unit {
+	case 0: // 10 minutes
+		return timerValue * 10 * time.Minute
+	case 1: // 1 hour
+		return timerValue * 1 * time.Hour
+	case 2: // 10 hours
+		return timerValue * 10 * time.Hour
+	case 3: // 2 seconds
+		return timerValue * 2 * time.Second
+	case 4: // 30 seconds
+		return timerValue * 30 * time.Second
+	case 5: // 1 minute
+		return timerValue * 1 * time.Minute
+	case 6: // 320 hours
+		return timerValue * 320 * time.Hour
+	case 7: // Deactivated
+		return 0
+	default:
+		return 0
+	}
+}
 
 // PDU Session States
 const (
@@ -35,6 +65,11 @@ type PduSession struct {
 	AuthorizedQosRules                   *nas.QosRules
 	AuthorizedQosFlowDescriptions        *nas.QosFlowDescriptions
 	ExtendedProtocolConfigurationOptions *nas.ExtendedProtocolConfigurationOptions
+	AlwaysOnPduSessionIndication         uint8
+
+	// Rejection info
+	BackOffTimer   time.Duration // Extracted from BackOffTimerValue
+	AllowedSscMode uint8         // Extracted from AllowedSscMode
 
 	// Transaction
 	pti uint8 // Procedure Transaction Identity

@@ -8,7 +8,7 @@ require (
 	github.com/lvdund/asn1go v1.0.6
 	github.com/lvdund/ngap v1.4.13
 	github.com/lvdund/rrc v1.0.6
-	github.com/reogac/nas v1.1.10
+	github.com/reogac/nas v1.2.0
 	github.com/reogac/utils v1.1.15
 	github.com/rs/zerolog v1.34.0
 	gopkg.in/yaml.v3 v3.0.1
