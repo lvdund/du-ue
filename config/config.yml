@@ -1,9 +1,9 @@
 du:
   id: 1
   name: "DU-UE-Simulator"
-  cucp_address: "192.168.1.10"
+  cucp_address: "127.0.0.1"
   cucp_port: 38472
-  local_address: "192.168.1.10"
+  local_address: "127.0.0.1"
   local_port: 38473
   plmn:
     mcc: "999"
