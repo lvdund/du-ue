@@ -22,13 +22,6 @@ const (
 	UE_STATE_REGISTERED
 )
 
-// 5GSM PDU Session States
-const (
-	SM5G_PDU_SESSION_INACTIVE uint8 = iota
-	SM5G_PDU_SESSION_ACTIVE_PENDING
-	SM5G_PDU_SESSION_ACTIVE
-)
-
 type UeContext struct {
 	*logger.Logger
 	id uint16
@@ -49,6 +42,9 @@ type UeContext struct {
 
 	sessions [16]*PduSession
 
+	// Measurement context for handover
+	measurement *MeasurementContext
+
 	mutex sync.Mutex
 	ctx   context.Context
 
@@ -56,8 +52,6 @@ type UeContext struct {
 	ReceiveFromDuChannel chan []byte
 	SendToDuChannel      chan []byte
 	IsReadyConn          chan bool
-
-	PduSessions map[uint8]*PduSession
 }
 
 func CreateUe(
@@ -65,15 +59,14 @@ func CreateUe(
 	ctx context.Context,
 ) *UeContext {
 	ue := &UeContext{
-		id:          1, // Fixed ID for single UE
-		mcc:         conf.PLMN.MCC,
-		mnc:         conf.PLMN.MNC,
-		msin:        conf.MSIN,
-		secCap:      conf.GetUESecurityCapability(),
-		state:       UE_STATE_DEREGISTERED,
-		Logger:      logger.InitLogger("", map[string]string{"mod": "ue", "msin": conf.MSIN}),
-		ctx:         ctx,
-		PduSessions: make(map[uint8]*PduSession),
+		id:     1, // Fixed ID for single UE
+		mcc:    conf.PLMN.MCC,
+		mnc:    conf.PLMN.MNC,
+		msin:   conf.MSIN,
+		secCap: conf.GetUESecurityCapability(),
+		state:  UE_STATE_DEREGISTERED,
+		Logger: logger.InitLogger("", map[string]string{"mod": "ue", "msin": conf.MSIN}),
+		ctx:    ctx,
 	}
 
 	// init AuthContext
@@ -98,7 +91,35 @@ func CreateUe(
 	// create SUCI (simplified - using fixed values)
 	ue.createConcealSuci(conf.PLMN.MCC, conf.PLMN.MNC, conf)
 
+	// Initialize measurement context
+	ue.initMeasurement()
+
 	return ue
+}
+
+
+// handleRrcFromDU listens for RRC messages from DU channel
+func (ue *UeContext) handleRrcFromDU() {
+	ue.Info("Started listening for RRC messages from DU")
+
+	for {
+		select {
+		case rrcBytes, ok := <-ue.ReceiveFromDuChannel:
+			if !ok {
+				ue.Warn("ReceiveFromDuChannel closed")
+				return
+			}
+			
+			ue.Info("Received RRC message from DU, length: %d", len(rrcBytes))
+			if err := ue.HandleRrcMessage(rrcBytes); err != nil {
+				ue.Error("Failed to handle RRC message: %v", err)
+			}
+
+		case <-ue.ctx.Done():
+			ue.Info("Context cancelled, stopping RRC handler")
+			return
+		}
+	}
 }
 
 func (ue *UeContext) GetMsin() string {
@@ -140,6 +161,7 @@ func (ue *UeContext) createConcealSuci(mcc, mnc string, ueConf config.UEConfig) 
 	suci.Parse([]string{mcc, mnc, "0000", "0", "0", ue.msin})
 	ue.suci = nas.MobileIdentity{Id: &nas.Suci{Content: suci}}
 }
+
 func (ue *UeContext) set5gGuti(guti *nas.MobileIdentity) {
 	if guti.GetType() != nas.MobileIdentity5GSType5gGuti {
 		ue.Warn("Invalid GUTI type")
@@ -157,7 +179,6 @@ func (ue *UeContext) Terminate() {
 }
 
 func (ue *UeContext) Send_UlInformationTransfer_To_Du(nas_message []byte) {
-
 	uldccchMessage := rrcies.UL_DCCH_Message{
 		Message: rrcies.UL_DCCH_MessageType{
 			Choice: rrcies.UL_DCCH_MessageType_Choice_C1,
@@ -179,7 +200,7 @@ func (ue *UeContext) Send_UlInformationTransfer_To_Du(nas_message []byte) {
 
 	encoded, err := rrc.Encode(&uldccchMessage)
 	if err != nil {
-		ue.Error("Failed to encode RRCSetupComplete: %v", err)
+		ue.Error("Failed to encode UL Information Transfer: %v", err)
 		return
 	}
 

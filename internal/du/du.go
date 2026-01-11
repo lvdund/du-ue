@@ -26,6 +26,7 @@ type DU struct {
 	UEConfig *config.UEConfig
 	f1Client *F1APClient
 	ue       *UeChannel
+	hoCtx    *HandoverContext  // Handover state and role tracking
 	mu       sync.Mutex
 }
 
@@ -36,6 +37,7 @@ type UeChannel struct {
 }
 
 // NewDU creates a new DU simulator instance
+// Update NewDU to initialize handover context:
 func NewDU(cfg *config.Config) (*DU, error) {
 	du := &DU{
 		ID:       cfg.DU.ID,
@@ -55,9 +57,13 @@ func NewDU(cfg *config.Config) (*DU, error) {
 		return nil, fmt.Errorf("create F1AP client: %w", err)
 	}
 	du.f1Client = f1Client
+	
+	// Initialize handover context
+	du.InitHandoverContext()
 
 	return du, nil
 }
+
 
 // InitUE creates UE context and initializes channels
 // This should be called after F1 Setup Procedure is complete
@@ -182,4 +188,11 @@ func (du *DU) OnF1SetupResponse() {
 		}
 		du.Info("UE context and channels initialized after F1 Setup")
 	}
+}
+
+
+func (du *DU) SetUEChannelForTest(ue *UeChannel) {
+	du.mu.Lock()
+	defer du.mu.Unlock()
+	du.ue = ue
 }
