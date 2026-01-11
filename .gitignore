@@ -3,7 +3,7 @@ du_ue
 StormSIM-main
 src
 docs
-/home/Lan233861/du-ue/test/ue_handover_test.go
+/test/ue_handover_test.go
 du-ue-simulator
 central-unit
 .central-unit
