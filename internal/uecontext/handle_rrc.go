@@ -123,3 +123,43 @@ func (ue *UeContext) handleRRCReconfiguration(msg *rrcies.RRCReconfiguration) er
 
 	return nil
 }
+
+// sendUlInformationTransfer wraps NAS PDU in RRC UL Information Transfer
+func (ue *UeContext) sendUlInformationTransfer(nasPdu []byte) error {
+	ue.Info("Wrapping NAS PDU in UL Information Transfer, NAS length: %d", len(nasPdu))
+	
+	// Create UL Information Transfer message
+	ulInfoTransfer := &rrcies.ULInformationTransfer{
+		CriticalExtensions: rrcies.ULInformationTransfer_CriticalExtensions{
+			Choice: rrcies.ULInformationTransfer_CriticalExtensions_Choice_UlInformationTransfer,
+			UlInformationTransfer: &rrcies.ULInformationTransfer_IEs{
+				DedicatedNAS_Message: &rrcies.DedicatedNAS_Message{
+					Value: nasPdu,
+				},
+			},
+		},
+	}
+	
+	// Wrap in UL-DCCH-Message
+	ulDcchMsg := rrcies.UL_DCCH_Message{
+		Message: rrcies.UL_DCCH_MessageType{
+			Choice: rrcies.UL_DCCH_MessageType_Choice_C1,
+			C1: &rrcies.UL_DCCH_MessageType_C1{
+				Choice:                 rrcies.UL_DCCH_MessageType_C1_Choice_UlInformationTransfer,
+				UlInformationTransfer: ulInfoTransfer,
+			},
+		},
+	}
+	
+	// Encode RRC message
+	encoded, err := rrc.Encode(&ulDcchMsg)
+	if err != nil {
+		ue.Error("Failed to encode UL Information Transfer: %v", err)
+		return err
+	}
+	
+	// Send to DU
+	ue.SendToDuChannel <- encoded
+	ue.Info("UL Information Transfer sent successfully, RRC length: %d", len(encoded))
+	return nil
+}

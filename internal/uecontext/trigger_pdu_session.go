@@ -201,7 +201,7 @@ func (ue *UeContext) getActivePduSessions() []*PduSession {
 	return active
 }
 
-// sendN1Sm wraps N1 SM message in UL NAS Transport and sends it
+// sendN1Sm wraps N1 SM message in UL NAS Transport and sends it via RRC
 func (ue *UeContext) sendN1Sm(
 	n1SmPdu []byte,
 	pduSessionId uint8,
@@ -238,5 +238,7 @@ func (ue *UeContext) sendN1Sm(
 	}
 
 	ue.Info("Sending N1 SM message (session %d) via UL NAS Transport", pduSessionId)
-	ue.Send_UlInformationTransfer_To_Du(nasPdu)
+	
+	// SỬA: Đóng gói vào RRC UL Information Transfer
+	ue.sendUlInformationTransfer(nasPdu)
 }
