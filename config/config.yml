@@ -13,6 +13,7 @@ du:
     tac: "000001"
 
 ue:
+  nue: 2
   msin: "0000000001"
   supi: "208930000000001"
   suci: "imsi-99970-0000000001"
@@ -22,6 +23,12 @@ ue:
   plmn:
     mcc: "999"
     mnc: "70"
+  events:
+    - rrc_setup
+    - registration
+    - pdu_esta
+    - handover
+
 
 #TODO: instead of hard code the events (registration, pdu session, handover...) of UE
 # you should defind the list of event in config files or with command line!!!

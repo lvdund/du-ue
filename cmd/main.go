@@ -40,6 +40,13 @@ func main() {
 		return
 	}
 
+	//NOTE: look file example.go
+	// create ue: uecontext.InitUE()
+	// list events:
+	// 		ue.TriggerEvents(EventInfo{eventype: rrc_setup, delay: time.Second})
+	// 		ue.TriggerEvents(EventInfo{eventype: registration, delay: time.Second})
+	// 		ue.TriggerEvents(EventInfo{eventype: pdu_esta, delay: time.Second})
+
 	// Wait for interrupt signal to keep the program running
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)

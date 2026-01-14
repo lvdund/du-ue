@@ -35,6 +35,7 @@ type CellConfig struct {
 }
 
 type UEConfig struct {
+	NUE  int        `yaml:"nue"`
 	MSIN string     `yaml:"msin"`
 	SUPI string     `yaml:"supi"`
 	Key  string     `yaml:"key"` // K in hex
