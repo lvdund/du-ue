@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	// Fixed UE IDs (for single UE simulation)
+	//FIX: now UE IDs (for single UE simulation)
 	DU_UE_F1AP_ID int64 = 0
 	CU_UE_F1AP_ID int64 = 0
 	C_RNTI        int64 = 1

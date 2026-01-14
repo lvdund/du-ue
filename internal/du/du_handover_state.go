@@ -12,8 +12,8 @@ const (
 	HANDOVER_ROLE_TARGET
 )
 
+//WARN: should use string
 type HandoverState int
-
 const (
 	HO_STATE_IDLE HandoverState = iota
 	HO_STATE_PREPARATION
@@ -104,6 +104,8 @@ func (du *DU) IsTargetDU() bool {
 	return du.GetHandoverRole() == HANDOVER_ROLE_TARGET
 }
 
+//WARN: instead of have a function to check handover state (type int)
+// use `HandoverState` type as string
 func handoverStateToString(state HandoverState) string {
 	switch state {
 	case HO_STATE_IDLE:

@@ -22,3 +22,6 @@ ue:
   plmn:
     mcc: "999"
     mnc: "70"
+
+#TODO: instead of hard code the events (registration, pdu session, handover...) of UE
+# you should defind the list of event in config files or with command line!!!

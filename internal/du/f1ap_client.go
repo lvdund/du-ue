@@ -203,6 +203,7 @@ func (c *F1APClient) handleF1SetupResponse(response *ies.F1SetupResponse) {
 	c.du.OnF1SetupResponse()
 }
 
+//FIX: there are many fixed value
 // SendF1SetupRequest encodes and sends F1 Setup Request
 func (c *F1APClient) SendF1SetupRequest() error {
 	cfg := c.du.Config
@@ -235,7 +236,7 @@ func (c *F1APClient) SendF1SetupRequest() error {
 			},
 		},
 		FiveGSTAC:                      tac,
-		MeasurementTimingConfiguration: []byte{1, 2, 3}, //FIX:
+		MeasurementTimingConfiguration: []byte{1, 2, 3}, //FIX: 
 		NRModeInfo: ies.NRModeInfo{
 			Choice: ies.NRModeInfoPresentFDD,
 			FDD: &ies.FDDInfo{
