@@ -204,56 +204,9 @@ func (du *DU) HandleUeContextSetupResponse(f1apPdu *f1ap.F1apPdu) error {
 	return nil
 }
 
-// StartRachMonitoring starts monitoring for RACH preambles
-func (du *DU) StartRachMonitoring() {
-	du.Info("[TARGET DU] Starting RACH monitoring for handover UE")
-
-	go func() {
-		du.Info("[TARGET DU] Waiting for UE to send RACH preamble...")
-	}()
-}
-
-// HandleRandomAccessPreamble handles RACH Msg1 from handover UE
-func (du *DU) HandleRandomAccessPreamble(preambleId int, ueId int64) error {
-	du.Info("[TARGET DU] Received Random Access Preamble (Msg1)")
-	du.Info("  - Preamble ID: %d", preambleId)
-	du.Info("  - Detected timing advance")
-
-	// Send Random Access Response (Msg2)
-	return du.sendRandomAccessResponse(preambleId, ueId)
-}
-
-// sendRandomAccessResponse sends RAR (Msg2) to UE
-func (du *DU) sendRandomAccessResponse(preambleId int, ueId int64) error {
-	du.Info("[TARGET DU] Sending Random Access Response (Msg2)")
-	du.Info("  - Assigning Timing Advance")
-	du.Info("  - Granting UL resources for Msg3")
-	du.Info("  - Assigning new C-RNTI: %d", C_RNTI)
-
-	// TODO: Actual RAR PDU creation and transmission
-	return nil
-}
-
-// HandleRrcReconfigurationComplete handles RRC Reconfiguration Complete from UE
-func (du *DU) HandleRrcReconfigurationComplete(rrcBytes []byte) error {
-	du.Info("[TARGET DU] Received RRC Reconfiguration Complete from UE")
-	du.Info("  - Handover execution successful!")
-	du.Info("  - UE is now active on target cell")
-
-	// Forward to CU-CP via F1AP UL RRC Message Transfer
-	return du.sendULRRCMessageTransfer(rrcBytes)
-}
-
-// SimulateRachReception simulates receiving RACH from handover UE (for testing)
-func (du *DU) SimulateRachReception() error {
-	du.Info("[TARGET DU] RACH procedure start")
-
-	preambleId := 63
-
-	if err := du.HandleRandomAccessPreamble(preambleId, DU_UE_F1AP_ID); err != nil {
-		return fmt.Errorf("handle RACH preamble failed: %w", err)
-	}
-
-	du.Info("[TARGET DU] RACH procedure completed")
-	return nil
-}
+// NOTE: RACH Logic Refactoring
+// The following functions were previously located here but have been moved to `internal/du/du_rach.go`
+// to support a state-based RACH handling implementation:
+// 1. StartRachMonitoring()
+// 2. SimulateRachReception() (Replaces HandleRandomAccessPreamble)
+// 3. sendRandomAccessResponse()
