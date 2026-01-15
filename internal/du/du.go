@@ -24,9 +24,9 @@ type DU struct {
 	State    string
 	Config   *config.DUConfig
 	UEConfig *config.UEConfig
-	f1Client *F1APClient
+	f1Client F1Client
 	ue       *UeChannel
-	hoCtx    *HandoverContext  // Handover state and role tracking
+	hoCtx    *HandoverContext // Handover state and role tracking
 	mu       sync.Mutex
 }
 
@@ -57,13 +57,12 @@ func NewDU(cfg *config.Config) (*DU, error) {
 		return nil, fmt.Errorf("create F1AP client: %w", err)
 	}
 	du.f1Client = f1Client
-	
+
 	// Initialize handover context
 	du.InitHandoverContext()
 
 	return du, nil
 }
-
 
 // InitUE creates UE context and initializes channels
 // This should be called after F1 Setup Procedure is complete
@@ -81,10 +80,10 @@ func (du *DU) InitUE() error {
 		SendToUeChannel:      toUE,
 	}
 	// Start goroutine to handle RRC messages from UE
-	go du.handleRrcFromUE()
+	go du.HandleRrcFromUE()
 
 	time.Sleep(1 * time.Second)
-	
+
 	// Create UE context
 	ueCtx := uecontext.InitUE(toUE, fromUE, *du.UEConfig)
 	if ueCtx == nil {
@@ -97,34 +96,8 @@ func (du *DU) InitUE() error {
 }
 
 // handleRrcFromUE handles RRC messages received from UE channel
-func (du *DU) handleRrcFromUE() {
-	du.Info("==== Started listening for RRC messages from UE ===")
-
-	var isInitialMessage bool = true // First message is Initial UL RRC Message Transfer
-
-	for {
-		select {
-		case rrcBytes, ok := <-du.ue.ReceiveFromUeChannel:
-			if !ok {
-				du.Warn("ReceiveFromUeChannel closed, stopping RRC handler")
-				return
-			}
-			du.Info("Received RRC message from UE, length: %d, %v", len(rrcBytes), rrcBytes)
-			if isInitialMessage {
-				// First RRC message (RRCSetupRequest) -> Initial UL RRC Message Transfer
-				if err := du.sendInitialULRRCMessageTransfer(rrcBytes); err != nil {
-					du.Error("Failed to send Initial UL RRC Message Transfer: %v", err)
-				}
-				isInitialMessage = false
-			} else {
-				// Subsequent RRC messages -> UL RRC Message Transfer
-				if err := du.sendULRRCMessageTransfer(rrcBytes); err != nil {
-					du.Error("Failed to send UL RRC Message Transfer: %v", err)
-				}
-			}
-		}
-	}
-}
+// handleRrcFromUE handles RRC messages received from UE channel
+// handleRrcFromUE is now implemented in du_rrc_handler.go
 
 // Start starts the DU simulator
 func (du *DU) Start() error {
@@ -146,7 +119,6 @@ func (du *DU) Start() error {
 	if err := du.SendF1SetupRequest(); err != nil {
 		return fmt.Errorf("send F1 Setup Request: %s", err.Error())
 	}
-	
 
 	du.State = DU_ACTIVE
 	return nil
@@ -190,9 +162,20 @@ func (du *DU) OnF1SetupResponse() {
 	}
 }
 
-
 func (du *DU) SetUEChannelForTest(ue *UeChannel) {
 	du.mu.Lock()
 	defer du.mu.Unlock()
 	du.ue = ue
+}
+
+func (du *DU) SetF1ClientForTest(client F1Client) {
+	du.mu.Lock()
+	defer du.mu.Unlock()
+	du.f1Client = client
+}
+
+func (du *DU) GetUEChannelForTest() *UeChannel {
+	du.mu.Lock()
+	defer du.mu.Unlock()
+	return du.ue
 }

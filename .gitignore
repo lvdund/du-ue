@@ -1,11 +1,20 @@
 .cursor/
 du_ue
 StormSIM-main
-src
-docs
-/test/ue_handover_test.go
+
+
 du-ue-simulator
 central-unit
 .central-unit
 du-ue
+
+# Temporary unrelated files
+temp_*.go
+du-ue-sim
+du-ue
+du.log
+
+/docs
+/temp_analysis
+vendor
 

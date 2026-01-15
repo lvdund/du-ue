@@ -17,6 +17,15 @@ const (
 	F1AP_PPID uint32 = 62
 )
 
+// F1Client defines the interface for F1AP communication
+type F1Client interface {
+	Connect() error
+	Close() error
+	Send(data []byte) error
+	SendF1SetupRequest() error
+	ReadLoop()
+}
+
 // F1APClient handles SCTP connection and F1AP messaging with CU-CP
 type F1APClient struct {
 	*logger.Logger
@@ -171,6 +180,11 @@ func (c *F1APClient) handleMessage(data []byte) error {
 		case ies.ProcedureCode_UEContextSetup:
 			c.Info("Received UE Context Setup Response")
 			c.du.HandleUeContextSetupResponse(&pdu)
+		case ies.ProcedureCode_UEContextModificationRequired:
+			c.Info("Received UE Context Modification Confirm (Handover Response)")
+			if err := c.du.HandleUeContextModificationConfirm(&pdu); err != nil {
+				c.Error("Failed to handle UE Context Modification Confirm: %v", err)
+			}
 		default:
 			c.Warn("Received successful outcome %d", pdu.Message.ProcedureCode.Value)
 		}
@@ -203,7 +217,7 @@ func (c *F1APClient) handleF1SetupResponse(response *ies.F1SetupResponse) {
 	c.du.OnF1SetupResponse()
 }
 
-//FIX: there are many fixed value
+// FIX: there are many fixed value
 // SendF1SetupRequest encodes and sends F1 Setup Request
 func (c *F1APClient) SendF1SetupRequest() error {
 	cfg := c.du.Config
@@ -236,7 +250,7 @@ func (c *F1APClient) SendF1SetupRequest() error {
 			},
 		},
 		FiveGSTAC:                      tac,
-		MeasurementTimingConfiguration: []byte{1, 2, 3}, //FIX: 
+		MeasurementTimingConfiguration: []byte{1, 2, 3}, //FIX:
 		NRModeInfo: ies.NRModeInfo{
 			Choice: ies.NRModeInfoPresentFDD,
 			FDD: &ies.FDDInfo{

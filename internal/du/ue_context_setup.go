@@ -95,7 +95,7 @@ func (du *DU) createTargetHandoverUeContext() {
 			SendToUeChannel:      toUE,
 		}
 
-		go du.handleRrcFromUE()
+		go du.HandleRrcFromUE()
 	}
 
 	du.Info("[TARGET DU] Ready, waiting for UE RACH")
