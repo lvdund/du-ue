@@ -253,7 +253,7 @@ func (ue *UeContext) handleRegistrationAccept(message *nas.RegistrationAccept) {
 		time.Sleep(100 * time.Millisecond)
 
 		ue.Info("Auto-triggering default PDU Session establishment")
-		if err := ue.TriggerDefaultPduSession(); err != nil {
+		if err := ue.TriggerPduSession(); err != nil {
 			ue.Error("Failed to trigger default PDU session: %v", err)
 		}
 	}()

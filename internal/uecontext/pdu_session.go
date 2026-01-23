@@ -9,18 +9,19 @@ import (
 
 // PDU Session States
 const (
-	PDUSessionInactive uint8 = iota
-	PDUSessionActivePending
-	PDUSessionActive
-	PDUSessionModificationPending
-	PDUSessionInactivePending
+	PDUSessionInactive            = "INACTIVE"
+	PDUSessionActivePending       = "ACTIVE_PENDING"
+	PDUSessionActive              = "ACTIVE"
+	PDUSessionModificationPending = "MODIFICATION_PENDING"
+	PDUSessionInactivePending     = "INACTIVE_PENDING"
 )
+const InitialPTI uint8 = 1
 
 // PduSession represents a single PDU session
 type PduSession struct {
 	*logger.Logger
-	id    uint8  // PDU Session ID (1-15)
-	state uint8  // Current state
+	id    uint8
+	state string 
 	ueIP  string // UE IP address
 
 	// Session parameters
@@ -40,10 +41,10 @@ type PduSession struct {
 // NewPduSession creates a new PDU Session
 func NewPduSession(ue *UeContext, sessionId uint8) *PduSession {
 	return &PduSession{
-		id:     sessionId,
-		state:  PDUSessionInactive,
-		pti:    1, // Start with PTI = 1
-		ue:     ue,
+		id:    sessionId,
+		state: PDUSessionInactive,
+		pti:   InitialPTI, 
+		ue:    ue,
 		Logger: logger.InitLogger("", map[string]string{
 			"mod":   "pdu_session",
 			"msin":  ue.msin,
@@ -53,42 +54,25 @@ func NewPduSession(ue *UeContext, sessionId uint8) *PduSession {
 }
 
 // GetState returns current state (thread-safe)
-func (ps *PduSession) GetState() uint8 {
+func (ps *PduSession) GetState() string {
 	ps.mutex.Lock()
 	defer ps.mutex.Unlock()
 	return ps.state
 }
 
 // SetState changes state (thread-safe)
-func (ps *PduSession) SetState(state uint8) {
+func (ps *PduSession) SetState(state string) {
 	ps.mutex.Lock()
 	defer ps.mutex.Unlock()
 	ps.state = state
-	ps.Info("PDU Session state changed to: %s", ps.stateToString(state))
-}
-
-// stateToString converts state to readable string
-func (ps *PduSession) stateToString(state uint8) string {
-	switch state {
-	case PDUSessionInactive:
-		return "INACTIVE"
-	case PDUSessionActivePending:
-		return "ACTIVE_PENDING"
-	case PDUSessionActive:
-		return "ACTIVE"
-	case PDUSessionModificationPending:
-		return "MODIFICATION_PENDING"
-	case PDUSessionInactivePending:
-		return "INACTIVE_PENDING"
-	default:
-		return "UNKNOWN"
-	}
+	ps.Info("PDU Session state changed to: %s", state)
 }
 
 // GetNextPTI returns next PTI and increments (thread-safe)
 func (ps *PduSession) GetNextPTI() uint8 {
 	ps.mutex.Lock()
 	defer ps.mutex.Unlock()
+
 	pti := ps.pti
 	ps.pti++
 	if ps.pti == 0 { // PTI wraps around at 255
@@ -107,9 +91,13 @@ func (ps *PduSession) setIp(ip []byte) {
 		ps.ueIP = fmt.Sprintf("%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3])
 	} else if len(ip) == 16 {
 		// IPv6
-		ps.ueIP = fmt.Sprintf("%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
-			ip[0], ip[1], ip[2], ip[3], ip[4], ip[5], ip[6], ip[7],
-			ip[8], ip[9], ip[10], ip[11], ip[12], ip[13], ip[14], ip[15])
+		ps.ueIP = fmt.Sprintf(
+			"%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x",
+			ip[0], ip[1], ip[2], ip[3],
+			ip[4], ip[5], ip[6], ip[7],
+			ip[8], ip[9], ip[10], ip[11],
+			ip[12], ip[13], ip[14], ip[15],
+		)
 	}
 }
 

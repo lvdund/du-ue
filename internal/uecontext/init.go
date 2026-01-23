@@ -2,6 +2,7 @@ package uecontext
 
 import (
 	"context"
+	"crypto/rand"
 	"du_ue/pkg/config"
 	"fmt"
 
@@ -10,6 +11,8 @@ import (
 	rrcies "github.com/lvdund/rrc/ies"
 )
 
+// InitUE initializes a UE context with channels and executes initial RRC setup
+// It blocks until RRCSetup is received and RRCSetupComplete is sent
 func InitUE(toUE, fromUE chan []byte, ue_config config.UEConfig) *UeContext {
 	// Channel mapping:
 	// toUE = DU -> UE (DU sends to UE, UE receives from DU)
@@ -35,7 +38,7 @@ func InitUE(toUE, fromUE chan []byte, ue_config config.UEConfig) *UeContext {
 	}
 
 	// Decode and handle RRCSetup
-	if err := ue.handleRRCSetup(rrcSetupBytes); err != nil {
+	if err := ue.handleRRCSetup(rrcSetupBytes, ue_config); err != nil {
 		ue.Error("Failed to handle RRCSetup: %v", err)
 		return nil
 	}
@@ -63,15 +66,40 @@ func (ue *UeContext) listenForRrcMessages() {
 	}
 }
 
+// generateRandomValue generates cryptographically random bytes for UE identity
+func generateRandomValue(numBits uint) ([]byte, error) {
+	numBytes := (numBits + 7) / 8 // Round up to nearest byte
+	randomBytes := make([]byte, numBytes)
+	
+	if _, err := rand.Read(randomBytes); err != nil {
+		return nil, fmt.Errorf("failed to generate random value: %w", err)
+	}
+	
+	// Mask off extra bits in the last byte if needed
+	if extraBits := numBits % 8; extraBits != 0 {
+		mask := byte(0xFF << (8 - extraBits))
+		randomBytes[numBytes-1] &= mask
+	}
+	
+	return randomBytes, nil
+}
+
+// InitRRCConn sends RRCSetupRequest with random UE identity
 func (ue *UeContext) InitRRCConn() error {
 	ue.Info("Initializing RRC connection")
+
+	// Generate random UE identity (39 bits as per 3GPP spec)
+	randomBytes, err := generateRandomValue(39)
+	if err != nil {
+		return fmt.Errorf("failed to generate UE identity: %w", err)
+	}
 
 	rrcSetupRequest := rrcies.RRCSetupRequest{
 		RrcSetupRequest: rrcies.RRCSetupRequest_IEs{
 			Ue_Identity: rrcies.InitialUE_Identity{
 				Choice: rrcies.InitialUE_Identity_Choice_RandomValue,
 				RandomValue: aper.BitString{
-					Bytes:   []byte{0x1A, 0x2B, 0x3C, 0x4D, 0x5E},
+					Bytes:   randomBytes,
 					NumBits: 39,
 				},
 			},
@@ -97,88 +125,105 @@ func (ue *UeContext) InitRRCConn() error {
 
 	encoded, err := rrc.Encode(&ulccchMessage)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to encode RRCSetupRequest: %w", err)
 	}
 
-	ue.Info("Sending RRCSetupRequest to DU")
+	ue.Info("Sending RRCSetupRequest to DU (UE identity: %x)", randomBytes)
 	ue.SendToDuChannel <- encoded
 
 	return nil
 }
 
+// extractTransactionId extracts RRC transaction identifier from RRCSetup message
+func extractTransactionId(rrcSetup *rrcies.RRCSetup) uint64 {
+	if rrcSetup != nil {
+		return rrcSetup.Rrc_TransactionIdentifier.Value
+	}
+	return 0
+}
+
 // handleRRCSetup handles RRCSetup message received from DU
 // This is called directly from InitUE after blocking on ReceiveFromDuChannel
-func (ue *UeContext) handleRRCSetup(rrcSetupBytes []byte) error {
+func (ue *UeContext) handleRRCSetup(rrcSetupBytes []byte, ue_config config.UEConfig) error {
 	ue.Info("Handling RRCSetup message, length: %d bytes", len(rrcSetupBytes))
 
 	// Decode RRC message
 	rrcMsg, err := rrc.DecodeAny(rrcSetupBytes)
 	if err != nil {
-		ue.Error("Failed to decode RRC message: %v", err)
-		return err
+		return fmt.Errorf("failed to decode RRC message: %w", err)
 	}
 
 	// Check if it's DL-CCCH message
 	if rrcMsg.Type != rrc.MessageContainerTypeDL_CCCH {
-		ue.Error("Expected DL-CCCH message, got: %v", rrcMsg.Type)
-		return fmt.Errorf("unexpected RRC message type")
+		return fmt.Errorf("expected DL-CCCH message, got: %v", rrcMsg.Type)
 	}
 
 	msg := rrcMsg.Message.(*rrcies.DL_CCCH_Message)
 
 	// Check message structure
 	if msg.Message.Choice != rrcies.DL_CCCH_MessageType_Choice_C1 {
-		ue.Error("DL-CCCH message has unsupported choice type: %v", msg.Message.Choice)
-		return fmt.Errorf("unsupported DL-CCCH choice type")
+		return fmt.Errorf("unsupported DL-CCCH choice type: %v", msg.Message.Choice)
 	}
 
 	c1 := msg.Message.C1
 	if c1 == nil {
-		ue.Error("DL-CCCH C1 is nil")
 		return fmt.Errorf("DL-CCCH C1 is nil")
 	}
 
 	// Check if it's RRCSetup message
 	if c1.Choice != rrcies.DL_CCCH_MessageType_C1_Choice_RrcSetup {
-		ue.Error("DL-CCCH message is not RRCSetup, choice: %v", c1.Choice)
-		return fmt.Errorf("expected RRCSetup message")
+		return fmt.Errorf("expected RRCSetup message, got choice: %v", c1.Choice)
 	}
 
 	if c1.RrcSetup == nil {
-		ue.Error("RRCSetup is nil")
 		return fmt.Errorf("RRCSetup is nil")
 	}
 
-	ue.Info("Received RRCSetup from DU")
+	// Extract transaction ID from RRCSetup
+	transactionId := extractTransactionId(c1.RrcSetup)
+	ue.Info("Received RRCSetup from DU (transaction ID: %d)", transactionId)
 
 	// Handle RRCSetup: prepare for registration
 	ue.auth.snn = []byte(deriveSNN(ue.mcc, ue.mnc))
 
 	// Trigger registration to create NAS Registration Request
 	if err := ue.TriggerInitRegistration(); err != nil {
-		ue.Error("Failed to trigger registration: %v", err)
-		return err
+		return fmt.Errorf("failed to trigger registration: %w", err)
 	}
 	ue.Info("Created NAS Registration Request, length: %d bytes", len(ue.nasPdu))
 
-	// Send RRCSetupComplete with NAS Registration Request embedded
+	// Build RRCSetupComplete message
+	// For initial registration, we don't include S-TMSI (ng-5G-S-TMSI-Value should be nil)
+	rrcSetupCompleteIEs := &rrcies.RRCSetupComplete_IEs{
+		SelectedPLMN_Identity: 1,
+		DedicatedNAS_Message: rrcies.DedicatedNAS_Message{
+			Value: ue.nasPdu, // NAS Registration Request is embedded here
+		},
+	}
+
+	// Only include S-TMSI if UE has GUTI (for resume/re-registration scenarios)
+	// For initial registration, ng_5G_S_TMSI_Value should be nil
+	if ue.guti != nil {
+		ue.Info("Including S-TMSI in RRCSetupComplete (resume/re-registration)")
+		// Extract S-TMSI Part2 from GUTI (lower 9 bits of S-TMSI)
+		// This is just for demonstration - actual extraction depends on GUTI structure
+		stmsiPart2 := aper.BitString{
+			Bytes:   []byte{0x00, 0x00}, // Should be extracted from ue.guti
+			NumBits: 9,
+		}
+		rrcSetupCompleteIEs.Ng_5G_S_TMSI_Value = &rrcies.RRCSetupComplete_IEs_ng_5G_S_TMSI_Value{
+			Choice:             rrcies.RRCSetupComplete_IEs_ng_5G_S_TMSI_Value_Choice_Ng_5G_S_TMSI_Part2,
+			Ng_5G_S_TMSI_Part2: stmsiPart2,
+		}
+	} else {
+		ue.Info("Initial registration - no S-TMSI included")
+	}
+
 	rrcSetupComplete := rrcies.RRCSetupComplete{
-		Rrc_TransactionIdentifier: rrcies.RRC_TransactionIdentifier{Value: 0},
+		Rrc_TransactionIdentifier: rrcies.RRC_TransactionIdentifier{Value: transactionId},
 		CriticalExtensions: rrcies.RRCSetupComplete_CriticalExtensions{
-			Choice: rrcies.RRCSetupComplete_CriticalExtensions_Choice_RrcSetupComplete,
-			RrcSetupComplete: &rrcies.RRCSetupComplete_IEs{
-				SelectedPLMN_Identity: 1,
-				Ng_5G_S_TMSI_Value: &rrcies.RRCSetupComplete_IEs_ng_5G_S_TMSI_Value{
-					Choice: rrcies.RRCSetupComplete_IEs_ng_5G_S_TMSI_Value_Choice_Ng_5G_S_TMSI_Part2,
-					Ng_5G_S_TMSI_Part2: aper.BitString{
-						Bytes:   []byte{0x00, 0x80},
-						NumBits: 9,
-					},
-				},
-				DedicatedNAS_Message: rrcies.DedicatedNAS_Message{
-					Value: ue.nasPdu, // NAS Registration Request is embedded here
-				},
-			},
+			Choice:           rrcies.RRCSetupComplete_CriticalExtensions_Choice_RrcSetupComplete,
+			RrcSetupComplete: rrcSetupCompleteIEs,
 		},
 	}
 
@@ -195,15 +240,11 @@ func (ue *UeContext) handleRRCSetup(rrcSetupBytes []byte) error {
 
 	encoded, err := rrc.Encode(&uldccchMessage)
 	if err != nil {
-		ue.Error("Failed to encode RRCSetupComplete: %v", err)
-		return err
+		return fmt.Errorf("failed to encode RRCSetupComplete: %w", err)
 	}
 
 	ue.Info("Sending RRCSetupComplete to DU (with NAS Registration Request embedded)")
 	ue.SendToDuChannel <- encoded
-
-	// Signal that RRC connection is ready (this unblocks <-ue.IsReadyConn in InitUE)
-	// ue.IsReadyConn <- true
 
 	ue.Info("==== RRC connection Initialized ====")
 

@@ -45,6 +45,11 @@ type UeContext struct {
 	// Measurement context for handover
 	measurement *MeasurementContext
 
+	// Event queue for scheduling UE events
+	eventQueue *eventQueue
+
+	config *config.UEConfig
+
 	mutex sync.Mutex
 	ctx   context.Context
 
@@ -59,7 +64,7 @@ func CreateUe(
 	ctx context.Context,
 ) *UeContext {
 	ue := &UeContext{
-		id:     1, // Fixed ID for single UE
+		id:     1, // Will be assigned proper ID by UE Manager
 		mcc:    conf.PLMN.MCC,
 		mnc:    conf.PLMN.MNC,
 		msin:   conf.MSIN,
@@ -67,6 +72,7 @@ func CreateUe(
 		state:  UE_STATE_DEREGISTERED,
 		Logger: logger.InitLogger("", map[string]string{"mod": "ue", "msin": conf.MSIN}),
 		ctx:    ctx,
+		config: &conf,
 	}
 
 	// init AuthContext
@@ -94,9 +100,11 @@ func CreateUe(
 	// Initialize measurement context
 	ue.initMeasurement()
 
+	// Initialize event queue
+	ue.initEventQueue()
+
 	return ue
 }
-
 
 // handleRrcFromDU listens for RRC messages from DU channel
 func (ue *UeContext) handleRrcFromDU() {

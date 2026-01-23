@@ -100,13 +100,15 @@ func (ue *UeContext) triggerInitPduSessionReleaseComplete(pduSession *PduSession
 	ue.releasePduSession(pduSession.id)
 }
 
-// TriggerDefaultPduSession triggers PDU session with default parameters
-func (ue *UeContext) TriggerDefaultPduSession() error {
-	params := map[string]any{
-		"dnn": "internet", // Default DNN
-	}
+// TriggerPduSession triggers PDU session with default parameters
+func (ue *UeContext) TriggerPduSession() error {
+    params := map[string]any{}
 
-	return ue.triggerInitPduSessionRequest(&params)
+    if ue.config.DefaultDnn != "" {
+        params["dnn"] = ue.config.DefaultDnn
+    }
+
+    return ue.triggerInitPduSessionRequest(&params)
 }
 
 // TriggerCustomPduSession triggers PDU session with custom parameters

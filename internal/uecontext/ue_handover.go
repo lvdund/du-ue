@@ -162,7 +162,8 @@ func (ue *UeContext) HandleRrcReconfiguration(rrcBytes []byte) error {
 	}
 
 	rrcReconfig := dlDcchMsg.Message.C1.RrcReconfiguration
-	ue.Info("RRC Reconfiguration received, TransactionId=%d", rrcReconfig.Rrc_TransactionIdentifier)
+	transactionId := rrcReconfig.Rrc_TransactionIdentifier.Value
+	ue.Info("RRC Reconfiguration received, TransactionId=%d", transactionId)
 
 	// Check if this is a handover command by examining ReconfigurationWithSync
 	isHandover := false
@@ -187,16 +188,18 @@ func (ue *UeContext) HandleRrcReconfiguration(rrcBytes []byte) error {
 	if isHandover {
 		ue.Info("Handover to target cell, new C-RNTI will be assigned")
 		// Simulate Random Access procedure to target cell
-		go ue.performRandomAccess()
+		go ue.performRandomAccess(transactionId)
 	} else {
 		ue.Info("RRC Reconfiguration completed (not a handover)")
+		// For non-handover case, send Complete immediately
+		go ue.sendRrcReconfigurationComplete(transactionId)
 	}
 
 	return nil
 }
 
 // performRandomAccess simulates Random Access procedure with target DU
-func (ue *UeContext) performRandomAccess() {
+func (ue *UeContext) performRandomAccess(transactionId uint64) {
 	ue.Info("Performing Random Access to Target Cell")
 
 	// Simulate Msg1 (RACH Preamble) transmission
@@ -208,7 +211,7 @@ func (ue *UeContext) performRandomAccess() {
 	time.Sleep(10 * time.Millisecond)
 
 	// Send RRC Reconfiguration Complete (Msg3)
-	if err := ue.sendRrcReconfigurationComplete(); err != nil {
+	if err := ue.sendRrcReconfigurationComplete(transactionId); err != nil {
 		ue.Error("Failed to send RRC Reconfiguration Complete: %v", err)
 		return
 	}
@@ -217,14 +220,14 @@ func (ue *UeContext) performRandomAccess() {
 }
 
 // sendRrcReconfigurationComplete sends RRC Reconfiguration Complete
-func (ue *UeContext) sendRrcReconfigurationComplete() error {
-	ue.Info("Sending RRC Reconfiguration Complete")
+func (ue *UeContext) sendRrcReconfigurationComplete(transactionId uint64) error {
+	ue.Info("Sending RRC Reconfiguration Complete with TransactionId=%d", transactionId)
 
-	transactionId := rrcies.RRC_TransactionIdentifier{Value: 0}
+	tid := rrcies.RRC_TransactionIdentifier{Value: transactionId}
 
 	// Create RRC Reconfiguration Complete
 	rrcComplete := &rrcies.RRCReconfigurationComplete{
-		Rrc_TransactionIdentifier: transactionId,
+		Rrc_TransactionIdentifier: tid,
 		CriticalExtensions: rrcies.RRCReconfigurationComplete_CriticalExtensions{
 			Choice:                     rrcies.RRCReconfigurationComplete_CriticalExtensions_Choice_RrcReconfigurationComplete,
 			RrcReconfigurationComplete: &rrcies.RRCReconfigurationComplete_IEs{},

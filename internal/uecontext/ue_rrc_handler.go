@@ -84,6 +84,9 @@ func (ue *UeContext) handleRrcReconfigurationMessage(msg *rrcies.RRCReconfigurat
 		return fmt.Errorf("invalid RRC Reconfiguration structure")
 	}
 
+	transactionId := msg.Rrc_TransactionIdentifier.Value
+	ue.Info("RRC Reconfiguration received, TransactionId=%d", transactionId)
+
 	rrcReconfig := msg.CriticalExtensions.RrcReconfiguration
 
 	// Check if this is a handover by checking SecondaryCellGroup
@@ -92,11 +95,12 @@ func (ue *UeContext) handleRrcReconfigurationMessage(msg *rrcies.RRCReconfigurat
 		// Decode SecondaryCellGroup to check for ReconfigurationWithSync
 		var cellGroupConfig rrcies.CellGroupConfig
 		if err := rrc.Decode(*rrcReconfig.SecondaryCellGroup, &cellGroupConfig); err == nil {
-			if cellGroupConfig.SpCellConfig != nil && 
+			if cellGroupConfig.SpCellConfig != nil &&
 				cellGroupConfig.SpCellConfig.ReconfigurationWithSync != nil {
 				isHandover = true
 				ue.Info("RRC Reconfiguration contains handover command")
-				return ue.handleHandoverReconfiguration(&cellGroupConfig)
+				// fixed: Pass transactionId to handover handler
+				return ue.handleHandoverReconfiguration(&cellGroupConfig, transactionId)
 			}
 		}
 	}
@@ -104,24 +108,23 @@ func (ue *UeContext) handleRrcReconfigurationMessage(msg *rrcies.RRCReconfigurat
 	if !isHandover {
 		// Normal RRC Reconfiguration (not handover)
 		ue.Info("Processing normal RRC Reconfiguration")
-		
+
 		// Extract NAS PDU if present in NonCriticalExtension
 		if rrcReconfig.NonCriticalExtension != nil &&
 			rrcReconfig.NonCriticalExtension.DedicatedNAS_MessageList != nil &&
 			len(rrcReconfig.NonCriticalExtension.DedicatedNAS_MessageList) > 0 {
 			ue.Info("RRC Reconfiguration contains NAS message")
 			nasMsg := rrcReconfig.NonCriticalExtension.DedicatedNAS_MessageList[0]
-			// FIX: HandleNasMsg returns void, not error
 			ue.HandleNasMsg(nasMsg.Value)
 		}
 	}
 
-	// Send RRC Reconfiguration Complete
-	return ue.sendRrcReconfigurationComplete()
+	// fixed: Send RRC Reconfiguration Complete with transactionId
+	return ue.sendRrcReconfigurationComplete(transactionId)
 }
 
-// handleHandoverReconfiguration handles RRC Reconfiguration for handover
-func (ue *UeContext) handleHandoverReconfiguration(cellGroupConfig *rrcies.CellGroupConfig) error {
+// fixed: Add transactionId parameter
+func (ue *UeContext) handleHandoverReconfiguration(cellGroupConfig *rrcies.CellGroupConfig, transactionId uint64) error {
 	ue.Info("Handling Handover Reconfiguration")
 
 	syncReconfig := cellGroupConfig.SpCellConfig.ReconfigurationWithSync
@@ -131,15 +134,13 @@ func (ue *UeContext) handleHandoverReconfiguration(cellGroupConfig *rrcies.CellG
 		ue.Info("Target cell configuration received")
 	}
 
-	// FIX: NewUE_Identity is RNTI_Value (not pointer), check Value field directly
-	// RNTI_Value is a struct with a Value field (int64)
 	if syncReconfig.NewUE_Identity.Value != 0 {
 		ue.Info("New C-RNTI assigned: %d", syncReconfig.NewUE_Identity.Value)
 	}
 
-	// Perform Random Access to target cell
+	// fixed: Perform Random Access to target cell with transactionId
 	ue.Info("Initiating Random Access to target cell")
-	go ue.performRandomAccess()
+	go ue.performRandomAccess(transactionId)
 
 	return nil
 }
@@ -166,8 +167,7 @@ func (ue *UeContext) handleDlInformationTransfer(msg *rrcies.DLInformationTransf
 	// Extract and handle NAS message
 	nasBytes := dlInfo.DedicatedNAS_Message.Value
 	ue.Info("Extracted NAS message from DL Information Transfer, length: %d", len(nasBytes))
-	
-	// FIX: HandleNasMsg returns void, not error
+
 	ue.HandleNasMsg(nasBytes)
 	return nil
 }
@@ -191,7 +191,6 @@ func (ue *UeContext) sendRrcSetupComplete() error {
 	// Get the NAS PDU
 	nasPdu := ue.nasPdu
 
-	// FIX: SelectedPLMN_Identity is int64, not struct
 	// Create RRC Setup Complete message
 	rrcSetupComplete := &rrcies.RRCSetupComplete{
 		Rrc_TransactionIdentifier: rrcies.RRC_TransactionIdentifier{Value: 0},

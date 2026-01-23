@@ -3,14 +3,20 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/reogac/nas"
 	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	DU DUConfig `yaml:"du"`
-	UE UEConfig `yaml:"ue"`
+	DU      DUConfig      `yaml:"du"`
+	UE      UEConfig      `yaml:"ue"`
+	Logging LoggingConfig `yaml:"logging"`
+}
+
+type LoggingConfig struct {
+	Level string `yaml:"level"`
 }
 
 type DUConfig struct {
@@ -35,14 +41,30 @@ type CellConfig struct {
 }
 
 type UEConfig struct {
-	NUE  int        `yaml:"nue"`
-	MSIN string     `yaml:"msin"`
-	SUPI string     `yaml:"supi"`
-	Key  string     `yaml:"key"` // K in hex
-	OP   string     `yaml:"op"`  // OP in hex (optional)
-	OPC  string     `yaml:"opc"` // OPC in hex (optional)
-	AMF  string     `yaml:"amf"` // AMF in hex
-	PLMN PLMNConfig `yaml:"plmn"`
+	NUE       int            `yaml:"nue"`
+	MSIN      string         `yaml:"msin"`       // Base MSIN, will increment for multiple UEs
+	Key       string         `yaml:"key"`        // K in hex
+	OP        string         `yaml:"op"`         // OP in hex (optional)
+	OPC       string         `yaml:"opc"`        // OPC in hex (optional)
+	AMF       string         `yaml:"amf"`        // AMF in hex
+	PLMN      PLMNConfig     `yaml:"plmn"`
+	Scenarios []UEScenario   `yaml:"scenarios"`  // List of scenarios to execute
+	DefaultDnn string         `yaml:"default_dnn"`
+}
+
+// UEScenario defines a sequence of events for UE(s)
+type UEScenario struct {
+	Name        string       `yaml:"name"`         // Scenario name for logging
+	Description string       `yaml:"description"`  // Optional description
+	ApplyTo     string       `yaml:"apply_to"`     // "all", "first", "last", or MSIN pattern
+	Events      []EventEntry `yaml:"events"`       // Sequence of events
+}
+
+// EventEntry defines a single event with timing and parameters
+type EventEntry struct {
+	Type   string                 `yaml:"type"`   // Event type: rrc_setup, registration, pdu_establishment, etc.
+	Delay  string                 `yaml:"delay"`  // Delay before triggering (e.g., "1s", "500ms", "2m")
+	Params map[string]interface{} `yaml:"params"` // Optional parameters for the event
 }
 
 // GetUESecurityCapability returns UE security capability with all algorithms enabled
@@ -64,6 +86,29 @@ func (ue *UEConfig) GetUESecurityCapability() *nas.UeSecurityCapability {
 	return secCap
 }
 
+// ParseDelay converts string delay to time.Duration
+func (e *EventEntry) ParseDelay() (time.Duration, error) {
+	if e.Delay == "" {
+		return 0, nil
+	}
+	return time.ParseDuration(e.Delay)
+}
+
+// ShouldApplyToUE checks if scenario should apply to given UE
+func (s *UEScenario) ShouldApplyToUE(msin string, ueIndex int, totalUEs int) bool {
+	switch s.ApplyTo {
+	case "", "all":
+		return true
+	case "first":
+		return ueIndex == 0
+	case "last":
+		return ueIndex == totalUEs-1
+	default:
+		// Check if it matches MSIN pattern or specific MSIN
+		return msin == s.ApplyTo
+	}
+}
+
 func Load(path string) (*Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -83,7 +128,6 @@ func Load(path string) (*Config, error) {
 }
 
 func (c *Config) Validate() error {
-
 	if c.DU.Name == "" {
 		return fmt.Errorf("du.name is required")
 	}
@@ -108,5 +152,24 @@ func (c *Config) Validate() error {
 	if c.UE.AMF == "" {
 		return fmt.Errorf("ue.amf is required")
 	}
+
+	// Validate scenarios and events
+	for i, scenario := range c.UE.Scenarios {
+		if scenario.Name == "" {
+			return fmt.Errorf("scenario[%d].name is required", i)
+		}
+		for j, event := range scenario.Events {
+			if event.Type == "" {
+				return fmt.Errorf("scenario[%d].events[%d].type is required", i, j)
+			}
+			// Validate delay format
+			if event.Delay != "" {
+				if _, err := time.ParseDuration(event.Delay); err != nil {
+					return fmt.Errorf("scenario[%d].events[%d].delay invalid: %w", i, j, err)
+				}
+			}
+		}
+	}
+
 	return nil
 }
