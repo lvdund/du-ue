@@ -124,18 +124,44 @@ func (du *DU) handleMeasurementReport(report *rrcies.MeasurementReport) {
 
 		du.Info("  - Neighbor Cell (PCI: %d): RSRP = %d dBm", pci, targetRSRP)
 
-		// 3. Handover Decision (A3 Event Logic)
-		// If Target > Serving + Offset (3dB)
-		offset := int64(3)
-		if targetRSRP > servingRSRP+offset {
-			du.Info("  >>> Handover Condition Met! (Target %d > Serving %d + %d)", targetRSRP, servingRSRP, offset)
-
-			// Trigger Handover if we are not already in it
-			if du.hoCtx == nil || du.hoCtx.state == HO_STATE_IDLE {
-				du.TriggerHandover(pci)
+		if du.hoCtx == nil || du.hoCtx.state == HO_STATE_IDLE {
+			// RRM: PCI Validation
+			if !du.isValidNeighbor(pci) {
+				du.Warn("  >>> Handover Rejected: Unknown Neighbor PCI %d", pci)
+				continue
 			}
+
+			// RRM: Admission Control (Simulation)
+			if !du.checkAdmissionControl(pci) {
+				du.Warn("  >>> Handover Rejected: Target Cell PCI %d Overloaded", pci)
+				continue
+			}
+
+			du.Info("  >>> Received Measurement Report for Target %d (RSRP: %d dBm) - Triggering Handover", pci, targetRSRP)
+			du.TriggerHandover(pci)
 		}
 	}
+}
+
+// isValidNeighbor checks if PCI is in the configured neighbor list
+func (du *DU) isValidNeighbor(pci int64) bool {
+	// Simulated Neighbor List
+	validNeighbors := []int64{2, 3, 4}
+	for _, valid := range validNeighbors {
+		if pci == valid {
+			return true
+		}
+	}
+	return false
+}
+
+// checkAdmissionControl simulates load checking on the target cell
+func (du *DU) checkAdmissionControl(pci int64) bool {
+	// Simulate overloaded cell for PCI 999
+	if pci == 999 {
+		return false
+	}
+	return true
 }
 
 // TriggerHandover initiates the sending of UEContextModificationRequired
