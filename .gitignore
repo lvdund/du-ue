@@ -20,3 +20,5 @@ vendor
 
 /internal/uecontext/pdu_session_test.go
 /internal/uecontext/example.go
+main
+.vscode/

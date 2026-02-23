@@ -177,9 +177,6 @@ func (c *F1APClient) handleMessage(data []byte) error {
 			if response, ok := pdu.Message.Msg.(*ies.F1SetupResponse); ok {
 				c.handleF1SetupResponse(response)
 			}
-		case ies.ProcedureCode_UEContextSetup:
-			c.Info("Received UE Context Setup Response")
-			c.du.HandleUeContextSetupResponse(&pdu)
 		case ies.ProcedureCode_UEContextModificationRequired:
 			c.Info("Received UE Context Modification Confirm (Handover Response)")
 			if err := c.du.HandleUeContextModificationConfirm(&pdu); err != nil {
@@ -200,6 +197,11 @@ func (c *F1APClient) handleMessage(data []byte) error {
 			if err := c.du.HandleUeContextSetupRequest(&pdu); err != nil {
 				c.Error("Failed to handle UE Context Setup Request: %v", err)
 			}
+		case ies.ProcedureCode_UEContextModification:
+			c.Info("Received UE Context Modification Request")
+			if err := c.du.HandleUeContextModificationRequest(&pdu); err != nil {
+				c.Error("Failed to handle UE Context Modification Request: %v", err)
+			}
 		default:
 			c.Info("Received initiating message %d", pdu.Message.ProcedureCode.Value)
 		}
@@ -217,7 +219,6 @@ func (c *F1APClient) handleF1SetupResponse(response *ies.F1SetupResponse) {
 	c.du.OnF1SetupResponse()
 }
 
-// FIX: there are many fixed value
 // SendF1SetupRequest encodes and sends F1 Setup Request
 func (c *F1APClient) SendF1SetupRequest() error {
 	cfg := c.du.Config
@@ -228,18 +229,37 @@ func (c *F1APClient) SendF1SetupRequest() error {
 	// Create RRC Version (3 bits: 0x0c = 0b110 = RRC Release 15)
 	rrcVersion := ies.RRCVersion{
 		LatestRRCVersion: aper.BitString{
-			Bytes:   []byte{2, 248, 57},
+			Bytes:   []byte{0xc0}, // 1100 0000 -> First 3 bits are 110 (6)
 			NumBits: 3,
 		},
 	}
 
-	tac := []byte{0x0, 0x0, 0x01}
+	// Parse TAC from hex string
+	tac, err := hex.DecodeString(cfg.Cell.TAC)
+	if err != nil || len(tac) != 3 {
+		c.Warn("Invalid TAC format in config: %s, using default", cfg.Cell.TAC)
+		tac = []byte{0x0, 0x0, 0x01}
+	}
+
+	// Create NRCGI
+	// NR Cell Identity is 36 bits. We combine DU ID and PCI or follow a convention.
+	// For simulation, we'll use: [DU_ID (24 bits) | PCI (12 bits)]
+	cellId := (cfg.ID << 12) | (int64(cfg.Cell.PCI) & 0xFFF)
+	nrCellIdentityBytes := make([]byte, 5)
+	nrCellIdentityBytes[0] = byte(cellId >> 28)
+	nrCellIdentityBytes[1] = byte(cellId >> 20)
+	nrCellIdentityBytes[2] = byte(cellId >> 12)
+	nrCellIdentityBytes[3] = byte(cellId >> 4)
+	nrCellIdentityBytes[4] = byte(cellId << 4)
 
 	// Create served cell information
 	servedCellInfo := ies.ServedCellInformation{
 		NRCGI: ies.NRCGI{
-			PLMNIdentity:   []byte{152, 249, 225}, // 99970
-			NRCellIdentity: aper.BitString{Bytes: []byte{0x0, 0x0, 0x01, 0x0, 0x0}, NumBits: 36},
+			PLMNIdentity: plmnBytes,
+			NRCellIdentity: aper.BitString{
+				Bytes:   nrCellIdentityBytes,
+				NumBits: 36,
+			},
 		},
 		NRPCI: ies.NRPCI{
 			Value: int64(cfg.Cell.PCI),
@@ -250,28 +270,23 @@ func (c *F1APClient) SendF1SetupRequest() error {
 			},
 		},
 		FiveGSTAC:                      tac,
-		MeasurementTimingConfiguration: []byte{1, 2, 3}, //FIX:
+		MeasurementTimingConfiguration: []byte{}, // Unconstrained (empty is valid)
 		NRModeInfo: ies.NRModeInfo{
 			Choice: ies.NRModeInfoPresentFDD,
 			FDD: &ies.FDDInfo{
 				ULNRFreqInfo: ies.NRFreqInfo{
-					NRARFCN: 1,
+					NRARFCN: int64(cfg.Cell.NRARFCN),
 					FreqBandListNr: []ies.FreqBandNrItem{
-						ies.FreqBandNrItem{
-							FreqBandIndicatorNr: 1,
-							SupportedSULBandList: []ies.SupportedSULFreqBandItem{
-								ies.SupportedSULFreqBandItem{
-									FreqBandIndicatorNr: 1,
-								},
-							},
+						{
+							FreqBandIndicatorNr: cfg.Cell.Band,
 						},
 					},
 				},
 				DLNRFreqInfo: ies.NRFreqInfo{
-					NRARFCN: 1,
+					NRARFCN: int64(cfg.Cell.NRARFCN),
 					FreqBandListNr: []ies.FreqBandNrItem{
-						ies.FreqBandNrItem{
-							FreqBandIndicatorNr: 1,
+						{
+							FreqBandIndicatorNr: cfg.Cell.Band,
 						},
 					},
 				},
@@ -295,7 +310,7 @@ func (c *F1APClient) SendF1SetupRequest() error {
 
 	// Create F1 Setup Request
 	msg := ies.F1SetupRequest{
-		TransactionID:   0, // Fixed transaction ID
+		TransactionID:   0,
 		GNBDUID:         cfg.ID,
 		GNBDUName:       []byte(cfg.Name),
 		GNBDURRCVersion: rrcVersion,
@@ -310,8 +325,9 @@ func (c *F1APClient) SendF1SetupRequest() error {
 		return fmt.Errorf("encode F1 Setup Request: %w", err)
 	}
 
-	c.Info("Sending F1 Setup Request")
-	// Send via SCTP
+	c.Info("Sending dynamic F1 Setup Request (DU ID: %d, PCI: %d, TAC: %s, ARFCN: %d)",
+		cfg.ID, cfg.Cell.PCI, cfg.Cell.TAC, cfg.Cell.NRARFCN)
+
 	return c.Send(buf)
 }
 

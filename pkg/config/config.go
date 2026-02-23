@@ -36,28 +36,30 @@ type PLMNConfig struct {
 }
 
 type CellConfig struct {
-	PCI uint16 `yaml:"pci"`
-	TAC string `yaml:"tac"`
+	PCI     uint16 `yaml:"pci"`
+	TAC     string `yaml:"tac"`
+	NRARFCN uint32 `yaml:"nrarfcn"`
+	Band    int64  `yaml:"band"`
 }
 
 type UEConfig struct {
-	NUE       int            `yaml:"nue"`
-	MSIN      string         `yaml:"msin"`       // Base MSIN, will increment for multiple UEs
-	Key       string         `yaml:"key"`        // K in hex
-	OP        string         `yaml:"op"`         // OP in hex (optional)
-	OPC       string         `yaml:"opc"`        // OPC in hex (optional)
-	AMF       string         `yaml:"amf"`        // AMF in hex
-	PLMN      PLMNConfig     `yaml:"plmn"`
-	Scenarios []UEScenario   `yaml:"scenarios"`  // List of scenarios to execute
-	DefaultDnn string         `yaml:"default_dnn"`
+	NUE        int          `yaml:"nue"`
+	MSIN       string       `yaml:"msin"` // Base MSIN, will increment for multiple UEs
+	Key        string       `yaml:"key"`  // K in hex
+	OP         string       `yaml:"op"`   // OP in hex (optional)
+	OPC        string       `yaml:"opc"`  // OPC in hex (optional)
+	AMF        string       `yaml:"amf"`  // AMF in hex
+	PLMN       PLMNConfig   `yaml:"plmn"`
+	Scenarios  []UEScenario `yaml:"scenarios"` // List of scenarios to execute
+	DefaultDnn string       `yaml:"default_dnn"`
 }
 
 // UEScenario defines a sequence of events for UE(s)
 type UEScenario struct {
-	Name        string       `yaml:"name"`         // Scenario name for logging
-	Description string       `yaml:"description"`  // Optional description
-	ApplyTo     string       `yaml:"apply_to"`     // "all", "first", "last", or MSIN pattern
-	Events      []EventEntry `yaml:"events"`       // Sequence of events
+	Name        string       `yaml:"name"`        // Scenario name for logging
+	Description string       `yaml:"description"` // Optional description
+	ApplyTo     string       `yaml:"apply_to"`    // "all", "first", "last", or MSIN pattern
+	Events      []EventEntry `yaml:"events"`      // Sequence of events
 }
 
 // EventEntry defines a single event with timing and parameters

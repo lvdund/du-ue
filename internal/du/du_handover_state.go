@@ -4,23 +4,23 @@ import (
 	"sync"
 )
 
-type HandoverRole int
+type HandoverRole string
 
 const (
-	HANDOVER_ROLE_NONE HandoverRole = iota
-	HANDOVER_ROLE_SOURCE
-	HANDOVER_ROLE_TARGET
+	HANDOVER_ROLE_NONE   HandoverRole = "NONE"
+	HANDOVER_ROLE_SOURCE HandoverRole = "SOURCE"
+	HANDOVER_ROLE_TARGET HandoverRole = "TARGET"
 )
 
-//WARN: should use string
-type HandoverState int
+type HandoverState string
+
 const (
-	HO_STATE_IDLE HandoverState = iota
-	HO_STATE_PREPARATION
-	HO_STATE_EXECUTION
-	HO_STATE_COMPLETION
-	HO_STATE_COMPLETED
-	HO_STATE_FAILED
+	HO_STATE_IDLE        HandoverState = "IDLE"
+	HO_STATE_PREPARATION HandoverState = "PREPARATION"
+	HO_STATE_EXECUTION   HandoverState = "EXECUTION"
+	HO_STATE_COMPLETION  HandoverState = "COMPLETION"
+	HO_STATE_COMPLETED   HandoverState = "COMPLETED"
+	HO_STATE_FAILED      HandoverState = "FAILED"
 )
 
 type HandoverContext struct {
@@ -35,104 +35,85 @@ type HandoverContext struct {
 	mutex         sync.RWMutex
 }
 
-func (du *DU) InitHandoverContext() {
-	du.hoCtx = &HandoverContext{
+func (ctx *DuUeContext) InitHandoverContext() {
+	ctx.HoCtx = &HandoverContext{
 		role:  HANDOVER_ROLE_NONE,
 		state: HO_STATE_IDLE,
 	}
 }
 
-func (du *DU) SetSourceHandoverState(state HandoverState) {
-	if du.hoCtx == nil {
-		du.InitHandoverContext()
+func (du *DU) SetSourceHandoverState(ctx *DuUeContext, state HandoverState) {
+	if ctx.HoCtx == nil {
+		ctx.InitHandoverContext()
 	}
 
-	du.hoCtx.mutex.Lock()
-	defer du.hoCtx.mutex.Unlock()
+	ctx.HoCtx.mutex.Lock()
+	defer ctx.HoCtx.mutex.Unlock()
 
-	du.hoCtx.role = HANDOVER_ROLE_SOURCE
-	oldState := du.hoCtx.state
-	du.hoCtx.state = state
+	ctx.HoCtx.role = HANDOVER_ROLE_SOURCE
+	oldState := ctx.HoCtx.state
+	ctx.HoCtx.state = state
 
-	du.Info("[SOURCE DU] State transition: %s -> %s",
-		handoverStateToString(oldState),
-		handoverStateToString(state))
+	du.Info("[SOURCE DU][UE %d] State transition: %s -> %s",
+		ctx.DuUeF1apId,
+		oldState,
+		state)
 }
 
-func (du *DU) SetTargetHandoverState(state HandoverState) {
-	if du.hoCtx == nil {
-		du.InitHandoverContext()
+func (du *DU) SetTargetHandoverState(ctx *DuUeContext, state HandoverState) {
+	if ctx.HoCtx == nil {
+		ctx.InitHandoverContext()
 	}
 
-	du.hoCtx.mutex.Lock()
-	defer du.hoCtx.mutex.Unlock()
+	ctx.HoCtx.mutex.Lock()
+	defer ctx.HoCtx.mutex.Unlock()
 
-	du.hoCtx.role = HANDOVER_ROLE_TARGET
-	oldState := du.hoCtx.state
-	du.hoCtx.state = state
+	ctx.HoCtx.role = HANDOVER_ROLE_TARGET
+	oldState := ctx.HoCtx.state
+	ctx.HoCtx.state = state
 
-	du.Info("[TARGET DU] State transition: %s -> %s",
-		handoverStateToString(oldState),
-		handoverStateToString(state))
+	du.Info("[TARGET DU][UE %d] State transition: %s -> %s",
+		ctx.DuUeF1apId,
+		oldState,
+		state)
 }
 
-func (du *DU) GetHandoverState() HandoverState {
-	if du.hoCtx == nil {
+func (du *DU) GetHandoverState(ctx *DuUeContext) HandoverState {
+	if ctx == nil || ctx.HoCtx == nil {
 		return HO_STATE_IDLE
 	}
 
-	du.hoCtx.mutex.RLock()
-	defer du.hoCtx.mutex.RUnlock()
-	return du.hoCtx.state
+	ctx.HoCtx.mutex.RLock()
+	defer ctx.HoCtx.mutex.RUnlock()
+	return ctx.HoCtx.state
 }
 
-func (du *DU) GetHandoverRole() HandoverRole {
-	if du.hoCtx == nil {
+func (du *DU) GetHandoverRole(ctx *DuUeContext) HandoverRole {
+	if ctx == nil || ctx.HoCtx == nil {
 		return HANDOVER_ROLE_NONE
 	}
 
-	du.hoCtx.mutex.RLock()
-	defer du.hoCtx.mutex.RUnlock()
-	return du.hoCtx.role
+	ctx.HoCtx.mutex.RLock()
+	defer ctx.HoCtx.mutex.RUnlock()
+	return ctx.HoCtx.role
 }
 
-func (du *DU) IsSourceDU() bool {
-	return du.GetHandoverRole() == HANDOVER_ROLE_SOURCE
+func (du *DU) IsSourceDU(ctx *DuUeContext) bool {
+	return du.GetHandoverRole(ctx) == HANDOVER_ROLE_SOURCE
 }
 
-func (du *DU) IsTargetDU() bool {
-	return du.GetHandoverRole() == HANDOVER_ROLE_TARGET
+func (du *DU) IsTargetDU(ctx *DuUeContext) bool {
+	return du.GetHandoverRole(ctx) == HANDOVER_ROLE_TARGET
 }
 
-//WARN: instead of have a function to check handover state (type int)
-// use `HandoverState` type as string
-func handoverStateToString(state HandoverState) string {
-	switch state {
-	case HO_STATE_IDLE:
-		return "IDLE"
-	case HO_STATE_PREPARATION:
-		return "PREPARATION"
-	case HO_STATE_EXECUTION:
-		return "EXECUTION"
-	case HO_STATE_COMPLETION:
-		return "COMPLETION"
-	case HO_STATE_COMPLETED:
-		return "COMPLETED"
-	case HO_STATE_FAILED:
-		return "FAILED"
-	default:
-		return "UNKNOWN"
-	}
-}
+func (du *DU) ResetHandoverContext(ctx *DuUeContext) {
+	if ctx != nil && ctx.HoCtx != nil {
+		ctx.HoCtx.mutex.Lock()
+		defer ctx.HoCtx.mutex.Unlock()
 
-func (du *DU) ResetHandoverContext() {
-	if du.hoCtx != nil {
-		du.hoCtx.mutex.Lock()
-		defer du.hoCtx.mutex.Unlock()
-
-		du.Info("Resetting handover context")
-		du.hoCtx.role = HANDOVER_ROLE_NONE
-		du.hoCtx.state = HO_STATE_IDLE
-		du.hoCtx.rachCompleted = false
+		du.Info("[UE %d] Resetting handover context", ctx.DuUeF1apId)
+		ctx.HoCtx.role = HANDOVER_ROLE_NONE
+		ctx.HoCtx.state = HO_STATE_IDLE
+		ctx.HoCtx.rachCompleted = false
 	}
 }

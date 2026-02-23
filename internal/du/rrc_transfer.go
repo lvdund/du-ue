@@ -10,16 +10,9 @@ import (
 	rrcies "github.com/lvdund/rrc/ies"
 )
 
-var (
-	//FIX: now UE IDs (for single UE simulation)
-	DU_UE_F1AP_ID int64 = 0
-	CU_UE_F1AP_ID int64 = 0
-	C_RNTI        int64 = 1
-)
-
 // sendInitialULRRCMessageTransfer sends Initial UL RRC Message Transfer to CU-CP
-func (du *DU) sendInitialULRRCMessageTransfer(rrcBytes []byte) error {
-	du.Info("Sending Initial UL RRC Message Transfer")
+func (du *DU) sendInitialULRRCMessageTransfer(rrcBytes []byte, duUeF1apId int64, cRnti int64) error {
+	du.Info("Sending Initial UL RRC Message Transfer (DU-UE-ID=%d, C-RNTI=%d)", duUeF1apId, cRnti)
 
 	// Convert MCC/MNC to PLMN bytes
 	plmnBytes := convertMccMncToPlmn(du.Config.PLMN.MCC, du.Config.PLMN.MNC)
@@ -45,9 +38,9 @@ func (du *DU) sendInitialULRRCMessageTransfer(rrcBytes []byte) error {
 
 	// Create Initial UL RRC Message Transfer
 	msg := ies.InitialULRRCMessageTransfer{
-		GNBDUUEF1APID:      DU_UE_F1AP_ID,
+		GNBDUUEF1APID:      duUeF1apId,
 		NRCGI:              nrcgi,
-		CRNTI:              C_RNTI,
+		CRNTI:              cRnti,
 		RRCContainer:       rrcBytes,
 		TransactionID:      0,
 		DUtoCURRCContainer: encodedCellGroupConfig,
@@ -70,17 +63,13 @@ func (du *DU) sendInitialULRRCMessageTransfer(rrcBytes []byte) error {
 }
 
 // sendULRRCMessageTransfer sends UL RRC Message Transfer to CU-CP
-func (du *DU) sendULRRCMessageTransfer(rrcBytes []byte) error {
-	du.Info("Sending UL RRC Message Transfer")
-
-	// Determine SRB ID based on RRC message type
-	// SRB0 = 0 (CCCH), SRB1 = 1 (DCCH), SRB2 = 2 (DCCH)
-	srbID := int64(1) // Default to SRB1 for DCCH messages
+func (du *DU) sendULRRCMessageTransfer(rrcBytes []byte, cuUeF1apId, duUeF1apId, srbID int64) error {
+	du.Info("Sending UL RRC Message Transfer (CU-UE-ID=%d, DU-UE-ID=%d, SRB=%d)", cuUeF1apId, duUeF1apId, srbID)
 
 	// Create UL RRC Message Transfer
 	msg := ies.ULRRCMessageTransfer{
-		GNBCUUEF1APID: CU_UE_F1AP_ID,
-		GNBDUUEF1APID: DU_UE_F1AP_ID,
+		GNBCUUEF1APID: cuUeF1apId,
+		GNBDUUEF1APID: duUeF1apId,
 		SRBID:         srbID,
 		RRCContainer:  rrcBytes,
 	}

@@ -1,5 +1,15 @@
 # Changelog
 
+#### [2026-02-22] PDU Session Management & F1AP Decoder Workarounds
+**fix(du): Implement defensive F1AP Control Plane handlers for missing/misclassified IEs**
+- **5G QoS Workaround (`internal/du/ue_context_setup.go`, `internal/du/f1ap_handover.go`)**: Discovered upstream ASN.1 compiler bug in `f1-gen` where `QoSInformation-ExtIEs` (which contains `DRB-Information` and `S-NSSAI`) is not parsed. Implemented fallback to extract 4G LTE `EUTRANQoS.QCI` and map it 1:1 to 5G `5QI`.
+- **Mock S-NSSAI Derivation**: Since true `S-NSSAI` cannot be extracted from `QoSInformation`, implemented heuristic mapping based on `5QI` (e.g., 5QI 1-9 -> SST 1 eMBB, 82-85 -> SST 2 URLLC).
+- **Misclassified Mandatory IEs (`f1-gen` ASN.1 Compiler Bugs)**: Discovered that the upstream `f1-gen` compiler incorrectly hardcoded several `PRESENCE optional` ASN.1 fields as `mandatory` in the generated Go structs, causing decoder panics.
+  - `RequestedTargetCellGlobalID`: Mistagged in `UEContextSetupResponse`, `UEContextSetupFailure`, `UEContextModificationResponse`, and `UEContextModificationFailure`.
+  - `PC5LinkAMBR`, `ConditionalIntraDUMobilityInformation`, `ExecuteDuplication`: Mistagged in `UEContextModificationRequest`. Implemented defensive fallbacks in the DU to intercept and mock these fields when interfacing with compliant 3GPP CUs.
+
+
+
 ## Thêm mới
 
 ### DU
