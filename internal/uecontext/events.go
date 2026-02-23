@@ -82,8 +82,6 @@ func (ue *UeContext) handleEvent(event EventInfo) {
 	}
 }
 
-// Event handlers
-
 func (ue *UeContext) handleRRCSetupEvent() {
 	ue.Info("Executing RRC Setup event")
 

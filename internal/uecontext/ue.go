@@ -117,9 +117,9 @@ func (ue *UeContext) handleRrcFromDU() {
 				ue.Warn("ReceiveFromDuChannel closed")
 				return
 			}
-			
+
 			ue.Info("Received RRC message from DU, length: %d", len(rrcBytes))
-			if err := ue.HandleRrcMessage(rrcBytes); err != nil {
+			if err := ue.HandleRrcMsg(rrcBytes); err != nil {
 				ue.Error("Failed to handle RRC message: %v", err)
 			}
 

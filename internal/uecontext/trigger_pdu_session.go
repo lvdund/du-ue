@@ -242,5 +242,5 @@ func (ue *UeContext) sendN1Sm(
 	ue.Info("Sending N1 SM message (session %d) via UL NAS Transport", pduSessionId)
 	
 	// SỬA: Đóng gói vào RRC UL Information Transfer
-	ue.sendUlInformationTransfer(nasPdu)
+	ue.Send_UlInformationTransfer_To_Du(nasPdu)
 }

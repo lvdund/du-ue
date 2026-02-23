@@ -208,7 +208,7 @@ func (ue *UeContext) handleRRCSetup(rrcSetupBytes []byte, ue_config config.UECon
 		// Extract S-TMSI Part2 from GUTI (lower 9 bits of S-TMSI)
 		// This is just for demonstration - actual extraction depends on GUTI structure
 		stmsiPart2 := aper.BitString{
-			Bytes:   []byte{0x00, 0x00}, // Should be extracted from ue.guti
+			Bytes:   []byte{0x00, 0x00}, 
 			NumBits: 9,
 		}
 		rrcSetupCompleteIEs.Ng_5G_S_TMSI_Value = &rrcies.RRCSetupComplete_IEs_ng_5G_S_TMSI_Value{
