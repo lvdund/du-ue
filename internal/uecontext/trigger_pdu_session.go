@@ -233,7 +233,7 @@ func (ue *UeContext) sendN1Sm(
 
 	// Encode with security context
 	nasCtx := ue.getNasContext()
-	nasPdu, err := nas.EncodeMm(nasCtx, ulNasTransport)
+	nasPdu, err := nas.EncodeMm(nasCtx, ulNasTransport, true)
 	if err != nil {
 		ue.Error("Failed to encode UL NAS Transport: %v", err)
 		return
