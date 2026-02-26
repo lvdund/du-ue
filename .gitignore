@@ -22,3 +22,4 @@ vendor
 /internal/uecontext/example.go
 main
 .vscode/
+/test
