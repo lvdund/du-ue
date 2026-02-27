@@ -27,3 +27,4 @@ main
 coverage.html
 coverage.out
 /central-unit
+/internal/du/f1ap_handover.go

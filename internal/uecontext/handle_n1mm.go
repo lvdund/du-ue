@@ -17,7 +17,7 @@ func (ue *UeContext) HandleNasMsg(nasBytes []byte) {
 
 	var nasMsg nas.NasMessage
 	var err error
-	if nasMsg, err = nas.Decode(ue.getNasContext(), nasBytes, false); err != nil {
+	if nasMsg, err = nas.Decode(ue.getNasContext(), nasBytes); err != nil {
 		ue.Error("Decode Nas message failed: %s", err.Error())
 		return
 	}
@@ -164,7 +164,7 @@ func (ue *UeContext) handleAuthenticationRequest(message *nas.AuthenticationRequ
 		ue.secCtx = sec.NewSecurityContext(&ue.auth.ngKsi, ue.auth.kamf, false)
 	}
 
-	responsePdu, _ = nas.EncodeMm(nil, response, false)
+	responsePdu, _ = nas.EncodeMm(nil, response)
 	ue.Send_UlInformationTransfer_To_Du(responsePdu)
 }
 
@@ -223,7 +223,7 @@ func (ue *UeContext) handleSecurityModeCommand(message *nas.SecurityModeCommand)
 	}
 
 	response.SetSecurityHeader(nas.NasSecBothNew)
-	responsePdu, _ := nas.EncodeMm(nasCtx, response, true)
+	responsePdu, _ := nas.EncodeMm(nasCtx, response)
 	ue.Send_UlInformationTransfer_To_Du(responsePdu)
 }
 
@@ -242,7 +242,7 @@ func (ue *UeContext) handleRegistrationAccept(message *nas.RegistrationAccept) {
 	response := &nas.RegistrationComplete{}
 	response.SetSecurityHeader(nas.NasSecBoth)
 	nasCtx := ue.getNasContext() // must be non-nil
-	responsePdu, _ := nas.EncodeMm(nasCtx, response, true)
+	responsePdu, _ := nas.EncodeMm(nasCtx, response)
 	ue.Send_UlInformationTransfer_To_Du(responsePdu)
 
 	ue.Info("Registration Complete sent")
@@ -279,7 +279,7 @@ func (ue *UeContext) handleIdentityRequest(message *nas.IdentityRequest) {
 		rsp.SetSecurityHeader(nas.NasSecNone)
 	}
 
-	if nasPdu, err := nas.EncodeMm(nasCtx, rsp, true); err != nil {
+	if nasPdu, err := nas.EncodeMm(nasCtx, rsp); err != nil {
 		ue.Error("Error encoding identity response: %v", err)
 	} else {
 		ue.Send_UlInformationTransfer_To_Du(nasPdu)
@@ -298,7 +298,7 @@ func (ue *UeContext) handleDlNasTransport(message *nas.DlNasTransport) {
 	}
 
 	// Decode the packed 5GSM message from the Payload Container
-	nasMsg, err := nas.Decode(nil, message.PayloadContainer, false)
+	nasMsg, err := nas.Decode(nil, message.PayloadContainer)
 	if err != nil {
 		ue.Error("Error in DL NAS Transport, fail to decode N1Sm: %v", err)
 		return

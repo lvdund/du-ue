@@ -56,7 +56,7 @@ func (du *DU) HandleUeContextModificationRequest(f1apPdu *f1ap.F1apPdu) error {
 	// -------------------------------------------------------------------------
 
 	// PC5 Link AMBR (Vehicular Sidelink Bit Rate)
-	if msg.PC5LinkAMBR > 0 {
+	if msg.PC5LinkAMBR != nil && *msg.PC5LinkAMBR > 0 {
 		du.Info("[UE %d] Received PC5LinkAMBR (Sidelink V2X): %d bps (Ignored by simulator)", ctx.DuUeF1apId, msg.PC5LinkAMBR)
 	} else {
 		du.Info("[UE %d] PC5LinkAMBR value is 0 or absent (Ignored)", ctx.DuUeF1apId)
