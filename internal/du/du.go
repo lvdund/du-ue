@@ -5,6 +5,7 @@ import (
 	"du_ue/internal/uecontext"
 	"du_ue/pkg/config"
 	"fmt"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -19,15 +20,16 @@ const (
 type DU struct {
 	*logger.Logger
 
-	ID       int64
-	Name     string
-	State    string
-	Config   *config.DUConfig
-	UEConfig *config.UEConfig
-	f1Client F1Client
-	ue       *UeChannel
-	hoCtx    *HandoverContext // Handover state and role tracking
-	mu       sync.Mutex
+	ID             int64
+	Name           string
+	State          string
+	Config         *config.DUConfig
+	UEConfig       *config.UEConfig
+	f1Client       F1Client
+	ueMgr          *UeManager
+	resourceMgr    *ResourceManager
+	lastDuUeF1apId uint32
+	mu             sync.Mutex
 }
 
 type UeChannel struct {
@@ -57,16 +59,16 @@ func NewDU(cfg *config.Config) (*DU, error) {
 		return nil, fmt.Errorf("create F1AP client: %w", err)
 	}
 	du.f1Client = f1Client
+	du.ueMgr = NewUeManager()
+	du.resourceMgr = NewResourceManager()
 
-	// Initialize handover context
-	du.InitHandoverContext()
+	du.lastDuUeF1apId = 0
 
 	return du, nil
 }
 
 // InitUE creates UE context and initializes channels
-// This should be called after F1 Setup Procedure is complete
-func (du *DU) InitUE() error {
+func (du *DU) InitUE(duUeF1apId, cuUeF1apId, cRnti int64) error {
 	if du.UEConfig == nil {
 		return fmt.Errorf("UE config not set")
 	}
@@ -74,30 +76,47 @@ func (du *DU) InitUE() error {
 	// Create channels for UE communication
 	toUE := make(chan []byte, 100)   // DU -> UE (RRC messages)
 	fromUE := make(chan []byte, 100) // UE -> DU (RRC messages)
+
 	// Set up UE channel structure
-	du.ue = &UeChannel{
+	ueChan := &UeChannel{
 		ReceiveFromUeChannel: fromUE,
 		SendToUeChannel:      toUE,
 	}
-	// Start goroutine to handle RRC messages from UE
-	go du.HandleRrcFromUE()
 
-	time.Sleep(1 * time.Second)
-
-	// Create UE context
-	ueCtx := uecontext.InitUE(toUE, fromUE, *du.UEConfig)
-	if ueCtx == nil {
-		return fmt.Errorf("failed to initialize UE context")
+	// Create and add UE context to manager
+	ctx := &DuUeContext{
+		DuUeF1apId:  duUeF1apId,
+		CuUeF1apId:  cuUeF1apId,
+		CRnti:       cRnti,
+		UeChannel:   ueChan,
+		PduSessions: make(map[int64]*GnbPDUSession),
+		State:       UE_STATE_CONNECTED,
 	}
-	du.ue.UE = ueCtx
+	du.ueMgr.AddContext(ctx)
 
-	du.Info("UE context initialized after F1 Setup")
+	// Start goroutine to handle RRC messages from this specific UE
+	go du.HandleRrcFromUE(ctx)
+
+	time.Sleep(100 * time.Millisecond)
+
+	// Start UE simulator in a goroutine as it blocks waiting for RRC handshake
+	go func() {
+		ueCtx := uecontext.InitUE(toUE, fromUE, *du.UEConfig)
+		if ueCtx == nil {
+			du.Error("Failed to initialize UE simulator context (DU_UE_ID=%d)", duUeF1apId)
+			return
+		}
+		// Update the store with the simulator context
+		ueChan.UE = ueCtx
+	}()
+
+	du.Info("UE context initialized (DU_UE_ID=%d, CU_UE_ID=%d, C-RNTI=%d)",
+		duUeF1apId, cuUeF1apId, cRnti)
 	return nil
 }
 
-// handleRrcFromUE handles RRC messages received from UE channel
-// handleRrcFromUE handles RRC messages received from UE channel
-// handleRrcFromUE is now implemented in du_rrc_handler.go
+// HandleRrcFromUE handles RRC messages received from a specific UE channel
+// (Implementation remains in du_rrc_handler.go, but signature changes)
 
 // Start starts the DU simulator
 func (du *DU) Start() error {
@@ -152,20 +171,124 @@ func (du *DU) OnF1SetupResponse() {
 		du.Info("F1 Setup completed successfully")
 	}
 
-	// Initialize UE context and channels after F1 Setup is complete
-	if du.ue == nil {
-		if err := du.InitUE(); err != nil {
-			du.Error("Failed to initialize UE context after F1 Setup: %v", err)
-			return
+	du.Info("DU is ready for UE connections")
+}
+
+// StartInitialAccess starts the Multi-UE Initial Access flow asynchronously
+func (du *DU) StartInitialAccess(cfg *config.Config) {
+	nue := cfg.UE.NUE
+	baseMSIN, _ := strconv.ParseUint(cfg.UE.MSIN, 10, 64)
+
+	du.Info("Starting Initial Access for %d UEs", nue)
+
+	for i := 0; i < nue; i++ {
+		msin := fmt.Sprintf("%010d", baseMSIN+uint64(i))
+
+		// Create a copy of UEConfig for this specific UE
+		ueConf := cfg.UE
+		ueConf.MSIN = msin
+
+		go func(ueIndex int, conf config.UEConfig) {
+			// 1. Allocate DU-UE F1AP ID and C-RNTI
+			duUeF1apId := du.allocateDuUeF1apId()
+			cRnti, _ := du.resourceMgr.AllocateCRNTI()
+
+			du.Info("[UE %s] Starting Initial Access (DU_UE_ID: %d, C-RNTI: %d)", conf.MSIN, duUeF1apId, cRnti)
+
+			// 2. Setup channels
+			toUE := make(chan []byte, 100)   // DU -> UE
+			fromUE := make(chan []byte, 100) // UE -> DU
+
+			ueChan := &UeChannel{
+				ReceiveFromUeChannel: fromUE,
+				SendToUeChannel:      toUE,
+			}
+
+			// 3. Register UE Context in DU
+			ctx := &DuUeContext{
+				DuUeF1apId:  duUeF1apId,
+				CuUeF1apId:  0,
+				CRnti:       cRnti,
+				UeChannel:   ueChan,
+				PduSessions: make(map[int64]*GnbPDUSession),
+				State:       UE_STATE_CONNECTED,
+			}
+			du.ueMgr.AddContext(ctx)
+
+			// 4. Start DU RRC handler for this UE
+			go du.HandleRrcFromUE(ctx)
+
+			// 5. Initialize UE (RRCSetupRequest -> RRCSetup -> RRCSetupComplete)
+			ueCtx := uecontext.InitUE(toUE, fromUE, conf)
+			if ueCtx == nil {
+				du.Error("[UE %s] Failed to initialize UE Context", conf.MSIN)
+				return
+			}
+			ueChan.UE = ueCtx
+
+			du.Info("[UE %s] RRC Connection Established successfully", conf.MSIN)
+
+			// 6. Execute Scenarios
+			du.executeScenarios(ueCtx, ueIndex, nue, cfg.UE.Scenarios)
+
+		}(i, ueConf)
+
+		// Stagger UE launches to avoid overwhelming the AMF proxy
+		time.Sleep(1 * time.Second)
+	}
+}
+
+func (du *DU) executeScenarios(ue *uecontext.UeContext, ueIndex int, totalUEs int, scenarios []config.UEScenario) {
+	msin := ue.GetMsin()
+
+	for _, scenario := range scenarios {
+		if !scenario.ShouldApplyToUE(msin, ueIndex, totalUEs) {
+			continue
 		}
-		du.Info("UE context and channels initialized after F1 Setup")
+
+		du.Info("[UE %s] Applying scenario: %s", msin, scenario.Name)
+
+		for _, event := range scenario.Events {
+			delay, _ := event.ParseDelay()
+
+			go func(ev config.EventEntry, d time.Duration) {
+				time.Sleep(d)
+				du.Info("[UE %s] Executing delayed event: %s", msin, ev.Type)
+
+				switch ev.Type {
+				case "registration":
+					// RRCSetupComplete with RegistrationRequest was ALREADY sent in InitUE via TriggerInitRegistration.
+					// Calling it again won't transmit it over RRC anyway, so we safely skip it.
+					du.Info("[UE %s] Initial Registration was handled automatically during RRC bootstrap", msin)
+				case "pdu_establishment":
+					ue.TriggerPduSession()
+				case "pdu_release":
+					ue.TriggerReleaseAllPduSessions()
+				case "deregistration":
+					ue.Terminate()
+				case "handover":
+					// Optional target_pci parse for extended testing
+					ue.TriggerMeasurement()
+				}
+			}(event, delay)
+		}
 	}
 }
 
 func (du *DU) SetUEChannelForTest(ue *UeChannel) {
 	du.mu.Lock()
 	defer du.mu.Unlock()
-	du.ue = ue
+	// Add/Update default UE context for testing
+	ctx := du.ueMgr.GetContextByDuId(1)
+	if ctx == nil {
+		ctx = &DuUeContext{
+			DuUeF1apId: 1,
+			UeChannel:  ue,
+		}
+		du.ueMgr.AddContext(ctx)
+	} else {
+		ctx.UeChannel = ue
+	}
 }
 
 func (du *DU) SetF1ClientForTest(client F1Client) {
@@ -175,7 +298,23 @@ func (du *DU) SetF1ClientForTest(client F1Client) {
 }
 
 func (du *DU) GetUEChannelForTest() *UeChannel {
+	// For testing, return a channel from the first UE context if available
+	all := du.ueMgr.GetAllContexts()
+	if len(all) > 0 {
+		return all[0].UeChannel
+	}
+	return nil
+}
+
+// allocateDuUeF1apId allocates a new DU-side UE F1AP ID
+func (du *DU) allocateDuUeF1apId() int64 {
 	du.mu.Lock()
 	defer du.mu.Unlock()
-	return du.ue
+	du.lastDuUeF1apId++
+	return int64(du.lastDuUeF1apId)
+}
+
+// GetUeManager returns the UE Manager (for testing)
+func (du *DU) GetUeManager() *UeManager {
+	return du.ueMgr
 }

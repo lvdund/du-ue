@@ -278,7 +278,8 @@ func (c *F1APClient) SendF1SetupRequest() error {
 					NRARFCN: int64(cfg.Cell.NRARFCN),
 					FreqBandListNr: []ies.FreqBandNrItem{
 						{
-							FreqBandIndicatorNr: cfg.Cell.Band,
+							FreqBandIndicatorNr:  cfg.Cell.Band,
+							SupportedSULBandList: []ies.SupportedSULFreqBandItem{},
 						},
 					},
 				},

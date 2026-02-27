@@ -26,43 +26,43 @@ type RACHContext struct {
 // StartRachMonitoring starts monitoring for RACH preambles
 // In a real DU, this would listen to PHY. Here, we wait for the trigger
 // from the Handover logic or the Test Harness.
-func (du *DU) StartRachMonitoring() {
-	du.Info("[TARGET DU] Started RACH Monitoring Service")
+// StartRachMonitoring starts monitoring for RACH preambles for a specific UE
+func (du *DU) StartRachMonitoring(ctx *DuUeContext) {
+	du.Info("[TARGET DU][UE %d] Started RACH Monitoring Service", ctx.DuUeF1apId)
 
-	// 1. Validate we are the Target DU
-	if !du.IsTargetDU() {
-		du.Error("[TARGET DU] Cannot start RACH monitoring: not acting as Target DU")
+	// 1. Validate we are the Target DU for this UE
+	if !du.IsTargetDU(ctx) {
+		du.Error("[TARGET DU][UE %d] Cannot start RACH monitoring: not acting as Target DU", ctx.DuUeF1apId)
 		return
 	}
 
 	// 2. Validate State (Expect to be in PREPARATION)
-	state := du.GetHandoverState()
+	state := du.GetHandoverState(ctx)
 	if state != HO_STATE_PREPARATION {
-		du.Warn("[TARGET DU] StartRachMonitoring called in unexpected state: %s", handoverStateToString(state))
+		du.Warn("[TARGET DU][UE %d] StartRachMonitoring called in unexpected state: %s", ctx.DuUeF1apId, state)
 	}
 
 	// 3. Transition to EXECUTION (Listening Mode)
-	du.SetTargetHandoverState(HO_STATE_EXECUTION)
-	du.Info("[TARGET DU] RACH Window Open - Waiting for Preamble...")
+	du.SetTargetHandoverState(ctx, HO_STATE_EXECUTION)
+	du.Info("[TARGET DU][UE %d] RACH Window Open - Waiting for Preamble...", ctx.DuUeF1apId)
 
 	// In this simulator, we don't polled a real PHY.
 	// The "Trigger" comes from `SimulateRachReception` being called
-	// by the Target Handover Flow in `ue_context_setup.go`.
+	// by the Target Handover Flow in `ue_context_setup.go` or tests.
 }
 
 // SimulateRachReception is the entry point when the DU "detects" a preamble
-// This is called by `du.handleTargetHandoverSetup`
-func (du *DU) SimulateRachReception() error {
-	du.Info("[TARGET DU] PHY Layer detected Random Access Preamble!")
+func (du *DU) SimulateRachReception(ctx *DuUeContext) error {
+	du.Info("[TARGET DU][UE %d] PHY Layer detected Random Access Preamble!", ctx.DuUeF1apId)
 
 	// 1. Create RACH Context
 	rachCtx := &RACHContext{
 		preambleId: 63, // Dedicated preamble for handover
 		raRnti:     100,
-		tempCrnti:  int64(C_RNTI), // Using the global constant for now
+		tempCrnti:  ctx.CRnti,
 		state:      "MSG1_RECEIVED",
 		startTime:  time.Now(),
-		ueChannel:  du.ue, // Link to the UE channel
+		ueChannel:  ctx.UeChannel,
 	}
 
 	du.Info("  - Preamble ID: %d", rachCtx.preambleId)

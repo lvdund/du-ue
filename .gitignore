@@ -23,3 +23,7 @@ vendor
 main
 .vscode/
 /test
+/third_party
+coverage.html
+coverage.out
+/central-unit

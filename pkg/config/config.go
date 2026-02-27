@@ -122,6 +122,27 @@ func Load(path string) (*Config, error) {
 		return nil, fmt.Errorf("parse config: %w", err)
 	}
 
+	// Try to automatically load the crypto keys from etrib5gc generated yaml
+	if generatedUE, err := os.ReadFile("third_party/etrib5gc/util/ue-gen/ue_1.yaml"); err == nil {
+		var uegen struct {
+			Key    string `yaml:"key"`
+			Op     string `yaml:"op"`
+			OpType string `yaml:"opType"`
+			Amf    string `yaml:"amf"`
+		}
+		if err := yaml.Unmarshal(generatedUE, &uegen); err == nil && uegen.Key != "" {
+			cfg.UE.Key = uegen.Key
+			cfg.UE.AMF = uegen.Amf
+			if uegen.OpType == "OPC" || uegen.OpType == "opc" {
+				cfg.UE.OPC = uegen.Op
+				cfg.UE.OP = ""
+			} else {
+				cfg.UE.OP = uegen.Op
+				cfg.UE.OPC = ""
+			}
+		}
+	}
+
 	if err := cfg.Validate(); err != nil {
 		return nil, fmt.Errorf("validate config: %w", err)
 	}

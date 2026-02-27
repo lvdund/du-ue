@@ -4,42 +4,108 @@ logging:
 du:
   id: 1
   name: "DU-UE-Simulator"
-  cucp_address: "192.168.1.2"
+  cucp_address: "192.168.10.3"
   cucp_port: 38472
-  local_address: "192.168.1.2"
+  local_address: "127.0.0.1"
   local_port: 38473
   plmn:
-    mcc: "208"
-    mnc: "93"
+    mcc: "001"
+    mnc: "01"
   cell:
     pci: 1
     tac: "000001"
+    nrarfcn: 632064
+    band: 78
 
 ue:
-  nue: 10
-  msin: "0000000001"
-  key: "8baf473f2f8fd09487cccbd7097c6862"
-  opc: "b9912fce303952b8e4af328992d3d497"
+  nue: 5  # Number of UEs to simulate
+  msin: "0000000001"  # Base MSIN, will auto-increment
+  key: "465B5CE8B199B49FAA5F0A2EE238A6BC"
+  opc: "E8ED289DEBA952E4283B54E88E6183CA"
   amf: "8000"
   plmn:
-    mcc: "208"
-    mnc: "93"
-
+    mcc: "001"
+    mnc: "01"
+  
+  # Define scenarios - sequences of events for UEs
   scenarios:
+    # Scenario 1: Basic registration and PDU session for all UEs
     - name: "basic_registration"
-      description: "Register UE and establish default PDU session"
-      apply_to: "all"
+      description: "Register all UEs and establish default PDU session"
+      apply_to: "all"  # Apply to all UEs
       events:
         - type: "registration"
-          delay: "2s"
-
-        - type: "pdu_establishment"
-          delay: "5s"
-          params:
-            dnn: "internet"
-
-        - type: "pdu_release"
-          delay: "30s"
-
+          delay: "2s"  # Wait 2 seconds before starting registration
+        
+        # - type: "pdu_establishment"
+        #   delay: "3s"  # Wait 3 seconds after registration
+        #   params:
+        #     dnn: "internet"  # Optional: specify DNN
+    
+    # # Scenario 2: Additional PDU session for first UE only
+    # - name: "multi_pdu_session"
+    #   description: "Establish additional PDU session for first UE"
+    #   apply_to: "first"  # Apply only to first UE
+    #   events:
+    #     - type: "pdu_establishment"
+    #       delay: "8s"
+    #       params:
+    #         dnn: "ims"  # IMS PDU session
+    
+    # # Scenario 3: Handover scenario for last UE
+    # - name: "handover_test"
+    #   description: "Test handover for last UE"
+    #   apply_to: "last"  # Apply only to last UE
+    #   events:
+    #     - type: "handover"
+    #       delay: "15s"
+    #       params:
+    #         target_pci: 2
+    #         target_cell_id: "0x000002"
+    
+    # Scenario 4: PDU release and deregistration for all UEs
+    - name: "cleanup"
+      description: "Release PDU sessions and deregister all UEs"
+      apply_to: "all"
+      events:
+        # - type: "pdu_release"
+        #   delay: "30s"
+        
         - type: "deregistration"
           delay: "32s"
+
+# Alternative example: Stress test scenario
+# scenarios:
+#   - name: "stress_test"
+#     description: "Rapid registration/deregistration cycle"
+#     apply_to: "all"
+#     events:
+#       - type: "registration"
+#         delay: "1s"
+#       
+#       - type: "pdu_establishment"
+#         delay: "2s"
+#       
+#       - type: "pdu_release"
+#         delay: "5s"
+#       
+#       - type: "deregistration"
+#         delay: "6s"
+#       
+#       - type: "registration"
+#         delay: "10s"  # Re-register
+#       
+#       - type: "pdu_establishment"
+#         delay: "11s"
+
+# Alternative example: Specific UE scenario
+# scenarios:
+#   - name: "special_ue"
+#     description: "Special behavior for specific UE"
+#     apply_to: "0000000003"  # Apply only to UE with this MSIN
+#     events:
+#       - type: "registration"
+#         delay: "5s"
+#       
+#       - type: "service_request"
+#         delay: "10s"
