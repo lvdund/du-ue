@@ -139,7 +139,10 @@ func (du *DU) Start() error {
 		return fmt.Errorf("send F1 Setup Request: %s", err.Error())
 	}
 
-	du.State = DU_ACTIVE
+	// DO NOT set du.State = DU_ACTIVE here!
+	// We must wait for the F1 Setup Response from the CU.
+	// OnF1SetupResponse() will set it to ACTIVE when the response is received.
+
 	return nil
 }
 
