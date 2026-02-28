@@ -17,7 +17,7 @@ func (ue *UeContext) HandleNasMsg(nasBytes []byte) {
 
 	var nasMsg nas.NasMessage
 	var err error
-	if nasMsg, err = nas.Decode(ue.getNasContext(), nasBytes); err != nil {
+	if nasMsg, err = nas.Decode(ue.getNasContext(), nasBytes, false); err != nil {
 		ue.Error("Decode Nas message failed: %s", err.Error())
 		return
 	}
@@ -69,6 +69,10 @@ func (ue *UeContext) handleNas_n1mm(nasMsg *nas.NasMessage) {
 	case nas.GmmStatusMsgType:
 		ue.Error("Receive Status 5GMM")
 		ue.handleGmmStatus(gmm.GmmStatus)
+
+	case nas.ConfigurationUpdateCommandMsgType:
+		ue.Info("Receive Configuration Update Command")
+		ue.handleConfigurationUpdateCommand(gmm.ConfigurationUpdateCommand)
 
 	case nas.DlNasTransportMsgType:
 		ue.Info("Receive DL NAS Transport")
@@ -164,7 +168,7 @@ func (ue *UeContext) handleAuthenticationRequest(message *nas.AuthenticationRequ
 		ue.secCtx = sec.NewSecurityContext(&ue.auth.ngKsi, ue.auth.kamf, false)
 	}
 
-	responsePdu, _ = nas.EncodeMm(nil, response)
+	responsePdu, _ = nas.EncodeMm(nil, response, false)
 	ue.Send_UlInformationTransfer_To_Du(responsePdu)
 }
 
@@ -223,7 +227,7 @@ func (ue *UeContext) handleSecurityModeCommand(message *nas.SecurityModeCommand)
 	}
 
 	response.SetSecurityHeader(nas.NasSecBothNew)
-	responsePdu, _ := nas.EncodeMm(nasCtx, response)
+	responsePdu, _ := nas.EncodeMm(nasCtx, response, true)
 	ue.Send_UlInformationTransfer_To_Du(responsePdu)
 }
 
@@ -242,7 +246,7 @@ func (ue *UeContext) handleRegistrationAccept(message *nas.RegistrationAccept) {
 	response := &nas.RegistrationComplete{}
 	response.SetSecurityHeader(nas.NasSecBoth)
 	nasCtx := ue.getNasContext() // must be non-nil
-	responsePdu, _ := nas.EncodeMm(nasCtx, response)
+	responsePdu, _ := nas.EncodeMm(nasCtx, response, true)
 	ue.Send_UlInformationTransfer_To_Du(responsePdu)
 
 	ue.Info("Registration Complete sent")
@@ -279,7 +283,7 @@ func (ue *UeContext) handleIdentityRequest(message *nas.IdentityRequest) {
 		rsp.SetSecurityHeader(nas.NasSecNone)
 	}
 
-	if nasPdu, err := nas.EncodeMm(nasCtx, rsp); err != nil {
+	if nasPdu, err := nas.EncodeMm(nasCtx, rsp, true); err != nil {
 		ue.Error("Error encoding identity response: %v", err)
 	} else {
 		ue.Send_UlInformationTransfer_To_Du(nasPdu)
@@ -298,7 +302,7 @@ func (ue *UeContext) handleDlNasTransport(message *nas.DlNasTransport) {
 	}
 
 	// Decode the packed 5GSM message from the Payload Container
-	nasMsg, err := nas.Decode(nil, message.PayloadContainer)
+	nasMsg, err := nas.Decode(nil, message.PayloadContainer, false)
 	if err != nil {
 		ue.Error("Error in DL NAS Transport, fail to decode N1Sm: %v", err)
 		return
@@ -306,4 +310,20 @@ func (ue *UeContext) handleDlNasTransport(message *nas.DlNasTransport) {
 
 	// Route to 5GSM handler
 	ue.handleNas_n1sm(&nasMsg)
+}
+
+func (ue *UeContext) handleConfigurationUpdateCommand(message *nas.ConfigurationUpdateCommand) {
+	// Save new GUTI if AMF assigned one
+	if message.Guti != nil {
+		ue.set5gGuti(message.Guti)
+		ue.Info("Updated 5G GUTI from ConfigurationUpdateCommand: %s", ue.guti.String())
+	}
+
+	// Send ConfigurationUpdateComplete
+	response := &nas.ConfigurationUpdateComplete{}
+	response.SetSecurityHeader(nas.NasSecBoth)
+	nasCtx := ue.getNasContext()
+	responsePdu, _ := nas.EncodeMm(nasCtx, response, true)
+	ue.Send_UlInformationTransfer_To_Du(responsePdu)
+	ue.Info("Configuration Update Complete sent")
 }

@@ -14,13 +14,20 @@ func (ue *UeContext) handleNas_n1sm(nasMsg *nas.NasMessage) {
 
 	switch gsm.MsgType {
 	case nas.PduSessionEstablishmentAcceptMsgType:
-
 		ue.Info("Receive PDU Session Establishment Accept")
 		ue.handlePduSessionEstablishmentAccept(gsm.PduSessionEstablishmentAccept)
 
 	case nas.PduSessionEstablishmentRejectMsgType:
 		ue.Error("Receive PDU Session Establishment Reject")
 		ue.handlePduSessionEstablishmentReject(gsm.PduSessionEstablishmentReject)
+
+	case nas.PduSessionModificationCommandMsgType:
+		ue.Info("Receive PDU Session Modification Command")
+		ue.handlePduSessionModificationCommand(gsm.PduSessionModificationCommand)
+
+	case nas.PduSessionModificationRejectMsgType:
+		ue.Error("Receive PDU Session Modification Reject")
+		ue.handlePduSessionModificationReject(gsm.PduSessionModificationReject)
 
 	case nas.PduSessionReleaseCommandMsgType:
 		ue.Info("Receive PDU Session Release Command")
@@ -135,6 +142,39 @@ func (ue *UeContext) handlePduSessionReleaseCommand(msg *nas.PduSessionReleaseCo
 
 	// Send PDU Session Release Complete
 	ue.triggerInitPduSessionReleaseComplete(pduSession)
+}
+
+func (ue *UeContext) handlePduSessionModificationCommand(msg *nas.PduSessionModificationCommand) {
+	if msg == nil {
+		ue.Error("PDU Session Modification Command is nil")
+		return
+	}
+	pduSessionId := msg.GetSessionId()
+	pti := msg.GetPti()
+	pduSession := ue.getPduSession(pduSessionId)
+	if pduSession == nil {
+		ue.Error("PDU Session Modification Command for unknown session id: %d", pduSessionId)
+		return
+	}
+	pduSession.Info("Received PDU Session Modification Command (PTI=%d)", pti)
+	ue.triggerPduSessionModificationComplete(pduSession, pti)
+}
+
+func (ue *UeContext) handlePduSessionModificationReject(msg *nas.PduSessionModificationReject) {
+	if msg == nil {
+		ue.Error("PDU Session Modification Reject is nil")
+		return
+	}
+	pduSessionId := msg.GetSessionId()
+	ue.Error("PDU Session Modification Reject for session %d, cause: %s",
+		pduSessionId, cause5GSMToString(msg.GsmCause))
+	pduSession := ue.getPduSession(pduSessionId)
+	if pduSession == nil {
+		return
+	}
+	if pduSession.GetState() == PDUSessionModificationPending {
+		pduSession.SetState(PDUSessionActive)
+	}
 }
 
 // handleCause5GSM processes 5GSM cause

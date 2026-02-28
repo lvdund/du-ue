@@ -233,7 +233,7 @@ func (ue *UeContext) sendN1Sm(
 
 	// Encode with security context
 	nasCtx := ue.getNasContext()
-	nasPdu, err := nas.EncodeMm(nasCtx, ulNasTransport)
+	nasPdu, err := nas.EncodeMm(nasCtx, ulNasTransport, true)
 	if err != nil {
 		ue.Error("Failed to encode UL NAS Transport: %v", err)
 		return
@@ -243,4 +243,78 @@ func (ue *UeContext) sendN1Sm(
 	
 	// SỬA: Đóng gói vào RRC UL Information Transfer
 	ue.Send_UlInformationTransfer_To_Du(nasPdu)
+}
+
+// triggerPduSessionModificationRequest gửi PDU Session Modification Request
+func (ue *UeContext) triggerPduSessionModificationRequest(pduSession *PduSession, params *map[string]any) error {
+	if pduSession.GetState() != PDUSessionActive {
+		ue.Warn("Cannot modify PDU Session %d: not in ACTIVE state (current: %s)",
+			pduSession.id, pduSession.GetState())
+		return fmt.Errorf("PDU session not active")
+	}
+
+	pduSession.SetState(PDUSessionModificationPending)
+	pduSession.Info("PDU Session Modification Request initiating")
+
+	n1Sm := new(nas.PduSessionModificationRequest)
+	n1Sm.SetPti(pduSession.GetNextPTI())
+	n1Sm.SetSessionId(pduSession.id)
+
+	n1SmPdu, err := nas.EncodeSm(n1Sm)
+	if err != nil {
+		pduSession.Error("Failed to encode PDU Session Modification Request: %v", err)
+		pduSession.SetState(PDUSessionActive) // rollback
+		return err
+	}
+
+	ue.sendN1Sm(n1SmPdu, pduSession.id, nil, params)
+	return nil
+}
+
+// triggerPduSessionModificationComplete gửi PDU Session Modification Complete
+// sau khi nhận PDU Session Modification Command từ network
+func (ue *UeContext) triggerPduSessionModificationComplete(pduSession *PduSession, pti uint8) {
+	pduSession.Info("Sending PDU Session Modification Complete")
+
+	n1Sm := new(nas.PduSessionModificationComplete)
+	n1Sm.SetPti(pti)
+	n1Sm.SetSessionId(pduSession.id)
+
+	n1SmPdu, err := nas.EncodeSm(n1Sm)
+	if err != nil {
+		pduSession.Error("Failed to encode PDU Session Modification Complete: %v", err)
+		return
+	}
+
+	ue.sendN1Sm(n1SmPdu, pduSession.id, nil, nil)
+	pduSession.SetState(PDUSessionActive)
+}
+
+// triggerPduSessionModificationCommandReject từ chối PDU Session Modification Command
+func (ue *UeContext) triggerPduSessionModificationCommandReject(pduSession *PduSession, pti uint8, cause uint8) {
+	pduSession.Info("Sending PDU Session Modification Command Reject (cause: %d)", cause)
+
+	n1Sm := new(nas.PduSessionModificationCommandReject)
+	n1Sm.SetPti(pti)
+	n1Sm.SetSessionId(pduSession.id)
+	n1Sm.GsmCause = cause
+
+	n1SmPdu, err := nas.EncodeSm(n1Sm)
+	if err != nil {
+		pduSession.Error("Failed to encode PDU Session Modification Command Reject: %v", err)
+		return
+	}
+
+	ue.sendN1Sm(n1SmPdu, pduSession.id, nil, nil)
+	pduSession.SetState(PDUSessionActive) // vẫn giữ ACTIVE sau khi reject
+}
+
+// TriggerModifyPduSession là public API để trigger modification
+func (ue *UeContext) TriggerModifyPduSession(sessionId uint8) error {
+	pduSession := ue.getPduSession(sessionId)
+	if pduSession == nil {
+		ue.Warn("PDU Session %d not found", sessionId)
+		return fmt.Errorf("PDU session %d not found", sessionId)
+	}
+	return ue.triggerPduSessionModificationRequest(pduSession, nil)
 }
