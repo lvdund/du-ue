@@ -1,50 +1,911 @@
-[90m4:02PM[0m [32mINF[0m [1mStarting DU-UE Simulator[0m
-4:02PM [32mINFO[0m Connection configured with PPID=62                	 du_id=1 mod=f1ap_client
-4:02PM [32mINFO[0m SCTP connection established to CU-CP              	 du_id=1 mod=f1ap_client
-4:02PM [32mINFO[0m Sending F1 Setup Request                          	 du_id=1 mod=f1ap_client
-[90m4:02PM[0m [32mINF[0m [1mDU-UE Simulator is running. Press Ctrl+C to stop.[0m
-4:02PM [32mINFO[0m Handling F1AP message, length: 46                 	 du_id=1 mod=f1ap_client
-4:02PM [32mINFO[0m Received F1 Setup Response                        	 du_id=1 mod=f1ap_client
-4:02PM [32mINFO[0m F1 Setup Response received 0                     	 du_id=1 mod=f1ap_client
-4:02PM [32mINFO[0m ==== Started listening for RRC messages from UE ===	 du_id=1 mod=du
-4:02PM TRACE milenage key=8baf473f2f8fd09487cccbd7097c6862                                   	 mod=milenage
-4:02PM TRACE milenage opc=8e27b6af0e692e750f32667a3b14605d                                   	 mod=milenage
-4:02PM [32mINFO[0m Initializing RRC connection                       	 mod=ue msin=0000000001
-4:02PM [32mINFO[0m Sending RRCSetupRequest to DU                     	 mod=ue msin=0000000001
-4:02PM [32mINFO[0m Waiting for RRCSetup from DU...                   	 mod=ue msin=0000000001
-4:02PM [32mINFO[0m Received RRC message from UE, length: 7, [2 26 43 60 77 94 96]      	 du_id=1 mod=du
-4:02PM [32mINFO[0m Sending Initial UL RRC Message Transfer           	 du_id=1 mod=du
-4:02PM [32mINFO[0m Successfully sent Initial UL RRC Message Transfer to CU-CP	 du_id=1 mod=du
-4:02PM [32mINFO[0m Handling F1AP message, length: 46                 	 du_id=1 mod=f1ap_client
-4:02PM [32mINFO[0m Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
-4:02PM [32mINFO[0m DL RRC Message Transfer: CU-UE-ID=2, DU-UE-ID=0, SRB-ID=0	 du_id=1 mod=du
-4:02PM [32mINFO[0m Forwarding RRC message to UE, length: 6          	 du_id=1 mod=du
-4:02PM [32mINFO[0m Handling RRCSetup message, length: 6 bytes       	 mod=ue msin=0000000001
-4:02PM [32mINFO[0m Received RRCSetup from DU                         	 mod=ue msin=0000000001
-4:02PM [32mINFO[0m Initiating Registration                           	 mod=ue msin=0000000001
-4:02PM [32mINFO[0m Created NAS Registration Request, length: 23 bytes	 mod=ue msin=0000000001
-4:02PM [32mINFO[0m Sending RRCSetupComplete to DU (with NAS Registration Request embedded)	 mod=ue msin=0000000001
-4:02PM [32mINFO[0m ==== RRC connection Initialized ====              	 mod=ue msin=0000000001
-4:02PM [32mINFO[0m UE context initialized after F1 Setup             	 du_id=1 mod=du
-4:02PM [32mINFO[0m UE context and channels initialized after F1 Setup	 du_id=1 mod=du
-4:02PM [32mINFO[0m Started listening for RRC messages from DU        	 mod=ue msin=0000000001
-4:02PM [32mINFO[0m Received RRC message from UE, length: 29, [4 2 0 23 126 0 65 121 0 13 1 153 249 7 0 0 0 0 0 0 0 0 16 46 2 240 240 64 32]      	 du_id=1 mod=du
-4:02PM [32mINFO[0m Sending UL RRC Message Transfer                   	 du_id=1 mod=du
-4:02PM [32mINFO[0m Handling F1AP message, length: 47                 	 du_id=1 mod=f1ap_client
-4:02PM [32mINFO[0m Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
-4:02PM [32mINFO[0m DL RRC Message Transfer: CU-UE-ID=0, DU-UE-ID=1, SRB-ID=0	 du_id=1 mod=du
-4:02PM [32mINFO[0m Forwarding RRC message to UE, length: 7          	 du_id=1 mod=du
-4:02PM [32mINFO[0m Handle RRC message, length: 7 bytes, [10 16 4 126 0 68 22]          	 mod=ue msin=0000000001
-4:02PM [32mINFO[0m Received DLInformationTransfer                    	 mod=ue msin=0000000001
-4:02PM [32mINFO[0m Extracted NAS message from DLInformationTransfer, length: 4	 mod=ue msin=0000000001
-4:02PM [31mERROR[0m Receive Registration Reject                       	 mod=ue msin=0000000001
-4:02PM [31mERROR[0m UE received a 5GMM Failure, cause: Congestion             	 mod=ue msin=0000000001
-4:02PM [32mINFO[0m Handling F1AP message, length: 47                 	 du_id=1 mod=f1ap_client
-4:02PM [32mINFO[0m Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
-4:02PM [32mINFO[0m DL RRC Message Transfer: CU-UE-ID=0, DU-UE-ID=1, SRB-ID=0	 du_id=1 mod=du
-4:02PM [32mINFO[0m Forwarding RRC message to UE, length: 7          	 du_id=1 mod=du
-4:02PM [32mINFO[0m Handle RRC message, length: 7 bytes, [10 16 4 126 0 68 12]          	 mod=ue msin=0000000001
-4:02PM [32mINFO[0m Received DLInformationTransfer                    	 mod=ue msin=0000000001
-4:02PM [32mINFO[0m Extracted NAS message from DLInformationTransfer, length: 4	 mod=ue msin=0000000001
-4:02PM [31mERROR[0m Receive Registration Reject                       	 mod=ue msin=0000000001
-4:02PM [31mERROR[0m UE received a 5GMM Failure, cause: Tracking area not allowed             	 mod=ue msin=0000000001
+9:46AM INF Starting DU-UE Simulator
+9:46AM INFO Connection configured with PPID=62                	 du_id=1 mod=f1ap_client
+9:46AM INFO SCTP connection established to CU-CP              	 du_id=1 mod=f1ap_client
+9:46AM INFO Sending dynamic F1 Setup Request (DU ID: 1, PCI: 1, TAC: 000001, ARFCN: 0)	 du_id=1 mod=f1ap_client
+9:46AM INF DU-UE Simulator is running. Press Ctrl+C to stop.
+9:46AM INFO Handling F1AP message, length: 46                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received F1 Setup Response                        	 du_id=1 mod=f1ap_client
+9:46AM INFO F1 Setup Response received 0                     	 du_id=1 mod=f1ap_client
+9:46AM INFO F1 Setup completed successfully                   	 du_id=1 mod=du
+9:46AM INFO DU is ready for UE connections                    	 du_id=1 mod=du
+9:46AM INF DU became ACTIVE. Starting Initial Access for configured UEs...
+9:46AM INFO Starting Initial Access for 10 UEs                	 du_id=1 mod=du
+9:46AM INFO [UE 0000000001] Starting Initial Access (DU_UE_ID: 1, C-RNTI: 100)	 du_id=1 mod=du
+9:46AM INFO Initializing RRC connection                       	 mod=ue msin=0000000001
+9:46AM INFO [UE 1] Started listening for RRC messages        	 du_id=1 mod=du
+9:46AM INFO Sending RRCSetupRequest to DU (UE identity: 3c78be19e2)   	 mod=ue msin=0000000001
+9:46AM INFO Waiting for RRCSetup from DU...                   	 mod=ue msin=0000000001
+9:46AM INFO [UE 1] Intercepted RRCReconfigurationComplete    	 du_id=1 mod=du
+9:46AM INFO Sending Initial UL RRC Message Transfer (DU-UE-ID=1, C-RNTI=100)	 du_id=1 mod=du
+9:46AM INFO Successfully sent Initial UL RRC Message Transfer to CU-CP	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 46                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=1, DU-UE-ID=1, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 1] Updated CU_UE_ID to 1 from DLRRCMessageTransfer	 du_id=1 mod=du
+9:46AM INFO [UE 1] Forwarding RRC message to UE, length: 6  	 du_id=1 mod=du
+9:46AM INFO Handling RRCSetup message, length: 6 bytes       	 mod=ue msin=0000000001
+9:46AM INFO Received RRCSetup from DU (transaction ID: 0)    	 mod=ue msin=0000000001
+9:46AM INFO Initiating Registration                           	 mod=ue msin=0000000001
+9:46AM INFO Created NAS Registration Request, length: 26 bytes	 mod=ue msin=0000000001
+9:46AM INFO Initial registration - no S-TMSI included         	 mod=ue msin=0000000001
+9:46AM INFO Sending RRCSetupComplete to DU (with NAS Registration Request embedded)	 mod=ue msin=0000000001
+9:46AM INFO ==== RRC connection Initialized ====              	 mod=ue msin=0000000001
+9:46AM INFO [UE 0000000001] RRC Connection Established successfully   	 du_id=1 mod=du
+9:46AM INFO [UE 0000000001] Applying scenario: basic_registration                     	 du_id=1 mod=du
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=1, DU-UE-ID=1, SRB=1)	 du_id=1 mod=du
+9:46AM INFO Started listening for RRC messages from DU        	 mod=ue msin=0000000001
+9:46AM INFO Handling F1AP message, length: 85                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=1, DU-UE-ID=1, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 1] Forwarding RRC message to UE, length: 45  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 45 bytes, [10 16 42 126 0 86 0 2 0 0 33 162 249 209 106 143 107 135 106 109 53 123 186 216 135 121 116 32 16 228 17 142 99 59 64 128 0 240 237 6 8 233 14 238 198]          	 mod=ue msin=0000000001
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000001
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 42	 mod=ue msin=0000000001
+9:46AM INFO Receive Authentication Request                    	 mod=ue msin=0000000001
+9:46AM INFO Authenticity of the authentication request message: OK	 mod=ue msin=0000000001
+9:46AM INFO SQN of the authentication request message: VALID  	 mod=ue msin=0000000001
+9:46AM INFO Send authentication response                      	 mod=ue msin=0000000001
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=1, DU-UE-ID=1, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 62                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=1, DU-UE-ID=1, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 1] Forwarding RRC message to UE, length: 22  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 22 bytes, [10 16 19 126 3 0 0 0 0 0 126 0 93 0 0 2 240 240 225 54 1 2]          	 mod=ue msin=0000000001
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000001
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 19	 mod=ue msin=0000000001
+9:46AM INFO Receive Security Mode Command                     	 mod=ue msin=0000000001
+9:46AM INFO Type of ciphering algorithm is 5G-0               	 mod=ue msin=0000000001
+9:46AM INFO Type of integrity algorithm is 5G-IA0             	 mod=ue msin=0000000001
+9:46AM INFO Have Additional Secutity Information, retransmission = true	 mod=ue msin=0000000001
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=1, DU-UE-ID=1, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 94                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=1, DU-UE-ID=1, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 1] Forwarding RRC message to UE, length: 54  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 54 bytes, [10 16 51 126 2 0 0 0 0 1 126 0 66 1 1 119 0 11 242 2 248 57 202 254 0 0 0 0 1 84 7 0 2 248 57 0 0 1 21 5 4 1 1 2 3 33 1 0 94 1 6 22 1 44]          	 mod=ue msin=0000000001
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000001
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 51	 mod=ue msin=0000000001
+9:46AM INFO Receive Registration Accept                       	 mod=ue msin=0000000001
+9:46AM INFO Handle Registration Accept                        	 mod=ue msin=0000000001
+9:46AM INFO UE 5G GUTI: 20893cafe0000000001                                    	 mod=ue msin=0000000001
+9:46AM INFO Registration Complete sent                        	 mod=ue msin=0000000001
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=1, DU-UE-ID=1, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 84                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=1, DU-UE-ID=1, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 1] Forwarding RRC message to UE, length: 44  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 44 bytes, [10 16 41 126 2 0 0 0 0 2 126 0 84 208 67 8 135 102 121 185 92 59 14 1 69 5 132 102 121 185 12 70 130 71 98 48 32 144 100 19 130 73 1 0]          	 mod=ue msin=0000000001
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000001
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 41	 mod=ue msin=0000000001
+9:46AM INFO Receive Configuration Update Command              	 mod=ue msin=0000000001
+9:46AM INFO Configuration Update Complete sent                	 mod=ue msin=0000000001
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=1, DU-UE-ID=1, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Auto-triggering default PDU Session establishment 	 mod=ue msin=0000000001
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000001
+9:46AM INFO Created PDU Session with ID: 1                   	 mod=ue msin=0000000001
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000001 pduId=1
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000001 pduId=1
+9:46AM INFO Sending N1 SM message (session 1) via UL NAS Transport	 mod=ue msin=0000000001
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=1, DU-UE-ID=1, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000002] Starting Initial Access (DU_UE_ID: 2, C-RNTI: 101)	 du_id=1 mod=du
+9:46AM INFO Initializing RRC connection                       	 mod=ue msin=0000000002
+9:46AM INFO Sending RRCSetupRequest to DU (UE identity: a716f1cfba)   	 mod=ue msin=0000000002
+9:46AM INFO Waiting for RRCSetup from DU...                   	 mod=ue msin=0000000002
+9:46AM INFO [UE 2] Started listening for RRC messages        	 du_id=1 mod=du
+9:46AM INFO [UE 2] Intercepted RRCReconfigurationComplete    	 du_id=1 mod=du
+9:46AM INFO Sending Initial UL RRC Message Transfer (DU-UE-ID=2, C-RNTI=101)	 du_id=1 mod=du
+9:46AM INFO Successfully sent Initial UL RRC Message Transfer to CU-CP	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 46                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=2, DU-UE-ID=2, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 2] Updated CU_UE_ID to 2 from DLRRCMessageTransfer	 du_id=1 mod=du
+9:46AM INFO [UE 2] Forwarding RRC message to UE, length: 6  	 du_id=1 mod=du
+9:46AM INFO Handling RRCSetup message, length: 6 bytes       	 mod=ue msin=0000000002
+9:46AM INFO Received RRCSetup from DU (transaction ID: 0)    	 mod=ue msin=0000000002
+9:46AM INFO Initiating Registration                           	 mod=ue msin=0000000002
+9:46AM INFO Created NAS Registration Request, length: 26 bytes	 mod=ue msin=0000000002
+9:46AM INFO Initial registration - no S-TMSI included         	 mod=ue msin=0000000002
+9:46AM INFO Sending RRCSetupComplete to DU (with NAS Registration Request embedded)	 mod=ue msin=0000000002
+9:46AM INFO ==== RRC connection Initialized ====              	 mod=ue msin=0000000002
+9:46AM INFO [UE 0000000002] RRC Connection Established successfully   	 du_id=1 mod=du
+9:46AM INFO [UE 0000000002] Applying scenario: basic_registration                     	 du_id=1 mod=du
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=2, DU-UE-ID=2, SRB=1)	 du_id=1 mod=du
+9:46AM INFO Started listening for RRC messages from DU        	 mod=ue msin=0000000002
+9:46AM INFO Handling F1AP message, length: 85                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=2, DU-UE-ID=2, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 2] Forwarding RRC message to UE, length: 45  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 45 bytes, [10 16 42 126 0 86 0 2 0 0 33 25 216 242 220 254 238 114 170 11 116 133 103 2 143 89 192 32 16 149 230 223 186 103 121 128 0 245 194 139 135 159 70 13 236]          	 mod=ue msin=0000000002
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000002
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 42	 mod=ue msin=0000000002
+9:46AM INFO Receive Authentication Request                    	 mod=ue msin=0000000002
+9:46AM INFO Authenticity of the authentication request message: OK	 mod=ue msin=0000000002
+9:46AM INFO SQN of the authentication request message: VALID  	 mod=ue msin=0000000002
+9:46AM INFO Send authentication response                      	 mod=ue msin=0000000002
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=2, DU-UE-ID=2, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 62                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=2, DU-UE-ID=2, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 2] Forwarding RRC message to UE, length: 22  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 22 bytes, [10 16 19 126 3 0 0 0 0 0 126 0 93 0 0 2 240 240 225 54 1 2]          	 mod=ue msin=0000000002
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000002
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 19	 mod=ue msin=0000000002
+9:46AM INFO Receive Security Mode Command                     	 mod=ue msin=0000000002
+9:46AM INFO Type of ciphering algorithm is 5G-0               	 mod=ue msin=0000000002
+9:46AM INFO Type of integrity algorithm is 5G-IA0             	 mod=ue msin=0000000002
+9:46AM INFO Have Additional Secutity Information, retransmission = true	 mod=ue msin=0000000002
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=2, DU-UE-ID=2, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 94                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=2, DU-UE-ID=2, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 2] Forwarding RRC message to UE, length: 54  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 54 bytes, [10 16 51 126 2 0 0 0 0 1 126 0 66 1 1 119 0 11 242 2 248 57 202 254 0 0 0 0 2 84 7 0 2 248 57 0 0 1 21 5 4 1 1 2 3 33 1 0 94 1 6 22 1 44]          	 mod=ue msin=0000000002
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000002
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 51	 mod=ue msin=0000000002
+9:46AM INFO Receive Registration Accept                       	 mod=ue msin=0000000002
+9:46AM INFO Handle Registration Accept                        	 mod=ue msin=0000000002
+9:46AM INFO UE 5G GUTI: 20893cafe0000000002                                    	 mod=ue msin=0000000002
+9:46AM INFO Registration Complete sent                        	 mod=ue msin=0000000002
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=2, DU-UE-ID=2, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 84                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=2, DU-UE-ID=2, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 2] Forwarding RRC message to UE, length: 44  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 44 bytes, [10 16 41 126 2 0 0 0 0 2 126 0 84 208 67 8 135 102 121 185 92 59 14 1 69 5 132 102 121 185 12 70 130 71 98 48 32 144 100 35 130 73 1 0]          	 mod=ue msin=0000000002
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000002
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 41	 mod=ue msin=0000000002
+9:46AM INFO Receive Configuration Update Command              	 mod=ue msin=0000000002
+9:46AM INFO Configuration Update Complete sent                	 mod=ue msin=0000000002
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=2, DU-UE-ID=2, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Auto-triggering default PDU Session establishment 	 mod=ue msin=0000000002
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000002
+9:46AM INFO Created PDU Session with ID: 1                   	 mod=ue msin=0000000002
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000002 pduId=1
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000002 pduId=1
+9:46AM INFO Sending N1 SM message (session 1) via UL NAS Transport	 mod=ue msin=0000000002
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=2, DU-UE-ID=2, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000003] Starting Initial Access (DU_UE_ID: 3, C-RNTI: 102)	 du_id=1 mod=du
+9:46AM INFO Initializing RRC connection                       	 mod=ue msin=0000000003
+9:46AM INFO Sending RRCSetupRequest to DU (UE identity: 1be2e94e32)   	 mod=ue msin=0000000003
+9:46AM INFO Waiting for RRCSetup from DU...                   	 mod=ue msin=0000000003
+9:46AM INFO [UE 3] Started listening for RRC messages        	 du_id=1 mod=du
+9:46AM INFO Sending Initial UL RRC Message Transfer (DU-UE-ID=3, C-RNTI=102)	 du_id=1 mod=du
+9:46AM INFO Successfully sent Initial UL RRC Message Transfer to CU-CP	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 46                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=3, DU-UE-ID=3, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 3] Updated CU_UE_ID to 3 from DLRRCMessageTransfer	 du_id=1 mod=du
+9:46AM INFO [UE 3] Forwarding RRC message to UE, length: 6  	 du_id=1 mod=du
+9:46AM INFO Handling RRCSetup message, length: 6 bytes       	 mod=ue msin=0000000003
+9:46AM INFO Received RRCSetup from DU (transaction ID: 0)    	 mod=ue msin=0000000003
+9:46AM INFO Initiating Registration                           	 mod=ue msin=0000000003
+9:46AM INFO Created NAS Registration Request, length: 26 bytes	 mod=ue msin=0000000003
+9:46AM INFO Initial registration - no S-TMSI included         	 mod=ue msin=0000000003
+9:46AM INFO Sending RRCSetupComplete to DU (with NAS Registration Request embedded)	 mod=ue msin=0000000003
+9:46AM INFO ==== RRC connection Initialized ====              	 mod=ue msin=0000000003
+9:46AM INFO [UE 0000000003] RRC Connection Established successfully   	 du_id=1 mod=du
+9:46AM INFO [UE 0000000003] Applying scenario: basic_registration                     	 du_id=1 mod=du
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=3, DU-UE-ID=3, SRB=1)	 du_id=1 mod=du
+9:46AM INFO Started listening for RRC messages from DU        	 mod=ue msin=0000000003
+9:46AM INFO [UE 0000000001] Executing delayed event: registration               	 du_id=1 mod=du
+9:46AM INFO [UE 0000000001] Initial Registration was handled automatically during RRC bootstrap	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 85                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=3, DU-UE-ID=3, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 3] Forwarding RRC message to UE, length: 45  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 45 bytes, [10 16 42 126 0 86 0 2 0 0 33 199 64 190 191 146 179 5 180 12 97 73 53 106 194 114 11 32 16 38 224 164 119 245 109 128 0 182 212 202 81 205 109 170 221]          	 mod=ue msin=0000000003
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000003
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 42	 mod=ue msin=0000000003
+9:46AM INFO Receive Authentication Request                    	 mod=ue msin=0000000003
+9:46AM INFO Authenticity of the authentication request message: OK	 mod=ue msin=0000000003
+9:46AM INFO SQN of the authentication request message: VALID  	 mod=ue msin=0000000003
+9:46AM INFO Send authentication response                      	 mod=ue msin=0000000003
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=3, DU-UE-ID=3, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 62                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=3, DU-UE-ID=3, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 3] Forwarding RRC message to UE, length: 22  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 22 bytes, [10 16 19 126 3 0 0 0 0 0 126 0 93 0 0 2 240 240 225 54 1 2]          	 mod=ue msin=0000000003
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000003
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 19	 mod=ue msin=0000000003
+9:46AM INFO Receive Security Mode Command                     	 mod=ue msin=0000000003
+9:46AM INFO Type of ciphering algorithm is 5G-0               	 mod=ue msin=0000000003
+9:46AM INFO Type of integrity algorithm is 5G-IA0             	 mod=ue msin=0000000003
+9:46AM INFO Have Additional Secutity Information, retransmission = true	 mod=ue msin=0000000003
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=3, DU-UE-ID=3, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 94                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=3, DU-UE-ID=3, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 3] Forwarding RRC message to UE, length: 54  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 54 bytes, [10 16 51 126 2 0 0 0 0 1 126 0 66 1 1 119 0 11 242 2 248 57 202 254 0 0 0 0 3 84 7 0 2 248 57 0 0 1 21 5 4 1 1 2 3 33 1 0 94 1 6 22 1 44]          	 mod=ue msin=0000000003
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000003
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 51	 mod=ue msin=0000000003
+9:46AM INFO Receive Registration Accept                       	 mod=ue msin=0000000003
+9:46AM INFO Handle Registration Accept                        	 mod=ue msin=0000000003
+9:46AM INFO UE 5G GUTI: 20893cafe0000000003                                    	 mod=ue msin=0000000003
+9:46AM INFO Registration Complete sent                        	 mod=ue msin=0000000003
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=3, DU-UE-ID=3, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 84                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=3, DU-UE-ID=3, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 3] Forwarding RRC message to UE, length: 44  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 44 bytes, [10 16 41 126 2 0 0 0 0 2 126 0 84 208 67 8 135 102 121 185 92 59 14 1 69 5 132 102 121 185 12 70 130 71 98 48 32 144 100 51 130 73 1 0]          	 mod=ue msin=0000000003
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000003
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 41	 mod=ue msin=0000000003
+9:46AM INFO Receive Configuration Update Command              	 mod=ue msin=0000000003
+9:46AM INFO Configuration Update Complete sent                	 mod=ue msin=0000000003
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=3, DU-UE-ID=3, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Auto-triggering default PDU Session establishment 	 mod=ue msin=0000000003
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000003
+9:46AM INFO Created PDU Session with ID: 1                   	 mod=ue msin=0000000003
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000003 pduId=1
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000003 pduId=1
+9:46AM INFO Sending N1 SM message (session 1) via UL NAS Transport	 mod=ue msin=0000000003
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=3, DU-UE-ID=3, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000004] Starting Initial Access (DU_UE_ID: 4, C-RNTI: 103)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000002] Executing delayed event: registration               	 du_id=1 mod=du
+9:46AM INFO [UE 4] Started listening for RRC messages        	 du_id=1 mod=du
+9:46AM INFO Initializing RRC connection                       	 mod=ue msin=0000000004
+9:46AM INFO Sending RRCSetupRequest to DU (UE identity: 258a52017e)   	 mod=ue msin=0000000004
+9:46AM INFO Waiting for RRCSetup from DU...                   	 mod=ue msin=0000000004
+9:46AM INFO [UE 4] Intercepted RRCReconfigurationComplete    	 du_id=1 mod=du
+9:46AM INFO Sending Initial UL RRC Message Transfer (DU-UE-ID=4, C-RNTI=103)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000002] Initial Registration was handled automatically during RRC bootstrap	 du_id=1 mod=du
+9:46AM INFO Successfully sent Initial UL RRC Message Transfer to CU-CP	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 46                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=4, DU-UE-ID=4, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 4] Updated CU_UE_ID to 4 from DLRRCMessageTransfer	 du_id=1 mod=du
+9:46AM INFO [UE 4] Forwarding RRC message to UE, length: 6  	 du_id=1 mod=du
+9:46AM INFO Handling RRCSetup message, length: 6 bytes       	 mod=ue msin=0000000004
+9:46AM INFO Received RRCSetup from DU (transaction ID: 0)    	 mod=ue msin=0000000004
+9:46AM INFO Initiating Registration                           	 mod=ue msin=0000000004
+9:46AM INFO Created NAS Registration Request, length: 26 bytes	 mod=ue msin=0000000004
+9:46AM INFO Initial registration - no S-TMSI included         	 mod=ue msin=0000000004
+9:46AM INFO Sending RRCSetupComplete to DU (with NAS Registration Request embedded)	 mod=ue msin=0000000004
+9:46AM INFO ==== RRC connection Initialized ====              	 mod=ue msin=0000000004
+9:46AM INFO [UE 0000000004] RRC Connection Established successfully   	 du_id=1 mod=du
+9:46AM INFO [UE 0000000004] Applying scenario: basic_registration                     	 du_id=1 mod=du
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=4, DU-UE-ID=4, SRB=1)	 du_id=1 mod=du
+9:46AM INFO Started listening for RRC messages from DU        	 mod=ue msin=0000000004
+9:46AM INFO Handling F1AP message, length: 85                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=4, DU-UE-ID=4, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 4] Forwarding RRC message to UE, length: 45  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 45 bytes, [10 16 42 126 0 86 0 2 0 0 33 144 120 113 190 249 105 125 33 122 238 141 46 7 232 66 0 32 16 145 87 108 219 36 217 128 0 121 78 12 222 171 121 185 51]          	 mod=ue msin=0000000004
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000004
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 42	 mod=ue msin=0000000004
+9:46AM INFO Receive Authentication Request                    	 mod=ue msin=0000000004
+9:46AM INFO Authenticity of the authentication request message: OK	 mod=ue msin=0000000004
+9:46AM INFO SQN of the authentication request message: VALID  	 mod=ue msin=0000000004
+9:46AM INFO Send authentication response                      	 mod=ue msin=0000000004
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=4, DU-UE-ID=4, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 62                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=4, DU-UE-ID=4, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 4] Forwarding RRC message to UE, length: 22  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 22 bytes, [10 16 19 126 3 0 0 0 0 0 126 0 93 0 0 2 240 240 225 54 1 2]          	 mod=ue msin=0000000004
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000004
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 19	 mod=ue msin=0000000004
+9:46AM INFO Receive Security Mode Command                     	 mod=ue msin=0000000004
+9:46AM INFO Type of ciphering algorithm is 5G-0               	 mod=ue msin=0000000004
+9:46AM INFO Type of integrity algorithm is 5G-IA0             	 mod=ue msin=0000000004
+9:46AM INFO Have Additional Secutity Information, retransmission = true	 mod=ue msin=0000000004
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=4, DU-UE-ID=4, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 94                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=4, DU-UE-ID=4, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 4] Forwarding RRC message to UE, length: 54  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 54 bytes, [10 16 51 126 2 0 0 0 0 1 126 0 66 1 1 119 0 11 242 2 248 57 202 254 0 0 0 0 4 84 7 0 2 248 57 0 0 1 21 5 4 1 1 2 3 33 1 0 94 1 6 22 1 44]          	 mod=ue msin=0000000004
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000004
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 51	 mod=ue msin=0000000004
+9:46AM INFO Receive Registration Accept                       	 mod=ue msin=0000000004
+9:46AM INFO Handle Registration Accept                        	 mod=ue msin=0000000004
+9:46AM INFO UE 5G GUTI: 20893cafe0000000004                                    	 mod=ue msin=0000000004
+9:46AM INFO Registration Complete sent                        	 mod=ue msin=0000000004
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=4, DU-UE-ID=4, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 84                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=4, DU-UE-ID=4, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 4] Forwarding RRC message to UE, length: 44  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 44 bytes, [10 16 41 126 2 0 0 0 0 2 126 0 84 208 67 8 135 102 121 185 92 59 14 1 69 5 132 102 121 185 12 70 130 71 98 48 32 144 100 67 130 73 1 0]          	 mod=ue msin=0000000004
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000004
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 41	 mod=ue msin=0000000004
+9:46AM INFO Receive Configuration Update Command              	 mod=ue msin=0000000004
+9:46AM INFO Configuration Update Complete sent                	 mod=ue msin=0000000004
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=4, DU-UE-ID=4, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Auto-triggering default PDU Session establishment 	 mod=ue msin=0000000004
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000004
+9:46AM INFO Created PDU Session with ID: 1                   	 mod=ue msin=0000000004
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000004 pduId=1
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000004 pduId=1
+9:46AM INFO Sending N1 SM message (session 1) via UL NAS Transport	 mod=ue msin=0000000004
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=4, DU-UE-ID=4, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000003] Executing delayed event: registration               	 du_id=1 mod=du
+9:46AM INFO [UE 0000000003] Initial Registration was handled automatically during RRC bootstrap	 du_id=1 mod=du
+9:46AM INFO [UE 0000000005] Starting Initial Access (DU_UE_ID: 5, C-RNTI: 104)	 du_id=1 mod=du
+9:46AM INFO Initializing RRC connection                       	 mod=ue msin=0000000005
+9:46AM INFO Sending RRCSetupRequest to DU (UE identity: b8839f3050)   	 mod=ue msin=0000000005
+9:46AM INFO Waiting for RRCSetup from DU...                   	 mod=ue msin=0000000005
+9:46AM INFO [UE 5] Started listening for RRC messages        	 du_id=1 mod=du
+9:46AM INFO [UE 5] Intercepted RRCReconfigurationComplete    	 du_id=1 mod=du
+9:46AM INFO Sending Initial UL RRC Message Transfer (DU-UE-ID=5, C-RNTI=104)	 du_id=1 mod=du
+9:46AM INFO Successfully sent Initial UL RRC Message Transfer to CU-CP	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 46                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=5, DU-UE-ID=5, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 5] Updated CU_UE_ID to 5 from DLRRCMessageTransfer	 du_id=1 mod=du
+9:46AM INFO [UE 5] Forwarding RRC message to UE, length: 6  	 du_id=1 mod=du
+9:46AM INFO Handling RRCSetup message, length: 6 bytes       	 mod=ue msin=0000000005
+9:46AM INFO Received RRCSetup from DU (transaction ID: 0)    	 mod=ue msin=0000000005
+9:46AM INFO Initiating Registration                           	 mod=ue msin=0000000005
+9:46AM INFO Created NAS Registration Request, length: 26 bytes	 mod=ue msin=0000000005
+9:46AM INFO Initial registration - no S-TMSI included         	 mod=ue msin=0000000005
+9:46AM INFO Sending RRCSetupComplete to DU (with NAS Registration Request embedded)	 mod=ue msin=0000000005
+9:46AM INFO ==== RRC connection Initialized ====              	 mod=ue msin=0000000005
+9:46AM INFO [UE 0000000005] RRC Connection Established successfully   	 du_id=1 mod=du
+9:46AM INFO [UE 0000000005] Applying scenario: basic_registration                     	 du_id=1 mod=du
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=5, DU-UE-ID=5, SRB=1)	 du_id=1 mod=du
+9:46AM INFO Started listening for RRC messages from DU        	 mod=ue msin=0000000005
+9:46AM INFO Handling F1AP message, length: 85                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=5, DU-UE-ID=5, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 5] Forwarding RRC message to UE, length: 45  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 45 bytes, [10 16 42 126 0 86 0 2 0 0 33 131 161 37 176 81 93 248 29 230 185 176 176 91 222 196 29 32 16 177 39 9 179 217 76 128 0 140 218 77 54 227 250 165 3]          	 mod=ue msin=0000000005
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000005
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 42	 mod=ue msin=0000000005
+9:46AM INFO Receive Authentication Request                    	 mod=ue msin=0000000005
+9:46AM INFO Authenticity of the authentication request message: OK	 mod=ue msin=0000000005
+9:46AM INFO SQN of the authentication request message: VALID  	 mod=ue msin=0000000005
+9:46AM INFO Send authentication response                      	 mod=ue msin=0000000005
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=5, DU-UE-ID=5, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 62                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=5, DU-UE-ID=5, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 5] Forwarding RRC message to UE, length: 22  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 22 bytes, [10 16 19 126 3 0 0 0 0 0 126 0 93 0 0 2 240 240 225 54 1 2]          	 mod=ue msin=0000000005
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000005
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 19	 mod=ue msin=0000000005
+9:46AM INFO Receive Security Mode Command                     	 mod=ue msin=0000000005
+9:46AM INFO Type of ciphering algorithm is 5G-0               	 mod=ue msin=0000000005
+9:46AM INFO Type of integrity algorithm is 5G-IA0             	 mod=ue msin=0000000005
+9:46AM INFO Have Additional Secutity Information, retransmission = true	 mod=ue msin=0000000005
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=5, DU-UE-ID=5, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 94                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=5, DU-UE-ID=5, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 5] Forwarding RRC message to UE, length: 54  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 54 bytes, [10 16 51 126 2 0 0 0 0 1 126 0 66 1 1 119 0 11 242 2 248 57 202 254 0 0 0 0 5 84 7 0 2 248 57 0 0 1 21 5 4 1 1 2 3 33 1 0 94 1 6 22 1 44]          	 mod=ue msin=0000000005
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000005
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 51	 mod=ue msin=0000000005
+9:46AM INFO Receive Registration Accept                       	 mod=ue msin=0000000005
+9:46AM INFO Handle Registration Accept                        	 mod=ue msin=0000000005
+9:46AM INFO UE 5G GUTI: 20893cafe0000000005                                    	 mod=ue msin=0000000005
+9:46AM INFO Registration Complete sent                        	 mod=ue msin=0000000005
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=5, DU-UE-ID=5, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 84                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=5, DU-UE-ID=5, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 5] Forwarding RRC message to UE, length: 44  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 44 bytes, [10 16 41 126 2 0 0 0 0 2 126 0 84 208 67 8 135 102 121 185 92 59 14 1 69 5 132 102 121 185 12 70 130 71 98 48 32 144 100 83 130 73 1 0]          	 mod=ue msin=0000000005
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000005
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 41	 mod=ue msin=0000000005
+9:46AM INFO Receive Configuration Update Command              	 mod=ue msin=0000000005
+9:46AM INFO Configuration Update Complete sent                	 mod=ue msin=0000000005
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=5, DU-UE-ID=5, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Auto-triggering default PDU Session establishment 	 mod=ue msin=0000000005
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000005
+9:46AM INFO Created PDU Session with ID: 1                   	 mod=ue msin=0000000005
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000005 pduId=1
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000005 pduId=1
+9:46AM INFO Sending N1 SM message (session 1) via UL NAS Transport	 mod=ue msin=0000000005
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=5, DU-UE-ID=5, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000006] Starting Initial Access (DU_UE_ID: 6, C-RNTI: 105)	 du_id=1 mod=du
+9:46AM INFO Initializing RRC connection                       	 mod=ue msin=0000000006
+9:46AM INFO Sending RRCSetupRequest to DU (UE identity: fa13eae550)   	 mod=ue msin=0000000006
+9:46AM INFO Waiting for RRCSetup from DU...                   	 mod=ue msin=0000000006
+9:46AM INFO [UE 6] Started listening for RRC messages        	 du_id=1 mod=du
+9:46AM INFO Sending Initial UL RRC Message Transfer (DU-UE-ID=6, C-RNTI=105)	 du_id=1 mod=du
+9:46AM INFO Successfully sent Initial UL RRC Message Transfer to CU-CP	 du_id=1 mod=du
+9:46AM INFO [UE 0000000004] Executing delayed event: registration               	 du_id=1 mod=du
+9:46AM INFO [UE 0000000004] Initial Registration was handled automatically during RRC bootstrap	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 46                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=6, DU-UE-ID=6, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 6] Updated CU_UE_ID to 6 from DLRRCMessageTransfer	 du_id=1 mod=du
+9:46AM INFO [UE 6] Forwarding RRC message to UE, length: 6  	 du_id=1 mod=du
+9:46AM INFO Handling RRCSetup message, length: 6 bytes       	 mod=ue msin=0000000006
+9:46AM INFO Received RRCSetup from DU (transaction ID: 0)    	 mod=ue msin=0000000006
+9:46AM INFO Initiating Registration                           	 mod=ue msin=0000000006
+9:46AM INFO Created NAS Registration Request, length: 26 bytes	 mod=ue msin=0000000006
+9:46AM INFO Initial registration - no S-TMSI included         	 mod=ue msin=0000000006
+9:46AM INFO Sending RRCSetupComplete to DU (with NAS Registration Request embedded)	 mod=ue msin=0000000006
+9:46AM INFO ==== RRC connection Initialized ====              	 mod=ue msin=0000000006
+9:46AM INFO [UE 0000000006] RRC Connection Established successfully   	 du_id=1 mod=du
+9:46AM INFO [UE 0000000006] Applying scenario: basic_registration                     	 du_id=1 mod=du
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=6, DU-UE-ID=6, SRB=1)	 du_id=1 mod=du
+9:46AM INFO Started listening for RRC messages from DU        	 mod=ue msin=0000000006
+9:46AM INFO [UE 0000000001] Executing delayed event: pdu_establishment               	 du_id=1 mod=du
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000001
+9:46AM INFO Created PDU Session with ID: 2                   	 mod=ue msin=0000000001
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000001 pduId=2
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000001 pduId=2
+9:46AM INFO Sending N1 SM message (session 2) via UL NAS Transport	 mod=ue msin=0000000001
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=1, DU-UE-ID=1, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 85                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=6, DU-UE-ID=6, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 6] Forwarding RRC message to UE, length: 45  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 45 bytes, [10 16 42 126 0 86 0 2 0 0 33 104 59 212 23 100 149 182 210 254 181 206 109 227 79 10 100 32 16 247 146 236 155 142 83 128 0 106 174 92 231 199 48 142 227]          	 mod=ue msin=0000000006
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000006
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 42	 mod=ue msin=0000000006
+9:46AM INFO Receive Authentication Request                    	 mod=ue msin=0000000006
+9:46AM INFO Authenticity of the authentication request message: OK	 mod=ue msin=0000000006
+9:46AM INFO SQN of the authentication request message: VALID  	 mod=ue msin=0000000006
+9:46AM INFO Send authentication response                      	 mod=ue msin=0000000006
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=6, DU-UE-ID=6, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 62                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=6, DU-UE-ID=6, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 6] Forwarding RRC message to UE, length: 22  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 22 bytes, [10 16 19 126 3 0 0 0 0 0 126 0 93 0 0 2 240 240 225 54 1 2]          	 mod=ue msin=0000000006
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000006
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 19	 mod=ue msin=0000000006
+9:46AM INFO Receive Security Mode Command                     	 mod=ue msin=0000000006
+9:46AM INFO Type of ciphering algorithm is 5G-0               	 mod=ue msin=0000000006
+9:46AM INFO Type of integrity algorithm is 5G-IA0             	 mod=ue msin=0000000006
+9:46AM INFO Have Additional Secutity Information, retransmission = true	 mod=ue msin=0000000006
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=6, DU-UE-ID=6, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 94                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=6, DU-UE-ID=6, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 6] Forwarding RRC message to UE, length: 54  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 54 bytes, [10 16 51 126 2 0 0 0 0 1 126 0 66 1 1 119 0 11 242 2 248 57 202 254 0 0 0 0 6 84 7 0 2 248 57 0 0 1 21 5 4 1 1 2 3 33 1 0 94 1 6 22 1 44]          	 mod=ue msin=0000000006
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000006
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 51	 mod=ue msin=0000000006
+9:46AM INFO Receive Registration Accept                       	 mod=ue msin=0000000006
+9:46AM INFO Handle Registration Accept                        	 mod=ue msin=0000000006
+9:46AM INFO UE 5G GUTI: 20893cafe0000000006                                    	 mod=ue msin=0000000006
+9:46AM INFO Registration Complete sent                        	 mod=ue msin=0000000006
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=6, DU-UE-ID=6, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 84                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=6, DU-UE-ID=6, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 6] Forwarding RRC message to UE, length: 44  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 44 bytes, [10 16 41 126 2 0 0 0 0 2 126 0 84 208 67 8 135 102 121 185 92 59 14 1 69 5 132 102 121 185 12 70 130 71 98 48 32 144 100 99 130 73 1 0]          	 mod=ue msin=0000000006
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000006
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 41	 mod=ue msin=0000000006
+9:46AM INFO Receive Configuration Update Command              	 mod=ue msin=0000000006
+9:46AM INFO Configuration Update Complete sent                	 mod=ue msin=0000000006
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=6, DU-UE-ID=6, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Auto-triggering default PDU Session establishment 	 mod=ue msin=0000000006
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000006
+9:46AM INFO Created PDU Session with ID: 1                   	 mod=ue msin=0000000006
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000006 pduId=1
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000006 pduId=1
+9:46AM INFO Sending N1 SM message (session 1) via UL NAS Transport	 mod=ue msin=0000000006
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=6, DU-UE-ID=6, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000002] Executing delayed event: pdu_establishment               	 du_id=1 mod=du
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000002
+9:46AM INFO Created PDU Session with ID: 2                   	 mod=ue msin=0000000002
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000002 pduId=2
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000002 pduId=2
+9:46AM INFO Sending N1 SM message (session 2) via UL NAS Transport	 mod=ue msin=0000000002
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=2, DU-UE-ID=2, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000005] Executing delayed event: registration               	 du_id=1 mod=du
+9:46AM INFO [UE 0000000007] Starting Initial Access (DU_UE_ID: 7, C-RNTI: 106)	 du_id=1 mod=du
+9:46AM INFO Initializing RRC connection                       	 mod=ue msin=0000000007
+9:46AM INFO [UE 0000000005] Initial Registration was handled automatically during RRC bootstrap	 du_id=1 mod=du
+9:46AM INFO Sending RRCSetupRequest to DU (UE identity: efe0d376c4)   	 mod=ue msin=0000000007
+9:46AM INFO Waiting for RRCSetup from DU...                   	 mod=ue msin=0000000007
+9:46AM INFO [UE 7] Started listening for RRC messages        	 du_id=1 mod=du
+9:46AM INFO Sending Initial UL RRC Message Transfer (DU-UE-ID=7, C-RNTI=106)	 du_id=1 mod=du
+9:46AM INFO Successfully sent Initial UL RRC Message Transfer to CU-CP	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 46                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=7, DU-UE-ID=7, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 7] Updated CU_UE_ID to 7 from DLRRCMessageTransfer	 du_id=1 mod=du
+9:46AM INFO [UE 7] Forwarding RRC message to UE, length: 6  	 du_id=1 mod=du
+9:46AM INFO Handling RRCSetup message, length: 6 bytes       	 mod=ue msin=0000000007
+9:46AM INFO Received RRCSetup from DU (transaction ID: 0)    	 mod=ue msin=0000000007
+9:46AM INFO Initiating Registration                           	 mod=ue msin=0000000007
+9:46AM INFO Created NAS Registration Request, length: 26 bytes	 mod=ue msin=0000000007
+9:46AM INFO Initial registration - no S-TMSI included         	 mod=ue msin=0000000007
+9:46AM INFO Sending RRCSetupComplete to DU (with NAS Registration Request embedded)	 mod=ue msin=0000000007
+9:46AM INFO ==== RRC connection Initialized ====              	 mod=ue msin=0000000007
+9:46AM INFO [UE 0000000007] RRC Connection Established successfully   	 du_id=1 mod=du
+9:46AM INFO [UE 0000000007] Applying scenario: basic_registration                     	 du_id=1 mod=du
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=7, DU-UE-ID=7, SRB=1)	 du_id=1 mod=du
+9:46AM INFO Started listening for RRC messages from DU        	 mod=ue msin=0000000007
+9:46AM INFO Handling F1AP message, length: 85                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=7, DU-UE-ID=7, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 7] Forwarding RRC message to UE, length: 45  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 45 bytes, [10 16 42 126 0 86 0 2 0 0 33 94 252 12 233 39 26 235 44 82 250 120 228 58 90 35 137 32 16 241 77 0 141 114 123 128 0 64 9 180 81 223 9 16 216]          	 mod=ue msin=0000000007
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000007
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 42	 mod=ue msin=0000000007
+9:46AM INFO Receive Authentication Request                    	 mod=ue msin=0000000007
+9:46AM INFO Authenticity of the authentication request message: OK	 mod=ue msin=0000000007
+9:46AM INFO SQN of the authentication request message: VALID  	 mod=ue msin=0000000007
+9:46AM INFO Send authentication response                      	 mod=ue msin=0000000007
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=7, DU-UE-ID=7, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 62                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=7, DU-UE-ID=7, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 7] Forwarding RRC message to UE, length: 22  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 22 bytes, [10 16 19 126 3 0 0 0 0 0 126 0 93 0 0 2 240 240 225 54 1 2]          	 mod=ue msin=0000000007
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000007
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 19	 mod=ue msin=0000000007
+9:46AM INFO Receive Security Mode Command                     	 mod=ue msin=0000000007
+9:46AM INFO Type of ciphering algorithm is 5G-0               	 mod=ue msin=0000000007
+9:46AM INFO Type of integrity algorithm is 5G-IA0             	 mod=ue msin=0000000007
+9:46AM INFO Have Additional Secutity Information, retransmission = true	 mod=ue msin=0000000007
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=7, DU-UE-ID=7, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 94                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=7, DU-UE-ID=7, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 7] Forwarding RRC message to UE, length: 54  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 54 bytes, [10 16 51 126 2 0 0 0 0 1 126 0 66 1 1 119 0 11 242 2 248 57 202 254 0 0 0 0 7 84 7 0 2 248 57 0 0 1 21 5 4 1 1 2 3 33 1 0 94 1 6 22 1 44]          	 mod=ue msin=0000000007
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000007
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 51	 mod=ue msin=0000000007
+9:46AM INFO Receive Registration Accept                       	 mod=ue msin=0000000007
+9:46AM INFO Handle Registration Accept                        	 mod=ue msin=0000000007
+9:46AM INFO UE 5G GUTI: 20893cafe0000000007                                    	 mod=ue msin=0000000007
+9:46AM INFO Registration Complete sent                        	 mod=ue msin=0000000007
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=7, DU-UE-ID=7, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 84                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=7, DU-UE-ID=7, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 7] Forwarding RRC message to UE, length: 44  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 44 bytes, [10 16 41 126 2 0 0 0 0 2 126 0 84 208 67 8 135 102 121 185 92 59 14 1 69 5 132 102 121 185 12 70 130 71 98 48 32 144 100 115 130 73 1 0]          	 mod=ue msin=0000000007
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000007
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 41	 mod=ue msin=0000000007
+9:46AM INFO Receive Configuration Update Command              	 mod=ue msin=0000000007
+9:46AM INFO Configuration Update Complete sent                	 mod=ue msin=0000000007
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=7, DU-UE-ID=7, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Auto-triggering default PDU Session establishment 	 mod=ue msin=0000000007
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000007
+9:46AM INFO Created PDU Session with ID: 1                   	 mod=ue msin=0000000007
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000007 pduId=1
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000007 pduId=1
+9:46AM INFO Sending N1 SM message (session 1) via UL NAS Transport	 mod=ue msin=0000000007
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=7, DU-UE-ID=7, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000003] Executing delayed event: pdu_establishment               	 du_id=1 mod=du
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000003
+9:46AM INFO Created PDU Session with ID: 2                   	 mod=ue msin=0000000003
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000003 pduId=2
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000003 pduId=2
+9:46AM INFO Sending N1 SM message (session 2) via UL NAS Transport	 mod=ue msin=0000000003
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=3, DU-UE-ID=3, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000008] Starting Initial Access (DU_UE_ID: 8, C-RNTI: 107)	 du_id=1 mod=du
+9:46AM INFO Initializing RRC connection                       	 mod=ue msin=0000000008
+9:46AM INFO Sending RRCSetupRequest to DU (UE identity: 55e1ce8d78)   	 mod=ue msin=0000000008
+9:46AM INFO Waiting for RRCSetup from DU...                   	 mod=ue msin=0000000008
+9:46AM INFO [UE 0000000006] Executing delayed event: registration               	 du_id=1 mod=du
+9:46AM INFO [UE 0000000006] Initial Registration was handled automatically during RRC bootstrap	 du_id=1 mod=du
+9:46AM INFO [UE 8] Started listening for RRC messages        	 du_id=1 mod=du
+9:46AM INFO Sending Initial UL RRC Message Transfer (DU-UE-ID=8, C-RNTI=107)	 du_id=1 mod=du
+9:46AM INFO Successfully sent Initial UL RRC Message Transfer to CU-CP	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 46                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=8, DU-UE-ID=8, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 8] Updated CU_UE_ID to 8 from DLRRCMessageTransfer	 du_id=1 mod=du
+9:46AM INFO [UE 8] Forwarding RRC message to UE, length: 6  	 du_id=1 mod=du
+9:46AM INFO Handling RRCSetup message, length: 6 bytes       	 mod=ue msin=0000000008
+9:46AM INFO Received RRCSetup from DU (transaction ID: 0)    	 mod=ue msin=0000000008
+9:46AM INFO Initiating Registration                           	 mod=ue msin=0000000008
+9:46AM INFO Created NAS Registration Request, length: 26 bytes	 mod=ue msin=0000000008
+9:46AM INFO Initial registration - no S-TMSI included         	 mod=ue msin=0000000008
+9:46AM INFO Sending RRCSetupComplete to DU (with NAS Registration Request embedded)	 mod=ue msin=0000000008
+9:46AM INFO ==== RRC connection Initialized ====              	 mod=ue msin=0000000008
+9:46AM INFO [UE 0000000008] RRC Connection Established successfully   	 du_id=1 mod=du
+9:46AM INFO [UE 0000000008] Applying scenario: basic_registration                     	 du_id=1 mod=du
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=8, DU-UE-ID=8, SRB=1)	 du_id=1 mod=du
+9:46AM INFO Started listening for RRC messages from DU        	 mod=ue msin=0000000008
+9:46AM INFO Handling F1AP message, length: 85                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=8, DU-UE-ID=8, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 8] Forwarding RRC message to UE, length: 45  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 45 bytes, [10 16 42 126 0 86 0 2 0 0 33 37 28 167 210 39 56 126 232 244 162 209 128 80 32 34 163 32 16 183 167 225 90 217 247 128 0 54 130 253 39 134 167 60 197]          	 mod=ue msin=0000000008
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000008
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 42	 mod=ue msin=0000000008
+9:46AM INFO Receive Authentication Request                    	 mod=ue msin=0000000008
+9:46AM INFO Authenticity of the authentication request message: OK	 mod=ue msin=0000000008
+9:46AM INFO SQN of the authentication request message: VALID  	 mod=ue msin=0000000008
+9:46AM INFO Send authentication response                      	 mod=ue msin=0000000008
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=8, DU-UE-ID=8, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 62                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=8, DU-UE-ID=8, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 8] Forwarding RRC message to UE, length: 22  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 22 bytes, [10 16 19 126 3 0 0 0 0 0 126 0 93 0 0 2 240 240 225 54 1 2]          	 mod=ue msin=0000000008
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000008
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 19	 mod=ue msin=0000000008
+9:46AM INFO Receive Security Mode Command                     	 mod=ue msin=0000000008
+9:46AM INFO Type of ciphering algorithm is 5G-0               	 mod=ue msin=0000000008
+9:46AM INFO Type of integrity algorithm is 5G-IA0             	 mod=ue msin=0000000008
+9:46AM INFO Have Additional Secutity Information, retransmission = true	 mod=ue msin=0000000008
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=8, DU-UE-ID=8, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 94                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=8, DU-UE-ID=8, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 8] Forwarding RRC message to UE, length: 54  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 54 bytes, [10 16 51 126 2 0 0 0 0 1 126 0 66 1 1 119 0 11 242 2 248 57 202 254 0 0 0 0 8 84 7 0 2 248 57 0 0 1 21 5 4 1 1 2 3 33 1 0 94 1 6 22 1 44]          	 mod=ue msin=0000000008
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000008
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 51	 mod=ue msin=0000000008
+9:46AM INFO Receive Registration Accept                       	 mod=ue msin=0000000008
+9:46AM INFO Handle Registration Accept                        	 mod=ue msin=0000000008
+9:46AM INFO UE 5G GUTI: 20893cafe0000000008                                    	 mod=ue msin=0000000008
+9:46AM INFO Registration Complete sent                        	 mod=ue msin=0000000008
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=8, DU-UE-ID=8, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 84                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=8, DU-UE-ID=8, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 8] Forwarding RRC message to UE, length: 44  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 44 bytes, [10 16 41 126 2 0 0 0 0 2 126 0 84 208 67 8 135 102 121 185 92 59 14 1 69 5 132 102 121 185 12 70 130 71 98 48 32 144 100 131 130 73 1 0]          	 mod=ue msin=0000000008
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000008
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 41	 mod=ue msin=0000000008
+9:46AM INFO Receive Configuration Update Command              	 mod=ue msin=0000000008
+9:46AM INFO Configuration Update Complete sent                	 mod=ue msin=0000000008
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=8, DU-UE-ID=8, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Auto-triggering default PDU Session establishment 	 mod=ue msin=0000000008
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000008
+9:46AM INFO Created PDU Session with ID: 1                   	 mod=ue msin=0000000008
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000008 pduId=1
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000008 pduId=1
+9:46AM INFO Sending N1 SM message (session 1) via UL NAS Transport	 mod=ue msin=0000000008
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=8, DU-UE-ID=8, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000004] Executing delayed event: pdu_establishment               	 du_id=1 mod=du
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000004
+9:46AM INFO Created PDU Session with ID: 2                   	 mod=ue msin=0000000004
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000004 pduId=2
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000004 pduId=2
+9:46AM INFO Sending N1 SM message (session 2) via UL NAS Transport	 mod=ue msin=0000000004
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=4, DU-UE-ID=4, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000009] Starting Initial Access (DU_UE_ID: 9, C-RNTI: 108)	 du_id=1 mod=du
+9:46AM INFO Initializing RRC connection                       	 mod=ue msin=0000000009
+9:46AM INFO Sending RRCSetupRequest to DU (UE identity: bdbf1eed48)   	 mod=ue msin=0000000009
+9:46AM INFO Waiting for RRCSetup from DU...                   	 mod=ue msin=0000000009
+9:46AM INFO [UE 9] Started listening for RRC messages        	 du_id=1 mod=du
+9:46AM INFO [UE 9] Intercepted RRCReconfigurationComplete    	 du_id=1 mod=du
+9:46AM INFO Sending Initial UL RRC Message Transfer (DU-UE-ID=9, C-RNTI=108)	 du_id=1 mod=du
+9:46AM INFO Successfully sent Initial UL RRC Message Transfer to CU-CP	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 46                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=9, DU-UE-ID=9, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 9] Updated CU_UE_ID to 9 from DLRRCMessageTransfer	 du_id=1 mod=du
+9:46AM INFO [UE 9] Forwarding RRC message to UE, length: 6  	 du_id=1 mod=du
+9:46AM INFO Handling RRCSetup message, length: 6 bytes       	 mod=ue msin=0000000009
+9:46AM INFO Received RRCSetup from DU (transaction ID: 0)    	 mod=ue msin=0000000009
+9:46AM INFO Initiating Registration                           	 mod=ue msin=0000000009
+9:46AM INFO [UE 0000000007] Executing delayed event: registration               	 du_id=1 mod=du
+9:46AM INFO [UE 0000000007] Initial Registration was handled automatically during RRC bootstrap	 du_id=1 mod=du
+9:46AM INFO Created NAS Registration Request, length: 26 bytes	 mod=ue msin=0000000009
+9:46AM INFO Initial registration - no S-TMSI included         	 mod=ue msin=0000000009
+9:46AM INFO Sending RRCSetupComplete to DU (with NAS Registration Request embedded)	 mod=ue msin=0000000009
+9:46AM INFO ==== RRC connection Initialized ====              	 mod=ue msin=0000000009
+9:46AM INFO [UE 0000000009] RRC Connection Established successfully   	 du_id=1 mod=du
+9:46AM INFO [UE 0000000009] Applying scenario: basic_registration                     	 du_id=1 mod=du
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=9, DU-UE-ID=9, SRB=1)	 du_id=1 mod=du
+9:46AM INFO Started listening for RRC messages from DU        	 mod=ue msin=0000000009
+9:46AM INFO Handling F1AP message, length: 85                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=9, DU-UE-ID=9, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 9] Forwarding RRC message to UE, length: 45  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 45 bytes, [10 16 42 126 0 86 0 2 0 0 33 170 206 226 8 72 44 197 165 218 108 39 79 119 252 216 240 32 16 78 117 53 32 86 11 128 0 50 222 29 142 211 4 152 41]          	 mod=ue msin=0000000009
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000009
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 42	 mod=ue msin=0000000009
+9:46AM INFO Receive Authentication Request                    	 mod=ue msin=0000000009
+9:46AM INFO Authenticity of the authentication request message: OK	 mod=ue msin=0000000009
+9:46AM INFO SQN of the authentication request message: VALID  	 mod=ue msin=0000000009
+9:46AM INFO Send authentication response                      	 mod=ue msin=0000000009
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=9, DU-UE-ID=9, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 62                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=9, DU-UE-ID=9, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 9] Forwarding RRC message to UE, length: 22  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 22 bytes, [10 16 19 126 3 0 0 0 0 0 126 0 93 0 0 2 240 240 225 54 1 2]          	 mod=ue msin=0000000009
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000009
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 19	 mod=ue msin=0000000009
+9:46AM INFO Receive Security Mode Command                     	 mod=ue msin=0000000009
+9:46AM INFO Type of ciphering algorithm is 5G-0               	 mod=ue msin=0000000009
+9:46AM INFO Type of integrity algorithm is 5G-IA0             	 mod=ue msin=0000000009
+9:46AM INFO Have Additional Secutity Information, retransmission = true	 mod=ue msin=0000000009
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=9, DU-UE-ID=9, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 94                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=9, DU-UE-ID=9, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 9] Forwarding RRC message to UE, length: 54  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 54 bytes, [10 16 51 126 2 0 0 0 0 1 126 0 66 1 1 119 0 11 242 2 248 57 202 254 0 0 0 0 9 84 7 0 2 248 57 0 0 1 21 5 4 1 1 2 3 33 1 0 94 1 6 22 1 44]          	 mod=ue msin=0000000009
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000009
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 51	 mod=ue msin=0000000009
+9:46AM INFO Receive Registration Accept                       	 mod=ue msin=0000000009
+9:46AM INFO Handle Registration Accept                        	 mod=ue msin=0000000009
+9:46AM INFO UE 5G GUTI: 20893cafe0000000009                                    	 mod=ue msin=0000000009
+9:46AM INFO Registration Complete sent                        	 mod=ue msin=0000000009
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=9, DU-UE-ID=9, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 84                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=9, DU-UE-ID=9, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 9] Forwarding RRC message to UE, length: 44  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 44 bytes, [10 16 41 126 2 0 0 0 0 2 126 0 84 208 67 8 135 102 121 185 92 59 14 1 69 5 132 102 121 185 12 70 130 71 98 48 32 144 100 147 130 73 1 0]          	 mod=ue msin=0000000009
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000009
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 41	 mod=ue msin=0000000009
+9:46AM INFO Receive Configuration Update Command              	 mod=ue msin=0000000009
+9:46AM INFO Configuration Update Complete sent                	 mod=ue msin=0000000009
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=9, DU-UE-ID=9, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Auto-triggering default PDU Session establishment 	 mod=ue msin=0000000009
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000009
+9:46AM INFO Created PDU Session with ID: 1                   	 mod=ue msin=0000000009
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000009 pduId=1
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000009 pduId=1
+9:46AM INFO Sending N1 SM message (session 1) via UL NAS Transport	 mod=ue msin=0000000009
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=9, DU-UE-ID=9, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000005] Executing delayed event: pdu_establishment               	 du_id=1 mod=du
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000005
+9:46AM INFO Created PDU Session with ID: 2                   	 mod=ue msin=0000000005
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000005 pduId=2
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000005 pduId=2
+9:46AM INFO Sending N1 SM message (session 2) via UL NAS Transport	 mod=ue msin=0000000005
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=5, DU-UE-ID=5, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000010] Starting Initial Access (DU_UE_ID: 10, C-RNTI: 109)	 du_id=1 mod=du
+9:46AM INFO Initializing RRC connection                       	 mod=ue msin=0000000010
+9:46AM INFO Sending RRCSetupRequest to DU (UE identity: 03d336b1fc)   	 mod=ue msin=0000000010
+9:46AM INFO Waiting for RRCSetup from DU...                   	 mod=ue msin=0000000010
+9:46AM INFO [UE 10] Started listening for RRC messages        	 du_id=1 mod=du
+9:46AM INFO [UE 10] Intercepted RRCReconfigurationComplete    	 du_id=1 mod=du
+9:46AM INFO Sending Initial UL RRC Message Transfer (DU-UE-ID=10, C-RNTI=109)	 du_id=1 mod=du
+9:46AM INFO Successfully sent Initial UL RRC Message Transfer to CU-CP	 du_id=1 mod=du
+9:46AM INFO [UE 0000000008] Executing delayed event: registration               	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 46                 	 du_id=1 mod=f1ap_client
+9:46AM INFO [UE 0000000008] Initial Registration was handled automatically during RRC bootstrap	 du_id=1 mod=du
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=10, DU-UE-ID=10, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 10] Updated CU_UE_ID to 10 from DLRRCMessageTransfer	 du_id=1 mod=du
+9:46AM INFO [UE 10] Forwarding RRC message to UE, length: 6  	 du_id=1 mod=du
+9:46AM INFO Handling RRCSetup message, length: 6 bytes       	 mod=ue msin=0000000010
+9:46AM INFO Received RRCSetup from DU (transaction ID: 0)    	 mod=ue msin=0000000010
+9:46AM INFO Initiating Registration                           	 mod=ue msin=0000000010
+9:46AM INFO Created NAS Registration Request, length: 26 bytes	 mod=ue msin=0000000010
+9:46AM INFO Initial registration - no S-TMSI included         	 mod=ue msin=0000000010
+9:46AM INFO Sending RRCSetupComplete to DU (with NAS Registration Request embedded)	 mod=ue msin=0000000010
+9:46AM INFO ==== RRC connection Initialized ====              	 mod=ue msin=0000000010
+9:46AM INFO [UE 0000000010] RRC Connection Established successfully   	 du_id=1 mod=du
+9:46AM INFO [UE 0000000010] Applying scenario: basic_registration                     	 du_id=1 mod=du
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=10, DU-UE-ID=10, SRB=1)	 du_id=1 mod=du
+9:46AM INFO Started listening for RRC messages from DU        	 mod=ue msin=0000000010
+9:46AM INFO Handling F1AP message, length: 85                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=10, DU-UE-ID=10, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 10] Forwarding RRC message to UE, length: 45  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 45 bytes, [10 16 42 126 0 86 0 2 0 0 33 158 31 93 138 89 244 106 203 168 115 103 78 204 231 25 12 32 16 194 179 30 244 197 118 128 0 219 221 249 93 157 1 143 128]          	 mod=ue msin=0000000010
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000010
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 42	 mod=ue msin=0000000010
+9:46AM INFO Receive Authentication Request                    	 mod=ue msin=0000000010
+9:46AM INFO Authenticity of the authentication request message: OK	 mod=ue msin=0000000010
+9:46AM INFO SQN of the authentication request message: VALID  	 mod=ue msin=0000000010
+9:46AM INFO Send authentication response                      	 mod=ue msin=0000000010
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=10, DU-UE-ID=10, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 62                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=10, DU-UE-ID=10, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 10] Forwarding RRC message to UE, length: 22  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 22 bytes, [10 16 19 126 3 0 0 0 0 0 126 0 93 0 0 2 240 240 225 54 1 2]          	 mod=ue msin=0000000010
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000010
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 19	 mod=ue msin=0000000010
+9:46AM INFO Receive Security Mode Command                     	 mod=ue msin=0000000010
+9:46AM INFO Type of ciphering algorithm is 5G-0               	 mod=ue msin=0000000010
+9:46AM INFO Type of integrity algorithm is 5G-IA0             	 mod=ue msin=0000000010
+9:46AM INFO Have Additional Secutity Information, retransmission = true	 mod=ue msin=0000000010
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=10, DU-UE-ID=10, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 94                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=10, DU-UE-ID=10, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 10] Forwarding RRC message to UE, length: 54  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 54 bytes, [10 16 51 126 2 0 0 0 0 1 126 0 66 1 1 119 0 11 242 2 248 57 202 254 0 0 0 0 10 84 7 0 2 248 57 0 0 1 21 5 4 1 1 2 3 33 1 0 94 1 6 22 1 44]          	 mod=ue msin=0000000010
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000010
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 51	 mod=ue msin=0000000010
+9:46AM INFO Receive Registration Accept                       	 mod=ue msin=0000000010
+9:46AM INFO Handle Registration Accept                        	 mod=ue msin=0000000010
+9:46AM INFO UE 5G GUTI: 20893cafe000000000a                                    	 mod=ue msin=0000000010
+9:46AM INFO Registration Complete sent                        	 mod=ue msin=0000000010
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=10, DU-UE-ID=10, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Handling F1AP message, length: 84                 	 du_id=1 mod=f1ap_client
+9:46AM INFO Received DL RRC Message Transfer                  	 du_id=1 mod=f1ap_client
+9:46AM INFO DL RRC Message Transfer: CU-UE-ID=10, DU-UE-ID=10, SRB-ID=0	 du_id=1 mod=du
+9:46AM INFO [UE 10] Forwarding RRC message to UE, length: 44  	 du_id=1 mod=du
+9:46AM INFO Handle RRC message, length: 44 bytes, [10 16 41 126 2 0 0 0 0 2 126 0 84 208 67 8 135 102 121 185 92 59 14 1 69 5 132 102 121 185 12 70 130 71 98 48 32 144 100 4 130 73 1 0]          	 mod=ue msin=0000000010
+9:46AM INFO Received DLInformationTransfer                    	 mod=ue msin=0000000010
+9:46AM INFO Extracted NAS message from DLInformationTransfer, length: 41	 mod=ue msin=0000000010
+9:46AM INFO Receive Configuration Update Command              	 mod=ue msin=0000000010
+9:46AM INFO Configuration Update Complete sent                	 mod=ue msin=0000000010
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=10, DU-UE-ID=10, SRB=2)	 du_id=1 mod=du
+9:46AM INFO Auto-triggering default PDU Session establishment 	 mod=ue msin=0000000010
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000010
+9:46AM INFO Created PDU Session with ID: 1                   	 mod=ue msin=0000000010
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000010 pduId=1
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000010 pduId=1
+9:46AM INFO Sending N1 SM message (session 1) via UL NAS Transport	 mod=ue msin=0000000010
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=10, DU-UE-ID=10, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000006] Executing delayed event: pdu_establishment               	 du_id=1 mod=du
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000006
+9:46AM INFO Created PDU Session with ID: 2                   	 mod=ue msin=0000000006
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000006 pduId=2
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000006 pduId=2
+9:46AM INFO Sending N1 SM message (session 2) via UL NAS Transport	 mod=ue msin=0000000006
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=6, DU-UE-ID=6, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000009] Executing delayed event: registration               	 du_id=1 mod=du
+9:46AM INFO [UE 0000000009] Initial Registration was handled automatically during RRC bootstrap	 du_id=1 mod=du
+9:46AM INFO [UE 0000000007] Executing delayed event: pdu_establishment               	 du_id=1 mod=du
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000007
+9:46AM INFO Created PDU Session with ID: 2                   	 mod=ue msin=0000000007
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000007 pduId=2
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000007 pduId=2
+9:46AM INFO Sending N1 SM message (session 2) via UL NAS Transport	 mod=ue msin=0000000007
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=7, DU-UE-ID=7, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000010] Executing delayed event: registration               	 du_id=1 mod=du
+9:46AM INFO [UE 0000000010] Initial Registration was handled automatically during RRC bootstrap	 du_id=1 mod=du
+9:46AM INFO [UE 0000000008] Executing delayed event: pdu_establishment               	 du_id=1 mod=du
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000008
+9:46AM INFO Created PDU Session with ID: 2                   	 mod=ue msin=0000000008
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000008 pduId=2
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000008 pduId=2
+9:46AM INFO Sending N1 SM message (session 2) via UL NAS Transport	 mod=ue msin=0000000008
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=8, DU-UE-ID=8, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000009] Executing delayed event: pdu_establishment               	 du_id=1 mod=du
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000009
+9:46AM INFO Created PDU Session with ID: 2                   	 mod=ue msin=0000000009
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000009 pduId=2
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000009 pduId=2
+9:46AM INFO Sending N1 SM message (session 2) via UL NAS Transport	 mod=ue msin=0000000009
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=9, DU-UE-ID=9, SRB=2)	 du_id=1 mod=du
+9:46AM INFO [UE 0000000010] Executing delayed event: pdu_establishment               	 du_id=1 mod=du
+9:46AM INFO Initiating New PDU Session                        	 mod=ue msin=0000000010
+9:46AM INFO Created PDU Session with ID: 2                   	 mod=ue msin=0000000010
+9:46AM INFO PDU Session Initiating                            	 mod=pdu_session msin=0000000010 pduId=2
+9:46AM INFO PDU Session state changed to: ACTIVE_PENDING                  	 mod=pdu_session msin=0000000010 pduId=2
+9:46AM INFO Sending N1 SM message (session 2) via UL NAS Transport	 mod=ue msin=0000000010
+9:46AM INFO Sending UL RRC Message Transfer (CU-UE-ID=10, DU-UE-ID=10, SRB=2)	 du_id=1 mod=du
+9:47AM INFO [UE 0000000001] Executing delayed event: pdu_release               	 du_id=1 mod=du
+9:47AM INFO No active PDU sessions to release                 	 mod=ue msin=0000000001
+9:47AM INFO [UE 0000000002] Executing delayed event: pdu_release               	 du_id=1 mod=du
+9:47AM INFO No active PDU sessions to release                 	 mod=ue msin=0000000002
+9:47AM INFO [UE 0000000003] Executing delayed event: pdu_release               	 du_id=1 mod=du
+9:47AM INFO No active PDU sessions to release                 	 mod=ue msin=0000000003
+9:47AM INFO [UE 0000000001] Executing delayed event: deregistration               	 du_id=1 mod=du
+9:47AM INFO UE Terminated                                     	 mod=ue msin=0000000001
+9:47AM INFO [UE 0000000002] Executing delayed event: deregistration               	 du_id=1 mod=du
+9:47AM INFO UE Terminated                                     	 mod=ue msin=0000000002
+9:47AM INFO [UE 0000000004] Executing delayed event: pdu_release               	 du_id=1 mod=du
+9:47AM INFO No active PDU sessions to release                 	 mod=ue msin=0000000004
+9:47AM INFO [UE 0000000003] Executing delayed event: deregistration               	 du_id=1 mod=du
+9:47AM INFO UE Terminated                                     	 mod=ue msin=0000000003
+9:47AM INFO [UE 0000000005] Executing delayed event: pdu_release               	 du_id=1 mod=du
+9:47AM INFO No active PDU sessions to release                 	 mod=ue msin=0000000005
+9:47AM INFO [UE 0000000004] Executing delayed event: deregistration               	 du_id=1 mod=du
+9:47AM INFO UE Terminated                                     	 mod=ue msin=0000000004
+9:47AM INFO [UE 0000000006] Executing delayed event: pdu_release               	 du_id=1 mod=du
+9:47AM INFO No active PDU sessions to release                 	 mod=ue msin=0000000006
+9:47AM INFO [UE 0000000005] Executing delayed event: deregistration               	 du_id=1 mod=du
+9:47AM INFO UE Terminated                                     	 mod=ue msin=0000000005
+9:47AM INFO [UE 0000000007] Executing delayed event: pdu_release               	 du_id=1 mod=du
+9:47AM INFO No active PDU sessions to release                 	 mod=ue msin=0000000007
+9:47AM INFO [UE 0000000006] Executing delayed event: deregistration               	 du_id=1 mod=du
+9:47AM INFO UE Terminated                                     	 mod=ue msin=0000000006
+9:47AM INFO [UE 0000000008] Executing delayed event: pdu_release               	 du_id=1 mod=du
+9:47AM INFO No active PDU sessions to release                 	 mod=ue msin=0000000008
+9:47AM INFO [UE 0000000009] Executing delayed event: pdu_release               	 du_id=1 mod=du
+9:47AM INFO No active PDU sessions to release                 	 mod=ue msin=0000000009
+9:47AM INFO [UE 0000000007] Executing delayed event: deregistration               	 du_id=1 mod=du
+9:47AM INFO UE Terminated                                     	 mod=ue msin=0000000007
+9:47AM INFO [UE 0000000008] Executing delayed event: deregistration               	 du_id=1 mod=du
+9:47AM INFO UE Terminated                                     	 mod=ue msin=0000000008
+9:47AM INFO [UE 0000000010] Executing delayed event: pdu_release               	 du_id=1 mod=du
+9:47AM INFO No active PDU sessions to release                 	 mod=ue msin=0000000010
+9:47AM INFO [UE 0000000009] Executing delayed event: deregistration               	 du_id=1 mod=du
+9:47AM INFO UE Terminated                                     	 mod=ue msin=0000000009
+9:47AM INFO [UE 0000000010] Executing delayed event: deregistration               	 du_id=1 mod=du
+9:47AM INFO UE Terminated                                     	 mod=ue msin=0000000010
+
+
+

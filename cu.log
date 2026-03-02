@@ -1,0 +1,591 @@
+9:46AM INFO Starting CU-CP application gNB-CU-CP                     	 mod=app
+9:46AM INFO ==== Store AMF 0 ====                            	 mod=cucp
+9:46AM INFO SCTP connection established with PPID=60          	 mod=sctp
+9:46AM INFO SCTP/NGAP service is running                      	 mod=cucp
+9:46AM INFO Initiating NG Setup Request                       	 mod=cucp
+9:46AM INFO Sending NG Setup Request to AMF                 	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 53 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=2, aper.Integer=21) mod=cucp
+9:46AM INFO Receive NG Setup Response                         	 mod=cucp
+9:46AM INFO Receive NGSetupResponse                           	 mod=cucp
+9:46AM INFO AMF Name: AMF - state: Active - capacity: 255       	 mod=cucp
+9:46AM INFO 	PLMNs Identities Supported by AMF -- mcc:208 mnc:93	 mod=cucp
+9:46AM INFO 	List of AMF slices Supported by AMF -- sst:01 sd:010203	 mod=cucp
+9:46AM INFO 	List of AMF slices Supported by AMF -- sst:01 sd:112233	 mod=cucp
+9:46AM INFO F1AP server listening on 192.168.1.2:38472                       	 mod=cucp
+9:46AM INFO SCTP/F1AP server is running                       	 mod=cucp
+9:46AM INFO CU-CP application started successfully            	 mod=app
+9:46AM INFO New connection from 192.168.1.2/192.168.56.1:59088                            	 mod=cucp
+9:46AM INFO New DU connection from 192.168.1.2/192.168.56.1:59088                         	 mod=cucp
+9:46AM INFO Handling F1AP connection from 192.168.1.2/192.168.56.1:59088                  	 mod=cucp
+9:46AM INFO Receive F1 Setup Request from DU                  	 mod=cucp
+9:46AM INFO Received F1 Setup Request from gNB_DU 1 (DU-UE-Simulator)     	 mod=cucp
+9:46AM INFO Accepting DU 1 (DU-UE-Simulator), sending F1 Setup Response   	 mod=cucp
+9:46AM INFO DU uses RRC version c0                            	 mod=cucp
+9:46AM INFO ==== Store DU 1 ====                             	 mod=cucp
+9:46AM INFO Create F1 SetupResponse                           	 mod=cucp
+9:46AM INFO Send F1 Setup Response to DU 1                   	 mod=du
+9:46AM INFO F1 Setup Procedure successfully with DU 1 (DU-UE-Simulator)   	 mod=cucp
+9:46AM INFO Receive Initial UL RRC Message from DU            	 mod=cucp
+9:46AM INFO Processing Initial UL RRC Message Transfer: DU-UE-ID=1, C-RNTI=100	 mod=cucp
+9:46AM INFO handle RRC Setup Request                          	 mod=cucp
+9:46AM INFO Created UE: RrcId=1, RanNgapId=1, CuF1apId=1, DuId=1	 mod=cucp
+9:46AM INFO Send RrcSetup to DU 1                            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Send NAS Registration Request to AMF              	 mod=cucp
+9:46AM INFO Create InitialUeMessage NGAP                      	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 66 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 43 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 75 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 73 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 328 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=14) mod=cucp
+9:46AM INFO Receive Initial Context Setup Request             	 mod=cucp
+9:46AM INFO  Context was created with successful              	 mod=cucp
+9:46AM INFO  RAN ID 1                                        	 mod=cucp
+9:46AM INFO  AMF ID 1                                        	 mod=cucp
+9:46AM INFO  Mobility Restrict --Plmn-- Mcc:208 Mnc:93         	 mod=cucp
+9:46AM INFO  Masked Imeisv: &{1110000000ffff00 40}                                	 mod=cucp
+9:46AM INFO  lowed Nssai (Sst-Sd): [{01 010203}]                         	 mod=cucp
+9:46AM INFO Receive Initial UL RRC Message from DU            	 mod=cucp
+9:46AM INFO Processing Initial UL RRC Message Transfer: DU-UE-ID=2, C-RNTI=101	 mod=cucp
+9:46AM INFO handle RRC Setup Request                          	 mod=cucp
+9:46AM INFO Created UE: RrcId=2, RanNgapId=2, CuF1apId=2, DuId=1	 mod=cucp
+9:46AM INFO Send RrcSetup to DU 1                            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Send NAS Registration Request to AMF              	 mod=cucp
+9:46AM INFO Create InitialUeMessage NGAP                      	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 66 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 43 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 75 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 73 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 299 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=14) mod=cucp
+9:46AM INFO Receive Initial Context Setup Request             	 mod=cucp
+9:46AM INFO  Context was created with successful              	 mod=cucp
+9:46AM INFO  RAN ID 2                                        	 mod=cucp
+9:46AM INFO  AMF ID 2                                        	 mod=cucp
+9:46AM INFO  Mobility Restrict --Plmn-- Mcc:208 Mnc:93         	 mod=cucp
+9:46AM INFO  Masked Imeisv: &{1110000000ffff00 40}                                	 mod=cucp
+9:46AM INFO  lowed Nssai (Sst-Sd): [{01 010203}]                         	 mod=cucp
+9:46AM INFO Receive Initial UL RRC Message from DU            	 mod=cucp
+9:46AM INFO Processing Initial UL RRC Message Transfer: DU-UE-ID=3, C-RNTI=102	 mod=cucp
+9:46AM INFO handle RRC Setup Request                          	 mod=cucp
+9:46AM INFO Created UE: RrcId=3, RanNgapId=3, CuF1apId=3, DuId=1	 mod=cucp
+9:46AM INFO Send RrcSetup to DU 1                            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Send NAS Registration Request to AMF              	 mod=cucp
+9:46AM INFO Create InitialUeMessage NGAP                      	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 66 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 43 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 75 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 73 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 299 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=14) mod=cucp
+9:46AM INFO Receive Initial Context Setup Request             	 mod=cucp
+9:46AM INFO  Context was created with successful              	 mod=cucp
+9:46AM INFO  RAN ID 3                                        	 mod=cucp
+9:46AM INFO  AMF ID 3                                        	 mod=cucp
+9:46AM INFO  Mobility Restrict --Plmn-- Mcc:208 Mnc:93         	 mod=cucp
+9:46AM INFO  Masked Imeisv: &{1110000000ffff00 40}                                	 mod=cucp
+9:46AM INFO  lowed Nssai (Sst-Sd): [{01 010203}]                         	 mod=cucp
+9:46AM INFO Receive Initial UL RRC Message from DU            	 mod=cucp
+9:46AM INFO Processing Initial UL RRC Message Transfer: DU-UE-ID=4, C-RNTI=103	 mod=cucp
+9:46AM INFO handle RRC Setup Request                          	 mod=cucp
+9:46AM INFO Created UE: RrcId=4, RanNgapId=4, CuF1apId=4, DuId=1	 mod=cucp
+9:46AM INFO Send RrcSetup to DU 1                            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Send NAS Registration Request to AMF              	 mod=cucp
+9:46AM INFO Create InitialUeMessage NGAP                      	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 66 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 43 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 75 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 73 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 299 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=14) mod=cucp
+9:46AM INFO Receive Initial Context Setup Request             	 mod=cucp
+9:46AM INFO  Context was created with successful              	 mod=cucp
+9:46AM INFO  RAN ID 4                                        	 mod=cucp
+9:46AM INFO  AMF ID 4                                        	 mod=cucp
+9:46AM INFO  Mobility Restrict --Plmn-- Mcc:208 Mnc:93         	 mod=cucp
+9:46AM INFO  Masked Imeisv: &{1110000000ffff00 40}                                	 mod=cucp
+9:46AM INFO  lowed Nssai (Sst-Sd): [{01 010203}]                         	 mod=cucp
+9:46AM INFO Receive Initial UL RRC Message from DU            	 mod=cucp
+9:46AM INFO Processing Initial UL RRC Message Transfer: DU-UE-ID=5, C-RNTI=104	 mod=cucp
+9:46AM INFO handle RRC Setup Request                          	 mod=cucp
+9:46AM INFO Created UE: RrcId=5, RanNgapId=5, CuF1apId=5, DuId=1	 mod=cucp
+9:46AM INFO Send RrcSetup to DU 1                            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Send NAS Registration Request to AMF              	 mod=cucp
+9:46AM INFO Create InitialUeMessage NGAP                      	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 66 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 43 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 75 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 73 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 299 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=14) mod=cucp
+9:46AM INFO Receive Initial Context Setup Request             	 mod=cucp
+9:46AM INFO  Context was created with successful              	 mod=cucp
+9:46AM INFO  RAN ID 5                                        	 mod=cucp
+9:46AM INFO  AMF ID 5                                        	 mod=cucp
+9:46AM INFO  Mobility Restrict --Plmn-- Mcc:208 Mnc:93         	 mod=cucp
+9:46AM INFO  Masked Imeisv: &{1110000000ffff00 40}                                	 mod=cucp
+9:46AM INFO  lowed Nssai (Sst-Sd): [{01 010203}]                         	 mod=cucp
+9:46AM INFO Receive Initial UL RRC Message from DU            	 mod=cucp
+9:46AM INFO Processing Initial UL RRC Message Transfer: DU-UE-ID=6, C-RNTI=105	 mod=cucp
+9:46AM INFO handle RRC Setup Request                          	 mod=cucp
+9:46AM INFO Created UE: RrcId=6, RanNgapId=6, CuF1apId=6, DuId=1	 mod=cucp
+9:46AM INFO Send RrcSetup to DU 1                            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Send NAS Registration Request to AMF              	 mod=cucp
+9:46AM INFO Create InitialUeMessage NGAP                      	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 66 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 239 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=29) mod=cucp
+9:46AM WARN Received unknown NgapPduInitiatingMessage ProcedureCode 0x1d	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 43 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 75 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 73 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 299 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=14) mod=cucp
+9:46AM INFO Receive Initial Context Setup Request             	 mod=cucp
+9:46AM INFO  Context was created with successful              	 mod=cucp
+9:46AM INFO  RAN ID 6                                        	 mod=cucp
+9:46AM INFO  AMF ID 6                                        	 mod=cucp
+9:46AM INFO  Mobility Restrict --Plmn-- Mcc:208 Mnc:93         	 mod=cucp
+9:46AM INFO  Masked Imeisv: &{1110000000ffff00 40}                                	 mod=cucp
+9:46AM INFO  lowed Nssai (Sst-Sd): [{01 010203}]                         	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 210 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=29) mod=cucp
+9:46AM WARN Received unknown NgapPduInitiatingMessage ProcedureCode 0x1d	 mod=cucp
+9:46AM INFO Receive Initial UL RRC Message from DU            	 mod=cucp
+9:46AM INFO Processing Initial UL RRC Message Transfer: DU-UE-ID=7, C-RNTI=106	 mod=cucp
+9:46AM INFO handle RRC Setup Request                          	 mod=cucp
+9:46AM INFO Created UE: RrcId=7, RanNgapId=7, CuF1apId=7, DuId=1	 mod=cucp
+9:46AM INFO Send RrcSetup to DU 1                            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Send NAS Registration Request to AMF              	 mod=cucp
+9:46AM INFO Create InitialUeMessage NGAP                      	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 66 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 43 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 75 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 73 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 299 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=14) mod=cucp
+9:46AM INFO Receive Initial Context Setup Request             	 mod=cucp
+9:46AM INFO  Context was created with successful              	 mod=cucp
+9:46AM INFO  RAN ID 7                                        	 mod=cucp
+9:46AM INFO  AMF ID 7                                        	 mod=cucp
+9:46AM INFO  Mobility Restrict --Plmn-- Mcc:208 Mnc:93         	 mod=cucp
+9:46AM INFO  Masked Imeisv: &{1110000000ffff00 40}                                	 mod=cucp
+9:46AM INFO  lowed Nssai (Sst-Sd): [{01 010203}]                         	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 210 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=29) mod=cucp
+9:46AM WARN Received unknown NgapPduInitiatingMessage ProcedureCode 0x1d	 mod=cucp
+9:46AM INFO Receive Initial UL RRC Message from DU            	 mod=cucp
+9:46AM INFO Processing Initial UL RRC Message Transfer: DU-UE-ID=8, C-RNTI=107	 mod=cucp
+9:46AM INFO handle RRC Setup Request                          	 mod=cucp
+9:46AM INFO Created UE: RrcId=8, RanNgapId=8, CuF1apId=8, DuId=1	 mod=cucp
+9:46AM INFO Send RrcSetup to DU 1                            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Send NAS Registration Request to AMF              	 mod=cucp
+9:46AM INFO Create InitialUeMessage NGAP                      	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 66 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 43 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 75 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 73 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 299 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=14) mod=cucp
+9:46AM INFO Receive Initial Context Setup Request             	 mod=cucp
+9:46AM INFO  Context was created with successful              	 mod=cucp
+9:46AM INFO  RAN ID 8                                        	 mod=cucp
+9:46AM INFO  AMF ID 8                                        	 mod=cucp
+9:46AM INFO  Mobility Restrict --Plmn-- Mcc:208 Mnc:93         	 mod=cucp
+9:46AM INFO  Masked Imeisv: &{1110000000ffff00 40}                                	 mod=cucp
+9:46AM INFO  lowed Nssai (Sst-Sd): [{01 010203}]                         	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 210 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=29) mod=cucp
+9:46AM WARN Received unknown NgapPduInitiatingMessage ProcedureCode 0x1d	 mod=cucp
+9:46AM INFO Receive Initial UL RRC Message from DU            	 mod=cucp
+9:46AM INFO Processing Initial UL RRC Message Transfer: DU-UE-ID=9, C-RNTI=108	 mod=cucp
+9:46AM INFO handle RRC Setup Request                          	 mod=cucp
+9:46AM INFO Created UE: RrcId=9, RanNgapId=9, CuF1apId=9, DuId=1	 mod=cucp
+9:46AM INFO Send RrcSetup to DU 1                            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Send NAS Registration Request to AMF              	 mod=cucp
+9:46AM INFO Create InitialUeMessage NGAP                      	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 66 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 43 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 75 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 73 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 299 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=14) mod=cucp
+9:46AM INFO Receive Initial Context Setup Request             	 mod=cucp
+9:46AM INFO  Context was created with successful              	 mod=cucp
+9:46AM INFO  RAN ID 9                                        	 mod=cucp
+9:46AM INFO  AMF ID 9                                        	 mod=cucp
+9:46AM INFO  Mobility Restrict --Plmn-- Mcc:208 Mnc:93         	 mod=cucp
+9:46AM INFO  Masked Imeisv: &{1110000000ffff00 40}                                	 mod=cucp
+9:46AM INFO  lowed Nssai (Sst-Sd): [{01 010203}]                         	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 210 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=29) mod=cucp
+9:46AM WARN Received unknown NgapPduInitiatingMessage ProcedureCode 0x1d	 mod=cucp
+9:46AM INFO Receive Initial UL RRC Message from DU            	 mod=cucp
+9:46AM INFO Processing Initial UL RRC Message Transfer: DU-UE-ID=10, C-RNTI=109	 mod=cucp
+9:46AM INFO handle RRC Setup Request                          	 mod=cucp
+9:46AM INFO Created UE: RrcId=10, RanNgapId=10, CuF1apId=10, DuId=1	 mod=cucp
+9:46AM INFO Send RrcSetup to DU 1                            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Send NAS Registration Request to AMF              	 mod=cucp
+9:46AM INFO Create InitialUeMessage NGAP                      	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 66 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 43 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 75 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 73 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=4) mod=cucp
+9:46AM INFO Receive Downlink NAS Transport                    	 mod=cucp
+9:46AM INFO Send DL RRC Message Transfer to .DU 1            	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 299 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=14) mod=cucp
+9:46AM INFO Receive Initial Context Setup Request             	 mod=cucp
+9:46AM INFO  Context was created with successful              	 mod=cucp
+9:46AM INFO  RAN ID 10                                        	 mod=cucp
+9:46AM INFO  AMF ID 10                                        	 mod=cucp
+9:46AM INFO  Mobility Restrict --Plmn-- Mcc:208 Mnc:93         	 mod=cucp
+9:46AM INFO  Masked Imeisv: &{1110000000ffff00 40}                                	 mod=cucp
+9:46AM INFO  lowed Nssai (Sst-Sd): [{01 010203}]                         	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 210 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=29) mod=cucp
+9:46AM WARN Received unknown NgapPduInitiatingMessage ProcedureCode 0x1d	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 210 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=29) mod=cucp
+9:46AM WARN Received unknown NgapPduInitiatingMessage ProcedureCode 0x1d	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 210 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=29) mod=cucp
+9:46AM WARN Received unknown NgapPduInitiatingMessage ProcedureCode 0x1d	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 210 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=29) mod=cucp
+9:46AM WARN Received unknown NgapPduInitiatingMessage ProcedureCode 0x1d	 mod=cucp
+9:46AM INFO Receive UL RRC Message from DU                    	 mod=cucp
+9:46AM INFO Sending NGAP to AMF                               	 mod=cucp
+9:46AM INFO Sent NGAP message to AMF 0                       	 mod=amf
+9:46AM INFO Received 210 bytes (PPID=60, Stream=0)            	 mod=sctp
+9:46AM INFO Receive NGAP message                              	%!(EXTRA uint8=1, aper.Integer=29) mod=cucp
+9:46AM WARN Received unknown NgapPduInitiatingMessage ProcedureCode 0x1d	 mod=cucp
+
+
