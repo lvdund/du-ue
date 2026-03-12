@@ -199,8 +199,14 @@ func (c *F1APClient) handleMessage(data []byte) error {
 			}
 		case ies.ProcedureCode_UEContextModification:
 			c.Info("Received UE Context Modification Request")
-			if err := c.du.HandleUeContextModificationRequest(&pdu); err != nil {
-				c.Error("Failed to handle UE Context Modification Request: %v", err)
+			if response, ok := pdu.Message.Msg.(*ies.UEContextModificationRequest); ok {
+				// [WORKAROUND] Extract missing IEs from raw data because the library's decoder is broken
+				if err := DecodeUEContextModificationRequestIEs(data, response); err != nil {
+					c.Warn("Failed to extract missing IEs from UEContextModificationRequest: %v", err)
+				}
+				if err := c.du.HandleUeContextModificationRequest(&pdu); err != nil {
+					c.Error("Failed to handle UE Context Modification Request: %v", err)
+				}
 			}
 		default:
 			c.Info("Received initiating message %d", pdu.Message.ProcedureCode.Value)

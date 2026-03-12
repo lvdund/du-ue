@@ -72,6 +72,12 @@ func (du *DU) processAndGetSrbID(ctx *DuUeContext, rrcBytes []byte) int64 {
 		// piggybacked NAS message -> SRB2 (if AS security is active, which it typically is for this message)
 		// For now, we assume if we see this, we use SRB2
 		srbID = 2
+
+		// Mock CU-CP: Intercept PDU Session Establishment Requests and inject fake response
+		if c1.UlInformationTransfer != nil {
+			du.Info("[UE %d] Parsing UlInformationTransfer to detect PDU session requests...", ctx.DuUeF1apId)
+			du.detectPduSessionRequest(ctx, c1.UlInformationTransfer)
+		}
 	}
 
 	return srbID

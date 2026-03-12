@@ -31,40 +31,13 @@ func IPToBitString(ipStr string) (aper.BitString, error) {
 
 // EncodeF1APPdu manually encodes an F1AP PDU with specified procedure code and IEs.
 // This bypasses the generated library's strict validation and incorrect procedure codes.
-func EncodeF1APPdu(procedureCode int64, criticality aper.Enumerated, ieList []ies.F1apMessageIE) ([]byte, error) {
+func EncodeF1APPdu(present int, procedureCode int64, criticality aper.Enumerated, ieList []ies.F1apMessageIE) ([]byte, error) {
 	var buf bytes.Buffer
-	aw := aper.NewWriter(&buf)
-
-	// 1. Present: F1apPduSuccessfulOutcome (Index 1)
-	// Choice Index (0=Initiating, 1=Successful, 2=Unsuccessful)
-	if err := aw.WriteBool(aper.Zero); err != nil { // No extension
-		return nil, err
-	}
-	if err := aw.WriteInteger(1, &aper.Constraint{Lb: 0, Ub: 2}, false); err != nil { // Index 1
-		return nil, err
-	}
-
-	// 2. Procedure Code
-	// Using generic Integer encoding as per Common.go
-	if err := aw.WriteInteger(procedureCode, &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
-		return nil, err
-	}
-
-	// 3. Criticality
-	if err := aw.WriteEnumerate(uint64(criticality), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
-		return nil, err
-	}
-
-	// 4. Message Payload (Open Type containing Sequence of IEs)
-	if len(ieList) == 0 {
-		return nil, fmt.Errorf("empty message IEs")
-	}
-
-	var ieBuf bytes.Buffer
-	ieW := aper.NewWriter(&ieBuf)
+	ieW := aper.NewWriter(&buf)
 
 	// Encode Sequence of IEs
-	ieW.WriteBool(aper.Zero) // Sequence extension
+	// Match library expectations: a bool followed by the sequence of IEs
+	ieW.WriteBool(aper.Zero) // Sequence extension or similar padding
 
 	if err := aper.WriteSequenceOf[ies.F1apMessageIE](ieList, ieW, &aper.Constraint{
 		Lb: 0,
@@ -74,9 +47,38 @@ func EncodeF1APPdu(procedureCode int64, criticality aper.Enumerated, ieList []ie
 	}
 
 	ieW.Close()
+	return EncodeF1APPduWithPayload(present, procedureCode, criticality, buf.Bytes())
+}
 
-	// Write the Open Type container for the whole message
-	if err := aw.WriteOpenType(ieBuf.Bytes()); err != nil {
+// EncodeF1APPduWithPayload manually encodes an F1AP PDU using a pre-encoded payload (sequence of IEs).
+func EncodeF1APPduWithPayload(present int, procedureCode int64, criticality aper.Enumerated, payload []byte) ([]byte, error) {
+	var buf bytes.Buffer
+	aw := aper.NewWriter(&buf)
+
+	// 1. First bit: manual header (Matched to library's encodeMessage)
+	if err := aw.WriteBool(aper.Zero); err != nil {
+		return nil, err
+	}
+
+	// 2. Choice Index
+	// Even though encodeMessage uses extensible=true, we'll try matching it.
+	// present should be ies.F1apPdu... (1, 2, or 3)
+	if err := aw.WriteChoice(uint64(present), 2, true); err != nil {
+		return nil, err
+	}
+
+	// 3. Procedure Code
+	if err := aw.WriteInteger(procedureCode, &aper.Constraint{Lb: 0, Ub: 255}, false); err != nil {
+		return nil, err
+	}
+
+	// 4. Criticality
+	if err := aw.WriteEnumerate(uint64(criticality), aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
+		return nil, err
+	}
+
+	// 5. Message Payload (Open Type containing Sequence of IEs)
+	if err := aw.WriteOpenType(payload); err != nil {
 		return nil, err
 	}
 
@@ -84,170 +86,106 @@ func EncodeF1APPdu(procedureCode int64, criticality aper.Enumerated, ieList []ie
 	return buf.Bytes(), nil
 }
 
-// BuildUEContextModificationResponseIEs constructs IEs for UEContextModificationResponse,
-// omitting optional "mandatory" fields that are not relevant.
-func BuildUEContextModificationResponseIEs(msg *ies.UEContextModificationResponse) []ies.F1apMessageIE {
-	list := []ies.F1apMessageIE{}
+// DecodeUEContextModificationRequestIEs manually decodes the missing IEs in UEContextModificationRequest.
+// This is necessary because the f1-gen library's decoder is missing several mandatory/optional fields.
+func DecodeUEContextModificationRequestIEs(data []byte, msg *ies.UEContextModificationRequest) error {
+	r := aper.NewReader(bytes.NewReader(data))
 
-	// 1. GNB-CU-UE-F1AP-ID (Mandatory)
-	{
-		val := ies.NewINTEGER(msg.GNBCUUEF1APID, aper.Constraint{Lb: 0, Ub: 4294967295}, false)
-		list = append(list, ies.F1apMessageIE{
-			Id:          ies.ProtocolIEID{Value: ies.ProtocolIEID_GNBCUUEF1APID},
-			Criticality: ies.Criticality{Value: ies.Criticality_PresentReject},
-			Value:       &val,
-		})
+	// 1. PDU Header
+	if _, err := r.ReadBool(); err != nil {
+		return err
+	}
+	choice, err := r.ReadChoice(2, false)
+	if err != nil {
+		return err
+	}
+	if choice != uint64(ies.F1apPduInitiatingMessage) {
+		return fmt.Errorf("not an initiating message")
 	}
 
-	// 2. GNB-DU-UE-F1AP-ID (Mandatory)
-	{
-		val := ies.NewINTEGER(msg.GNBDUUEF1APID, aper.Constraint{Lb: 0, Ub: 4294967295}, false)
-		list = append(list, ies.F1apMessageIE{
-			Id:          ies.ProtocolIEID{Value: ies.ProtocolIEID_GNBDUUEF1APID},
-			Criticality: ies.Criticality{Value: ies.Criticality_PresentReject},
-			Value:       &val,
-		})
+	// 2. Procedure Code
+	code, err := r.ReadInteger(&aper.Constraint{Lb: 0, Ub: 255}, false)
+	if err != nil {
+		return err
+	}
+	if code != 7 { // UEContextModification
+		return fmt.Errorf("not a UEContextModificationRequest")
 	}
 
-	// 3. DUtoCURRCInformation (Mandatory)
-	if msg.DUtoCURRCInformation != nil {
-		list = append(list, ies.F1apMessageIE{
-			Id:          ies.ProtocolIEID{Value: ies.ProtocolIEID_DUtoCURRCInformation},
-			Criticality: ies.Criticality{Value: ies.Criticality_PresentReject},
-			Value:       msg.DUtoCURRCInformation,
-		})
+	// 3. Criticality
+	if _, err := r.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
+		return err
 	}
 
-	// 4. DRBsSetupModList (Conditional Mandatory in spec, strict in lib)
-	if len(msg.DRBsSetupModList) > 0 {
-		items := []*ies.DRBsSetupModItem{}
-		for _, item := range msg.DRBsSetupModList {
-			val := item
-			items = append(items, &val)
+	// 4. Value (Open Type)
+	buf, err := r.ReadOpenType()
+	if err != nil {
+		return err
+	}
+
+	// 5. UEContextModificationRequest SEQUENCE
+	ieR := aper.NewReader(bytes.NewReader(buf))
+	if _, err := ieR.ReadBool(); err != nil {
+		return err
+	}
+
+	// 6. Loop through IEs and extract missing ones
+	decodeIEFunc := func(argR *aper.AperReader) (msgIe *ies.F1apMessageIE, err error) {
+		var id int64
+		var c uint64
+		var ieBuf []byte
+		if id, err = argR.ReadInteger(&aper.Constraint{Lb: 0, Ub: int64(aper.POW_16) - 1}, false); err != nil {
+			return
 		}
-		// Constraint: Lb: 1, Ub: 64
-		seq := ies.NewSequence(items, aper.Constraint{Lb: 1, Ub: 64}, false)
-		list = append(list, ies.F1apMessageIE{
-			Id:          ies.ProtocolIEID{Value: ies.ProtocolIEID_DRBsSetupModList},
-			Criticality: ies.Criticality{Value: ies.Criticality_PresentIgnore},
-			Value:       &seq,
-		})
-	}
-
-	// 5. DRBsModifiedList (Strict Mandatory in lib)
-	{
-		dummyItem := ies.DRBsModifiedItem{
-			DRBID: 1, // Dummy ID
-			DLUPTNLInformationToBeSetupList: []ies.DLUPTNLInformationToBeSetupItem{
-				{
-					// DLUPTNLAddress is NOT a field here.
-					DLUPTNLInformation: ies.UPTransportLayerInformation{
-						Choice: ies.UPTransportLayerInformationPresentGTPTunnel,
-						GTPTunnel: &ies.GTPTunnel{
-							TransportLayerAddress: aper.BitString{
-								Bytes:   []byte{0x00, 0x00, 0x00, 0x00},
-								NumBits: 32,
-							},
-							GTPTEID: []byte{0x00, 0x00, 0x00, 0x00},
-						},
-					},
-				},
-			},
+		msgIe = new(ies.F1apMessageIE)
+		msgIe.Id.Value = aper.Integer(id)
+		if c, err = argR.ReadEnumerate(aper.Constraint{Lb: 0, Ub: 2}, false); err != nil {
+			return
 		}
-		items := []*ies.DRBsModifiedItem{&dummyItem}
-		// Constraint: Lb: 1, Ub: 64
-		seq := ies.NewSequence(items, aper.Constraint{Lb: 1, Ub: 64}, false)
-		list = append(list, ies.F1apMessageIE{
-			Id:          ies.ProtocolIEID{Value: ies.ProtocolIEID_DRBsModifiedList},
-			Criticality: ies.Criticality{Value: ies.Criticality_PresentIgnore},
-			Value:       &seq,
-		})
-	}
-
-	// 6. SRBsFailedToBeSetupModList (Optional)
-	if len(msg.SRBsFailedToBeSetupModList) > 0 {
-		items := []*ies.SRBsFailedToBeSetupModItem{}
-		for _, item := range msg.SRBsFailedToBeSetupModList {
-			val := item
-			items = append(items, &val)
+		msgIe.Criticality.Value = aper.Enumerated(c)
+		if ieBuf, err = argR.ReadOpenType(); err != nil {
+			return
 		}
-		// Constraint: Lb: 1, Ub: 8
-		seq := ies.NewSequence(items, aper.Constraint{Lb: 1, Ub: 8}, false)
-		list = append(list, ies.F1apMessageIE{
-			Id:          ies.ProtocolIEID{Value: ies.ProtocolIEID_SRBsFailedToBeSetupModList},
-			Criticality: ies.Criticality{Value: ies.Criticality_PresentIgnore},
-			Value:       &seq,
-		})
-	}
 
-	// 7. DRBsFailedToBeSetupModList (Optional)
-	if len(msg.DRBsFailedToBeSetupModList) > 0 {
-		items := []*ies.DRBsFailedToBeSetupModItem{}
-		for _, item := range msg.DRBsFailedToBeSetupModList {
-			val := item
-			items = append(items, &val)
+		subR := aper.NewReader(bytes.NewReader(ieBuf))
+		switch msgIe.Id.Value {
+		case ies.ProtocolIEID_RRCContainer:
+			tmp := ies.NewOCTETSTRING(nil, aper.Constraint{Lb: 0, Ub: 0}, false)
+			if err = tmp.Decode(subR); err == nil {
+				msg.RRCContainer = tmp.Value
+			}
+		case ies.ProtocolIEID_DRBsToBeSetupModList:
+			tmp := ies.NewSequence[*ies.DRBsToBeSetupModItem](nil, aper.Constraint{Lb: 1, Ub: 64}, false)
+			fn := func() *ies.DRBsToBeSetupModItem { return new(ies.DRBsToBeSetupModItem) }
+			if err = tmp.Decode(subR, fn); err == nil {
+				msg.DRBsToBeSetupModList = []ies.DRBsToBeSetupModItem{}
+				for _, i := range tmp.Value {
+					msg.DRBsToBeSetupModList = append(msg.DRBsToBeSetupModList, *i)
+				}
+			}
+		case ies.ProtocolIEID_SRBsToBeSetupModList:
+			tmp := ies.NewSequence[*ies.SRBsToBeSetupModItem](nil, aper.Constraint{Lb: 1, Ub: 8}, false)
+			fn := func() *ies.SRBsToBeSetupModItem { return new(ies.SRBsToBeSetupModItem) }
+			if err = tmp.Decode(subR, fn); err == nil {
+				msg.SRBsToBeSetupModList = []ies.SRBsToBeSetupModItem{}
+				for _, i := range tmp.Value {
+					msg.SRBsToBeSetupModList = append(msg.SRBsToBeSetupModList, *i)
+				}
+			}
+		case ies.ProtocolIEID_ExecuteDuplication:
+			var tmp ies.ExecuteDuplication
+			if err = tmp.Decode(subR); err == nil {
+				msg.ExecuteDuplication = &tmp
+			}
+		case ies.ProtocolIEID_PC5LinkAMBR:
+			tmp := ies.NewINTEGER(0, aper.Constraint{Lb: 0, Ub: 4000000000000}, false)
+			if err = tmp.Decode(subR); err == nil {
+				msg.PC5LinkAMBR = int64(tmp.Value)
+			}
 		}
-		// Constraint: Lb: 1, Ub: 64
-		seq := ies.NewSequence(items, aper.Constraint{Lb: 1, Ub: 64}, false)
-		list = append(list, ies.F1apMessageIE{
-			Id:          ies.ProtocolIEID{Value: ies.ProtocolIEID_DRBsFailedToBeSetupModList},
-			Criticality: ies.Criticality{Value: ies.Criticality_PresentIgnore},
-			Value:       &seq,
-		})
+		return msgIe, nil
 	}
 
-	// 8. BHChannelsSetupModList (Strict Mandatory)
-	{
-		dummyItem := ies.BHChannelsSetupModItem{
-			BHRLCChannelID: aper.BitString{
-				Bytes:   []byte{0x00, 0x00},
-				NumBits: 16,
-			},
-		}
-		items := []*ies.BHChannelsSetupModItem{&dummyItem}
-		// Constraint: Lb: 1, Ub: 65536
-		seq := ies.NewSequence(items, aper.Constraint{Lb: 1, Ub: 65536}, false)
-		list = append(list, ies.F1apMessageIE{
-			Id:          ies.ProtocolIEID{Value: ies.ProtocolIEID_BHChannelsSetupModList},
-			Criticality: ies.Criticality{Value: ies.Criticality_PresentIgnore},
-			Value:       &seq,
-		})
-	}
-
-	// 9. BHChannelsModifiedList (Strict Mandatory)
-	{
-		dummyItem := ies.BHChannelsModifiedItem{
-			BHRLCChannelID: aper.BitString{
-				Bytes:   []byte{0x00, 0x00},
-				NumBits: 16,
-			},
-		}
-		items := []*ies.BHChannelsModifiedItem{&dummyItem}
-		// Constraint: Lb: 1, Ub: 65536
-		seq := ies.NewSequence(items, aper.Constraint{Lb: 1, Ub: 65536}, false)
-		list = append(list, ies.F1apMessageIE{
-			Id:          ies.ProtocolIEID{Value: ies.ProtocolIEID_BHChannelsModifiedList},
-			Criticality: ies.Criticality{Value: ies.Criticality_PresentIgnore},
-			Value:       &seq,
-		})
-	}
-
-	// 10. RequestedTargetCellGlobalID (Strict Mandatory)
-	targetCGI := msg.RequestedTargetCellGlobalID
-	if targetCGI == nil {
-		targetCGI = &ies.NRCGI{
-			PLMNIdentity: []byte{0x00, 0x00, 0x00},
-			NRCellIdentity: aper.BitString{
-				Bytes:   []byte{0x00, 0x00, 0x00, 0x00, 0x00},
-				NumBits: 36,
-			},
-		}
-	}
-	list = append(list, ies.F1apMessageIE{
-		Id:          ies.ProtocolIEID{Value: ies.ProtocolIEID_RequestedTargetCellGlobalID},
-		Criticality: ies.Criticality{Value: ies.Criticality_PresentReject},
-		Value:       targetCGI,
-	})
-
-	return list
+	_, err = aper.ReadSequenceOf[ies.F1apMessageIE](decodeIEFunc, ieR, &aper.Constraint{Lb: 0, Ub: int64(aper.POW_16 - 1)}, false)
+	return err
 }

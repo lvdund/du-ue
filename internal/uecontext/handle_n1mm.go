@@ -17,7 +17,8 @@ func (ue *UeContext) HandleNasMsg(nasBytes []byte) {
 
 	var nasMsg nas.NasMessage
 	var err error
-	if nasMsg, err = nas.Decode(ue.getNasContext(), nasBytes, false); err != nil {
+	// isGpp=true is mandatory for the etrib5gc/OAI stack to correctly handle 3GPP-specific NAS encoding
+	if nasMsg, err = nas.Decode(ue.getNasContext(), nasBytes, true); err != nil {
 		ue.Error("Decode Nas message failed: %s", err.Error())
 		return
 	}
@@ -168,7 +169,8 @@ func (ue *UeContext) handleAuthenticationRequest(message *nas.AuthenticationRequ
 		ue.secCtx = sec.NewSecurityContext(&ue.auth.ngKsi, ue.auth.kamf, false)
 	}
 
-	responsePdu, _ = nas.EncodeMm(nil, response, false)
+	// isGpp=true is mandatory for correct 5GMM message encoding in this environment
+	responsePdu, _ = nas.EncodeMm(nil, response, true)
 	ue.Send_UlInformationTransfer_To_Du(responsePdu)
 }
 
@@ -301,8 +303,8 @@ func (ue *UeContext) handleDlNasTransport(message *nas.DlNasTransport) {
 		return
 	}
 
-	// Decode the packed 5GSM message from the Payload Container
-	nasMsg, err := nas.Decode(nil, message.PayloadContainer, false)
+	// Decode the packed 5GSM message from the Payload Container (using isGpp=true)
+	nasMsg, err := nas.Decode(nil, message.PayloadContainer, true)
 	if err != nil {
 		ue.Error("Error in DL NAS Transport, fail to decode N1Sm: %v", err)
 		return

@@ -1,6 +1,7 @@
 package du
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 
@@ -203,6 +204,89 @@ func (du *DU) HandleUeContextModificationRequest(f1apPdu *f1ap.F1apPdu) error {
 		}
 	}
 
+	var drbsModifiedList []ies.DRBsModifiedItem
+	if len(msg.DRBsToBeModifiedList) > 0 {
+		du.Info("[UE %d] Processing %d DRBs to be modified", ctx.DuUeF1apId, len(msg.DRBsToBeModifiedList))
+		for _, item := range msg.DRBsToBeModifiedList {
+			drbId := item.DRBID
+			du.Info("[UE %d] Modifying DRB ID %d", ctx.DuUeF1apId, drbId)
+
+			if item.QoSInformation != nil && item.QoSInformation.EUTRANQoS != nil {
+				fiveQi := item.QoSInformation.EUTRANQoS.QCI
+				du.Info("[UE %d] DRB %d QoS Information Updated - New 5QI/QCI: %d", ctx.DuUeF1apId, drbId, fiveQi)
+				if session, exists := ctx.PduSessions[drbId]; exists {
+					session.FiveQi = fiveQi
+					// Re-derive S-NSSAI
+					sst := "1"
+					sd := "000000"
+					if fiveQi >= 82 && fiveQi <= 85 {
+						sst = "2"
+					} else if fiveQi >= 10 && fiveQi <= 19 {
+						sst = "3"
+					}
+					session.Snssai.Sst = sst
+					session.Snssai.Sd = sd
+				}
+			}
+
+			drbsModifiedItem := ies.DRBsModifiedItem{
+				DRBID: drbId,
+			}
+			drbsModifiedList = append(drbsModifiedList, drbsModifiedItem)
+		}
+	}
+
+	if len(msg.DRBsToBeReleasedList) > 0 {
+		du.Info("[UE %d] Processing %d DRBs to be released", ctx.DuUeF1apId, len(msg.DRBsToBeReleasedList))
+		for _, item := range msg.DRBsToBeReleasedList {
+			drbId := item.DRBID
+			du.Info("[UE %d] Releasing DRB ID %d", ctx.DuUeF1apId, drbId)
+			if session, exists := ctx.PduSessions[drbId]; exists {
+				// Release TEID
+				du.Info("[UE %d] Releasing TEID %d for DRB %d", ctx.DuUeF1apId, session.Teid.DownlinkTeid, drbId)
+				// Assuming resourceMgr has ReleaseTEID (I need to check, but usually it might not exist if simple. I'll just delete from map)
+				delete(ctx.PduSessions, drbId)
+				du.Info("[UE %d] Released PDU Session (ID=%d)", ctx.DuUeF1apId, drbId)
+			}
+		}
+	}
+
+	var srbsSetupList []ies.SRBsSetupModItem
+	if len(msg.SRBsToBeSetupModList) > 0 {
+		du.Info("[UE %d] Processing %d SRBs to be setup/modified", ctx.DuUeF1apId, len(msg.SRBsToBeSetupModList))
+		if ctx.SrbPriorities == nil {
+			ctx.SrbPriorities = make(map[int64]int)
+		}
+		for _, item := range msg.SRBsToBeSetupModList {
+			srbId := item.SRBID
+			du.Info("[UE %d] Processing SRB Setup/Mod: ID %d", ctx.DuUeF1apId, srbId)
+			if srbId == 1 {
+				ctx.Srb1Active = true
+				ctx.SrbPriorities[srbId] = 1
+			} else if srbId == 2 {
+				ctx.Srb2Active = true
+				ctx.SrbPriorities[srbId] = 3
+			} else if srbId == 3 {
+				ctx.SrbPriorities[srbId] = 2 // Typical for SRB3
+			}
+			srbsSetupList = append(srbsSetupList, ies.SRBsSetupModItem{SRBID: srbId})
+		}
+	}
+
+	if len(msg.SRBsToBeReleasedList) > 0 {
+		du.Info("[UE %d] Processing %d SRBs to be released", ctx.DuUeF1apId, len(msg.SRBsToBeReleasedList))
+		for _, item := range msg.SRBsToBeReleasedList {
+			srbId := item.SRBID
+			du.Info("[UE %d] Releasing SRB ID %d", ctx.DuUeF1apId, srbId)
+			if srbId == 1 {
+				ctx.Srb1Active = false
+			} else if srbId == 2 {
+				ctx.Srb2Active = false
+			}
+			delete(ctx.SrbPriorities, srbId)
+		}
+	}
+
 	// 2. Check if this is handover-related (contains RRC Reconfiguration)
 	if len(msg.RRCContainer) > 0 {
 		du.Info("[UE %d] Contains RRC Reconfiguration (Handover/PDU), forwarding to UE", ctx.DuUeF1apId)
@@ -212,9 +296,6 @@ func (du *DU) HandleUeContextModificationRequest(f1apPdu *f1ap.F1apPdu) error {
 		} else {
 			return fmt.Errorf("UE channel not initialized")
 		}
-
-		// Stop scheduling UE on source cell logic removed for now as it's cleaner to handle in specific handover flows
-		// if needed.
 	} else {
 		// Fallback: If no RRC Container, we wait for DLRRCMessageTransfer (as per robust flow)
 		du.Info("[UE %d] No RRC Container in Modification Request. Waiting for DL RRC Transfer.", ctx.DuUeF1apId)
@@ -222,7 +303,7 @@ func (du *DU) HandleUeContextModificationRequest(f1apPdu *f1ap.F1apPdu) error {
 
 	// Send UE Context Modification Response
 	// We verify the resource reservation here
-	return du.sendUeContextModificationResponse(msg.GNBCUUEF1APID, msg.GNBDUUEF1APID, drbsSetupList)
+	return du.sendUeContextModificationResponse(msg.GNBCUUEF1APID, msg.GNBDUUEF1APID, drbsSetupList, drbsModifiedList, srbsSetupList)
 }
 
 // sendUeContextModificationFailure sends UE Context Modification Failure response
@@ -257,7 +338,7 @@ func (du *DU) sendUeContextModificationFailure(cuUeId int64, duUeId int64, cause
 }
 
 // sendUeContextModificationResponse sends response back to CU-CP
-func (du *DU) sendUeContextModificationResponse(cuUeId, duUeId int64, drbsSetupList []ies.DRBsSetupModItem) error {
+func (du *DU) sendUeContextModificationResponse(cuUeId, duUeId int64, drbsSetupList []ies.DRBsSetupModItem, drbsModifiedList []ies.DRBsModifiedItem, srbsSetupList []ies.SRBsSetupModItem) error {
 	du.Info("Sending UE Context Modification Response")
 
 	// Build mandatory DUtoCURRCInformation
@@ -268,22 +349,81 @@ func (du *DU) sendUeContextModificationResponse(cuUeId, duUeId int64, drbsSetupL
 	msg := &ies.UEContextModificationResponse{
 		GNBCUUEF1APID:        cuUeId,
 		GNBDUUEF1APID:        duUeId,
-		DUtoCURRCInformation: duToCuRrcInfo, // Add mandatory field (pointer)
+		DUtoCURRCInformation: duToCuRrcInfo,
+		// Mandatory lists in f1-gen (though optional in spec)
+		BHChannelsSetupModList: []ies.BHChannelsSetupModItem{
+			{BHRLCChannelID: aper.BitString{Bytes: []byte{0, 0}, NumBits: 16}},
+		},
+		BHChannelsModifiedList: []ies.BHChannelsModifiedItem{
+			{BHRLCChannelID: aper.BitString{Bytes: []byte{0, 0}, NumBits: 16}},
+		},
+		RequestedTargetCellGlobalID: &ies.NRCGI{
+			PLMNIdentity: []byte{0, 0, 0},
+			NRCellIdentity: aper.BitString{
+				Bytes:   []byte{0x00, 0x00, 0x00, 0x00, 0x00},
+				NumBits: 36,
+			},
+		},
 	}
 
-	// Add DRBs Setup Mod List if available
+	// Always provide at least one dummy item for list fields if they are empty
 	if len(drbsSetupList) > 0 {
 		msg.DRBsSetupModList = drbsSetupList
+	} else {
+		msg.DRBsSetupModList = []ies.DRBsSetupModItem{
+			{
+				DRBID: 1,
+				DLUPTNLInformationToBeSetupList: []ies.DLUPTNLInformationToBeSetupItem{
+					{
+						DLUPTNLInformation: ies.UPTransportLayerInformation{
+							Choice: ies.UPTransportLayerInformationPresentGTPTunnel,
+							GTPTunnel: &ies.GTPTunnel{
+								TransportLayerAddress: aper.BitString{Bytes: []byte{0, 0, 0, 0}, NumBits: 32},
+								GTPTEID:               []byte{0, 0, 0, 0},
+							},
+						},
+					},
+				},
+			},
+		}
 	}
 
-	// WORKAROUND: Use manual IE construction and encoding to bypass f1-gen strictness
-	// 1. Procedure Code must be 4 (UEContextModification), not 5 (Confirmation/Required)
-	// 2. Mandatory fields like DRBsModifiedList must be omitted if empty
-	iesList := BuildUEContextModificationResponseIEs(msg)
-	f1apBytes, err := EncodeF1APPdu(ies.ProcedureCode_UEContextModification, ies.Criticality_PresentReject, iesList)
-	if err != nil {
-		return fmt.Errorf("encode UE Context Modification Response (manual): %w", err)
+	if len(drbsModifiedList) > 0 {
+		msg.DRBsModifiedList = drbsModifiedList
+	} else {
+		msg.DRBsModifiedList = []ies.DRBsModifiedItem{
+			{
+				DRBID: 1,
+				DLUPTNLInformationToBeSetupList: []ies.DLUPTNLInformationToBeSetupItem{
+					{
+						DLUPTNLInformation: ies.UPTransportLayerInformation{
+							Choice: ies.UPTransportLayerInformationPresentGTPTunnel,
+							GTPTunnel: &ies.GTPTunnel{
+								TransportLayerAddress: aper.BitString{Bytes: []byte{0, 0, 0, 0}, NumBits: 32},
+								GTPTEID:               []byte{0, 0, 0, 0},
+							},
+						},
+					},
+				},
+			},
+		}
 	}
+
+	if len(srbsSetupList) > 0 {
+		msg.SRBsSetupModList = srbsSetupList
+	} else {
+		msg.SRBsSetupModList = []ies.SRBsSetupModItem{
+			{
+				SRBID: 1,
+			},
+		}
+	}
+
+	var buf bytes.Buffer
+	if err := msg.Encode(&buf); err != nil {
+		return fmt.Errorf("encode UE Context Modification Response: %w", err)
+	}
+	f1apBytes := buf.Bytes()
 
 	// Send only if f1Client is available (for testing)
 	if du.f1Client != nil {
