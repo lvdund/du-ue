@@ -37,6 +37,9 @@ ue:
           delay: "5s"
           params:
             dnn: "internet"
+        
+        - type: "handover"
+          delay: "20s"
 
         # Commented out: PDU sessions won't complete without CU-CP fix
         # (CU-CP needs to include UEContextRequest in NGAP InitialUEMessage)
@@ -44,4 +47,7 @@ ue:
         #   delay: "30s"
 
         - type: "deregistration"
-          delay: "10s"
+
+          delay: "32s"
+        
+

@@ -11,6 +11,7 @@ import (
 
 type Config struct {
 	DU      DUConfig      `yaml:"du"`
+	DUs     []DUConfig    `yaml:"dus"`     // Multiple DUs for handover simulation
 	UE      UEConfig      `yaml:"ue"`
 	Logging LoggingConfig `yaml:"logging"`
 }
@@ -44,14 +45,15 @@ type CellConfig struct {
 
 type UEConfig struct {
 	NUE        int          `yaml:"nue"`
-	MSIN       string       `yaml:"msin"` // Base MSIN, will increment for multiple UEs
-	Key        string       `yaml:"key"`  // K in hex
-	OP         string       `yaml:"op"`   // OP in hex (optional)
-	OPC        string       `yaml:"opc"`  // OPC in hex (optional)
-	AMF        string       `yaml:"amf"`  // AMF in hex
+	MSIN       string       `yaml:"msin"`        // Base MSIN, will increment for multiple UEs
+	Key        string       `yaml:"key"`         // K in hex
+	OP         string       `yaml:"op"`          // OP in hex (optional)
+	OPC        string       `yaml:"opc"`         // OPC in hex (optional)
+	AMF        string       `yaml:"amf"`         // AMF in hex
 	PLMN       PLMNConfig   `yaml:"plmn"`
-	Scenarios  []UEScenario `yaml:"scenarios"` // List of scenarios to execute
+	Scenarios  []UEScenario `yaml:"scenarios"`   // List of scenarios to execute
 	DefaultDnn string       `yaml:"default_dnn"`
+	DUID       string       `yaml:"duid"`        // ID of the initial DU to connect to (e.g. "du-0")
 }
 
 // UEScenario defines a sequence of events for UE(s)
@@ -141,6 +143,16 @@ func Load(path string) (*Config, error) {
 				cfg.UE.OPC = ""
 			}
 		}
+	}
+
+	// If DUs list is empty but single DU is configured, use it as default
+	if len(cfg.DUs) == 0 && cfg.DU.Name != "" {
+		cfg.DUs = []DUConfig{cfg.DU}
+	}
+
+	// Default DUID to first DU if not specified
+	if cfg.UE.DUID == "" && len(cfg.DUs) > 0 {
+		cfg.UE.DUID = fmt.Sprintf("du-%d", cfg.DUs[0].ID)
 	}
 
 	if err := cfg.Validate(); err != nil {

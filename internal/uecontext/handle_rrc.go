@@ -46,7 +46,7 @@ func (ue *UeContext) handleDLDCCHMessage(msg *rrcies.DL_DCCH_Message) error {
 	case rrcies.DL_DCCH_MessageType_C1_Choice_RrcReconfiguration:
 		// Extract NAS from RRCReconfiguration
 		if c1.RrcReconfiguration != nil {
-			return ue.handleRRCReconfiguration(c1.RrcReconfiguration)
+			return ue.HandleRrcReconfiguration(c1.RrcReconfiguration)
 		}
 
 	case rrcies.DL_DCCH_MessageType_C1_Choice_SecurityModeCommand:
@@ -86,44 +86,6 @@ func (ue *UeContext) handleDLInformationTransfer(msg *rrcies.DLInformationTransf
 	return nil
 }
 
-// handleRRCReconfiguration handles RRCReconfiguration message
-// Note: RRCReconfiguration typically doesn't contain NAS messages directly
-// NAS messages (like Registration Accept) usually come via DLInformationTransfer
-func (ue *UeContext) handleRRCReconfiguration(msg *rrcies.RRCReconfiguration) error {
-	ue.Info("Received RRCReconfiguration")
-
-	// RRCReconfiguration is mainly for DRB/SRB configuration
-	// Check if there's any NAS in NonCriticalExtension (unlikely but possible)
-	if msg.CriticalExtensions.Choice == rrcies.RRCReconfiguration_CriticalExtensions_Choice_RrcReconfiguration {
-		ies := msg.CriticalExtensions.RrcReconfiguration
-		if ies != nil {
-			ue.Info("RRCReconfiguration IEs received")
-			// TODO: Handle radio bearer config, measurement config, etc. if needed
-		}
-	}
-
-	ies := msg.CriticalExtensions.RrcReconfiguration.NonCriticalExtension
-	if ies == nil || len(ies.DedicatedNAS_MessageList) == 0 {
-		ue.Warn("DLInformationTransfer has no NAS message")
-		return nil
-	}
-
-	nasBytes := ies.DedicatedNAS_MessageList[0].Value
-	if len(nasBytes) == 0 {
-		ue.Warn("DLInformationTransfer has no NAS message")
-		return nil
-	}
-	ue.Info("Extracted NAS message from DLInformationTransfer, length: %d", len(nasBytes))
-
-	// Forward to NAS handler: want Registration Accept NAS
-	ue.HandleNasMsg(nasBytes)
-
-	// TODO: Send RRCReconfigurationComplete response
-	// For now, we just log the reception
-
-	return nil
-}
-
 // sendUlInformationTransfer wraps NAS PDU in RRC UL Information Transfer
 func (ue *UeContext) sendUlInformationTransfer(nasPdu []byte) error {
 	ue.Info("Wrapping NAS PDU in UL Information Transfer, NAS length: %d", len(nasPdu))
@@ -159,7 +121,10 @@ func (ue *UeContext) sendUlInformationTransfer(nasPdu []byte) error {
 	}
 	
 	// Send to DU
-	ue.SendToDuChannel <- encoded
+	if err := ue.sendToActiveDU(encoded); err != nil {
+    ue.Error("Failed to send UL Information Transfer: %v", err)
+    return err
+}
 	ue.Info("UL Information Transfer sent successfully, RRC length: %d", len(encoded))
 	return nil
 }

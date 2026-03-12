@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
-	"strings"
 
 	"du_ue/internal/common/logger"
 	"du_ue/pkg/config"
@@ -37,34 +37,49 @@ func NewUEManager(ctx context.Context, cfg *config.Config, duSim interface{}) *U
 	}
 }
 
-func (mgr *UEManager) CreateUE(conf config.UEConfig) (*UeContext, error) {
+// DUChannels holds the channel pair the DU simulator needs to talk to a UE.
+type DUChannels struct {
+	ToUE   chan []byte // DU writes inbound RRC here
+	FromUE chan []byte // DU reads outbound RRC from here
+	Ready  chan bool   // DU signals readiness here
+}
+
+// CreateUE creates a UeContext, connects it to conf.DUID, and returns the
+// DUChannels so the DU side can wire up immediately.
+func (mgr *UEManager) CreateUE(conf config.UEConfig) (*UeContext, *DUChannels, error) {
 	mgr.mutex.Lock()
 	defer mgr.mutex.Unlock()
 
 	if _, exists := mgr.ues[conf.MSIN]; exists {
-		return nil, fmt.Errorf("UE with MSIN %s already exists", conf.MSIN)
+		return nil, nil, fmt.Errorf("UE with MSIN %s already exists", conf.MSIN)
 	}
 
+	// pciToDUID removed — UE no longer resolves DU ID from PCI
 	ue := CreateUe(conf, mgr.ctx)
 	if ue == nil {
-		return nil, fmt.Errorf("failed to create UE context")
+		return nil, nil, fmt.Errorf("failed to create UE context")
 	}
 
-	ue.ReceiveFromDuChannel = make(chan []byte, 100)
-	ue.SendToDuChannel = make(chan []byte, 100)
-	ue.IsReadyConn = make(chan bool, 1)
+	duID := conf.DUID
+	if duID == "" {
+		duID = "du-0"
+	}
 
-	// Start goroutines for RRC handler and event processor
-	go ue.handleRrcFromDU()
+	conn, err := ue.ConnectToDU(duID)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to connect UE to DU %s: %w", duID, err)
+	}
+
 	go ue.processEvents()
 
 	mgr.ues[conf.MSIN] = ue
-	mgr.Info("Created and registered UE: MSIN=%s, SUPI=%s", conf.MSIN, ue.supi)
+	mgr.Info("Created and registered UE: MSIN=%s, SUPI=%s, DU=%s", conf.MSIN, ue.supi, duID)
 
-	return ue, nil
+	return ue, connToChannels(conn), nil
 }
 
-func (mgr *UEManager) CreateAllUEs() error {
+// CreateAllUEs creates N UEs with auto-incremented MSINs.
+func (mgr *UEManager) CreateAllUEs() (map[string]*DUChannels, error) {
 	nue := mgr.config.UE.NUE
 	baseMSIN := mgr.config.UE.MSIN
 
@@ -72,29 +87,31 @@ func (mgr *UEManager) CreateAllUEs() error {
 
 	baseMSINInt, err := strconv.ParseUint(baseMSIN, 10, 64)
 	if err != nil {
-		return fmt.Errorf("invalid base MSIN: %w", err)
+		return nil, fmt.Errorf("invalid base MSIN: %w", err)
 	}
 
+	allChannels := make(map[string]*DUChannels, nue)
+
 	for i := 0; i < nue; i++ {
-		// Auto-increment MSIN for each UE
 		msin := fmt.Sprintf("%010d", baseMSINInt+uint64(i))
 
 		ueConf := mgr.config.UE
 		ueConf.MSIN = msin
 
-		ue, err := mgr.CreateUE(ueConf)
+		ue, ch, err := mgr.CreateUE(ueConf)
 		if err != nil {
-			return fmt.Errorf("failed to create UE %d (MSIN %s): %w", i, msin, err)
+			return nil, fmt.Errorf("failed to create UE %d (MSIN %s): %w", i, msin, err)
 		}
 
-		mgr.Info("Created UE %d/%d: MSIN=%s", i+1, nue, msin)
+		allChannels[msin] = ch
+		mgr.Info("Created UE %d/%d: MSIN=%s DU=%s", i+1, nue, msin, ue.GetActiveDUID())
 
 		if err := mgr.applyScenarios(ue, i, nue); err != nil {
 			mgr.Error("Failed to apply scenarios to UE %s: %v", msin, err)
 		}
 	}
 
-	return nil
+	return allChannels, nil
 }
 
 func (mgr *UEManager) applyScenarios(ue *UeContext, ueIndex int, totalUEs int) error {
@@ -115,10 +132,6 @@ func (mgr *UEManager) applyScenarios(ue *UeContext, ueIndex int, totalUEs int) e
 
 			eventType := EventType(strings.ToUpper(strings.TrimSpace(eventEntry.Type)))
 
-			if err != nil {
-				return fmt.Errorf("invalid event type: %w", err)
-			}
-
 			eventInfo := EventInfo{
 				EventType: eventType,
 				Delay:     delay,
@@ -126,8 +139,7 @@ func (mgr *UEManager) applyScenarios(ue *UeContext, ueIndex int, totalUEs int) e
 			}
 
 			ue.TriggerEvents(eventInfo)
-			mgr.Info("Scheduled event '%s' for UE %s with delay %v", 
-				eventEntry.Type, msin, delay)
+			mgr.Info("Scheduled event '%s' for UE %s with delay %v", eventEntry.Type, msin, delay)
 		}
 	}
 
@@ -142,7 +154,6 @@ func (mgr *UEManager) GetUE(msin string) (*UeContext, error) {
 	if !exists {
 		return nil, fmt.Errorf("UE with MSIN %s not found", msin)
 	}
-
 	return ue, nil
 }
 
@@ -154,7 +165,6 @@ func (mgr *UEManager) GetAllUEs() []*UeContext {
 	for _, ue := range mgr.ues {
 		ues = append(ues, ue)
 	}
-
 	return ues
 }
 
@@ -168,19 +178,7 @@ func (mgr *UEManager) RemoveUE(msin string) error {
 	}
 
 	ue.Terminate()
-	
-	// Wait for goroutines to finish before closing channels
-	time.Sleep(100 * time.Millisecond)
-
-	close(ue.ReceiveFromDuChannel)
-	close(ue.SendToDuChannel)
-	close(ue.IsReadyConn)
-	if ue.eventQueue != nil {
-		close(ue.eventQueue.events)
-	}
-
 	delete(mgr.ues, msin)
-
 	mgr.Info("Removed UE: MSIN=%s", msin)
 	return nil
 }
@@ -191,25 +189,12 @@ func (mgr *UEManager) Shutdown() {
 
 	mgr.Info("Shutting down UE Manager, terminating %d UEs", len(mgr.ues))
 
-	// Signal all UEs to terminate
 	for msin, ue := range mgr.ues {
 		ue.Terminate()
 		mgr.Info("Terminated UE: MSIN=%s", msin)
 	}
 
-	// Wait for goroutines to finish
 	time.Sleep(200 * time.Millisecond)
-
-	// Close all channels
-	for _, ue := range mgr.ues {
-		close(ue.ReceiveFromDuChannel)
-		close(ue.SendToDuChannel)
-		close(ue.IsReadyConn)
-		if ue.eventQueue != nil {
-			close(ue.eventQueue.events)
-		}
-	}
-
 	mgr.ues = make(map[string]*UeContext)
 	mgr.cancel()
 }
@@ -230,8 +215,51 @@ func (mgr *UEManager) GetUEsByState(state uint8) []*UeContext {
 			result = append(result, ue)
 		}
 	}
-
 	return result
+}
+
+// HandoverUEToDU is called by DU target after it receives UE Context Setup Request
+// from CU-CP (F1AP). It creates a new DUConnection, injects it into the UE,
+// and returns the channels so DU target can wire up its side.
+//
+// Flow:
+//   CU-CP → UE Context Setup Request → DU target
+//   DU target → mgr.HandoverUEToDU(msin, targetDUID)  ← this function
+//   UE.performRandomAccess unblocks, switches to new conn
+//   UE → RRC Reconfiguration Complete → DU target
+func (mgr *UEManager) HandoverUEToDU(msin, targetDUID string) (*DUChannels, error) {
+	ue, err := mgr.GetUE(msin)
+	if err != nil {
+		return nil, err
+	}
+
+	oldDUID := ue.GetActiveDUID()
+	if oldDUID == targetDUID {
+		return nil, fmt.Errorf("UE %s is already on DU %s", msin, targetDUID)
+	}
+
+	// Create new connection for target DU
+	conn := newDUConnection(targetDUID, mgr.ctx)
+
+	// Inject into UE — unblocks WaitForHandoverConnection in performRandomAccess
+	ue.InjectHandoverConnection(conn)
+
+	mgr.Info("Handover initiated: UE %s  %s → %s", msin, oldDUID, targetDUID)
+	return connToChannels(conn), nil
+}
+
+// GetDUChannels returns the live channel pair for a UE's current DU connection.
+func (mgr *UEManager) GetDUChannels(msin string) (*DUChannels, error) {
+	ue, err := mgr.GetUE(msin)
+	if err != nil {
+		return nil, err
+	}
+
+	conn := ue.GetActiveDUConn()
+	if conn == nil {
+		return nil, fmt.Errorf("UE %s has no active DU connection", msin)
+	}
+	return connToChannels(conn), nil
 }
 
 func (mgr *UEManager) TriggerEventForAll(eventType EventType, delay time.Duration, params map[string]interface{}) {
@@ -247,9 +275,7 @@ func (mgr *UEManager) TriggerEventForAll(eventType EventType, delay time.Duratio
 	for _, ue := range mgr.ues {
 		ue.TriggerEvents(eventInfo)
 	}
-
 	mgr.Info("Triggered event %s for all %d UEs", eventType, len(mgr.ues))
-
 }
 
 func (mgr *UEManager) TriggerEventForUE(msin string, eventType EventType, delay time.Duration, params map[string]interface{}) error {
@@ -266,7 +292,13 @@ func (mgr *UEManager) TriggerEventForUE(msin string, eventType EventType, delay 
 
 	ue.TriggerEvents(eventInfo)
 	mgr.Info("Triggered event %s for UE %s", eventType, msin)
-
-
 	return nil
+}
+
+func connToChannels(conn *DUConnection) *DUChannels {
+	return &DUChannels{
+		ToUE:   conn.ReceiveFromDu,
+		FromUE: conn.SendToDu,
+		Ready:  conn.IsReady,
+	}
 }

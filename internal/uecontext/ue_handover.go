@@ -1,7 +1,7 @@
 package uecontext
 
 import (
-	"fmt"
+
 	"time"
 
 	"github.com/lvdund/rrc"
@@ -37,15 +37,13 @@ func (ue *UeContext) initMeasurement() {
 func (ue *UeContext) TriggerMeasurement() error {
 	ue.Info("Starting RRC Measurement")
 
-	// Simulate measurement values
-	servingRSRP := int32(-80) // dBm
-	targetRSRP := int32(-75)  // dBm (better than serving)
-	targetRSRQ := int32(-10)  // dB
+	servingRSRP := int32(-80)
+	targetRSRP := int32(-75)
+	targetRSRQ := int32(-10)
 
 	ue.Info("Measurement: Serving RSRP=%d dBm, Target RSRP=%d dBm", servingRSRP, targetRSRP)
 
-	// Check A3 event: Target better than Serving + offset
-	offset := int32(3) // 3 dB
+	offset := int32(3)
 	if targetRSRP > servingRSRP+offset {
 		ue.Info("A3 Event triggered: Target cell is better")
 		return ue.sendMeasurementReport(servingRSRP, targetRSRP, targetRSRQ)
@@ -58,16 +56,14 @@ func (ue *UeContext) TriggerMeasurement() error {
 func (ue *UeContext) sendMeasurementReport(servingRSRP, targetRSRP, targetRSRQ int32) error {
 	ue.Info("Sending RRC Measurement Report")
 
-	// Convert values to proper types
-	rsrpServing := rrcies.RSRP_Range{Value: uint64(servingRSRP + 156)} // RSRP_Range: 0..127, mapping from -156..-29 dBm
+	rsrpServing := rrcies.RSRP_Range{Value: uint64(servingRSRP + 156)}
 	rsrpTarget := rrcies.RSRP_Range{Value: uint64(targetRSRP + 156)}
-	rsrqTarget := rrcies.RSRQ_Range{Value: uint64(targetRSRQ + 87)} // RSRQ_Range: 0..127, mapping from -87..-30 dB
+	rsrqTarget := rrcies.RSRQ_Range{Value: uint64(targetRSRQ + 87)}
 
 	measId := rrcies.MeasId{Value: 1}
 	servCellId := rrcies.ServCellIndex{Value: 0}
 	physCellId := rrcies.PhysCellId{Value: 2} // Target cell PCI
 
-	// Create MeasResult for serving cell
 	servingMeasResult := &rrcies.MeasResultNR_measResult{
 		CellResults: &rrcies.MeasResultNR_measResult_cellResults{
 			ResultsSSB_Cell: &rrcies.MeasQuantityResults{
@@ -77,7 +73,6 @@ func (ue *UeContext) sendMeasurementReport(servingRSRP, targetRSRP, targetRSRQ i
 		},
 	}
 
-	// Create MeasResult for neighbor/target cell
 	targetMeasResult := &rrcies.MeasResultNR_measResult{
 		CellResults: &rrcies.MeasResultNR_measResult_cellResults{
 			ResultsSSB_Cell: &rrcies.MeasQuantityResults{
@@ -87,7 +82,6 @@ func (ue *UeContext) sendMeasurementReport(servingRSRP, targetRSRP, targetRSRQ i
 		},
 	}
 
-	// Create Measurement Report message
 	measReport := &rrcies.MeasurementReport{
 		CriticalExtensions: rrcies.MeasurementReport_CriticalExtensions{
 			Choice: rrcies.MeasurementReport_CriticalExtensions_Choice_MeasurementReport,
@@ -120,7 +114,6 @@ func (ue *UeContext) sendMeasurementReport(servingRSRP, targetRSRP, targetRSRQ i
 		},
 	}
 
-	// Wrap in UL-DCCH-Message
 	ulDcchMsg := rrcies.UL_DCCH_Message{
 		Message: rrcies.UL_DCCH_MessageType{
 			Choice: rrcies.UL_DCCH_MessageType_Choice_C1,
@@ -137,47 +130,33 @@ func (ue *UeContext) sendMeasurementReport(servingRSRP, targetRSRP, targetRSRQ i
 		return err
 	}
 
-	// Send to DU
-	ue.SendToDuChannel <- encoded
+	// Send via active DU connection (DU source)
+	if err := ue.sendToActiveDU(encoded); err != nil {
+		ue.Error("Failed to send Measurement Report: %v", err)
+		return err
+	}
+
 	ue.Info("Measurement Report sent successfully")
 	return nil
 }
 
 // HandleRrcReconfiguration handles RRC Reconfiguration message (for handover)
-func (ue *UeContext) HandleRrcReconfiguration(rrcBytes []byte) error {
+func (ue *UeContext) HandleRrcReconfiguration(rrcReconfig *rrcies.RRCReconfiguration) error {
 	ue.Info("Handling RRC Reconfiguration (Handover Command)")
 
-	// Decode RRC Reconfiguration
-	var dlDcchMsg rrcies.DL_DCCH_Message
-	if err := rrc.Decode(rrcBytes, &dlDcchMsg); err != nil {
-		ue.Error("Failed to decode RRC Reconfiguration: %v", err)
-		return err
-	}
-
-	// Extract RRC Reconfiguration
-	if dlDcchMsg.Message.C1 == nil ||
-		dlDcchMsg.Message.C1.RrcReconfiguration == nil {
-		ue.Error("Invalid RRC Reconfiguration message")
-		return fmt.Errorf("invalid message structure")
-	}
-
-	rrcReconfig := dlDcchMsg.Message.C1.RrcReconfiguration
 	transactionId := rrcReconfig.Rrc_TransactionIdentifier.Value
 	ue.Info("RRC Reconfiguration received, TransactionId=%d", transactionId)
 
-	// Check if this is a handover command by examining ReconfigurationWithSync
 	isHandover := false
-	
+
 	if rrcReconfig.CriticalExtensions.RrcReconfiguration != nil &&
 		rrcReconfig.CriticalExtensions.RrcReconfiguration.SecondaryCellGroup != nil {
-		
-		// Decode SecondaryCellGroup to check for ReconfigurationWithSync
+
 		var cellGroupConfig rrcies.CellGroupConfig
 		if err := rrc.Decode(*rrcReconfig.CriticalExtensions.RrcReconfiguration.SecondaryCellGroup, &cellGroupConfig); err != nil {
 			ue.Error("Failed to decode SecondaryCellGroup: %v", err)
 		} else {
-			// Check if SpCellConfig contains ReconfigurationWithSync
-			if cellGroupConfig.SpCellConfig != nil && 
+			if cellGroupConfig.SpCellConfig != nil &&
 				cellGroupConfig.SpCellConfig.ReconfigurationWithSync != nil {
 				isHandover = true
 				ue.Info("ReconfigurationWithSync detected - this is a handover command")
@@ -186,46 +165,71 @@ func (ue *UeContext) HandleRrcReconfiguration(rrcBytes []byte) error {
 	}
 
 	if isHandover {
-		ue.Info("Handover to target cell, new C-RNTI will be assigned")
-		// Simulate Random Access procedure to target cell
+		ue.Info("Handover command received, waiting for DU target to be ready")
+		// performRandomAccess will block on WaitForHandoverConnection()
+		// until DU target calls mgr.HandoverUEToDU(msin, targetDUID) after
+		// receiving UE Context Setup Request from CU-CP (F1AP).
 		go ue.performRandomAccess(transactionId)
 	} else {
 		ue.Info("RRC Reconfiguration completed (not a handover)")
-		// For non-handover case, send Complete immediately
 		go ue.sendRrcReconfigurationComplete(transactionId)
 	}
 
 	return nil
 }
 
-// performRandomAccess simulates Random Access procedure with target DU
+// performRandomAccess simulates Random Access procedure to target cell.
+//
+// Correct 5G protocol flow:
+//   1. CU-CP sends UE Context Setup Request to DU target (F1AP)
+//   2. DU target calls mgr.HandoverUEToDU(msin, targetDUID) → injects new DUConnection
+//   3. This function unblocks, switches active connection to DU target
+//   4. Sends RRC Reconfiguration Complete on the NEW connection (DU target)
+//
+// UE does NOT know the target DU ID — it only receives the connection
+// that was prepared by DU target and injected via InjectHandoverConnection.
 func (ue *UeContext) performRandomAccess(transactionId uint64) {
 	ue.Info("Performing Random Access to Target Cell")
 
-	// Simulate Msg1 (RACH Preamble) transmission
+	// Simulate Msg1 (RACH Preamble)
 	ue.Info("Sending Msg1 (RACH Preamble)")
 	time.Sleep(10 * time.Millisecond)
 
-	// Simulate Msg2 (RAR) reception
-	ue.Info("Received Msg2 (Random Access Response)")
+	// Block here until DU target injects the new connection.
+	// This unblocks when DU target receives UE Context Setup Request from CU-CP
+	// and calls mgr.HandoverUEToDU(msin, targetDUID).
+	ue.Info("Waiting for DU target to be ready (UE Context Setup)")
+	newConn, err := ue.WaitForHandoverConnection()
+	if err != nil {
+		ue.Error("Handover aborted: %v", err)
+		return
+	}
+
+	// Simulate Msg2 (RAR) reception from target DU
+	ue.Info("Received Msg2 (Random Access Response) from DU target: %s", newConn.duID)
 	time.Sleep(10 * time.Millisecond)
 
-	// Send RRC Reconfiguration Complete (Msg3)
+	// Switch active connection to DU target — closes DU source connection
+	ue.SwitchActiveDU(newConn)
+	ue.Info("Switched active connection to DU target: %s", newConn.duID)
+
+	// Send RRC Reconfiguration Complete on the NEW connection (Msg3 to DU target)
 	if err := ue.sendRrcReconfigurationComplete(transactionId); err != nil {
 		ue.Error("Failed to send RRC Reconfiguration Complete: %v", err)
 		return
 	}
 
-	ue.Info("Handover completed successfully")
+	ue.Info("Handover completed successfully, now on DU: %s", newConn.duID)
 }
 
-// sendRrcReconfigurationComplete sends RRC Reconfiguration Complete
+// sendRrcReconfigurationComplete sends RRC Reconfiguration Complete on the active connection.
+// After handover, active connection is already switched to DU target.
 func (ue *UeContext) sendRrcReconfigurationComplete(transactionId uint64) error {
-	ue.Info("Sending RRC Reconfiguration Complete with TransactionId=%d", transactionId)
+	ue.Info("Sending RRC Reconfiguration Complete (TransactionId=%d) on DU: %s",
+		transactionId, ue.GetActiveDUID())
 
 	tid := rrcies.RRC_TransactionIdentifier{Value: transactionId}
 
-	// Create RRC Reconfiguration Complete
 	rrcComplete := &rrcies.RRCReconfigurationComplete{
 		Rrc_TransactionIdentifier: tid,
 		CriticalExtensions: rrcies.RRCReconfigurationComplete_CriticalExtensions{
@@ -234,7 +238,6 @@ func (ue *UeContext) sendRrcReconfigurationComplete(transactionId uint64) error 
 		},
 	}
 
-	// Wrap in UL-DCCH-Message
 	ulDcchMsg := rrcies.UL_DCCH_Message{
 		Message: rrcies.UL_DCCH_MessageType{
 			Choice: rrcies.UL_DCCH_MessageType_Choice_C1,
@@ -251,8 +254,12 @@ func (ue *UeContext) sendRrcReconfigurationComplete(transactionId uint64) error 
 		return err
 	}
 
-	// Send to DU
-	ue.SendToDuChannel <- encoded
+	// Send on active connection — after SwitchActiveDU this is DU target
+	if err := ue.sendToActiveDU(encoded); err != nil {
+		ue.Error("Failed to send RRC Reconfiguration Complete: %v", err)
+		return err
+	}
+
 	ue.Info("RRC Reconfiguration Complete sent successfully")
 	return nil
 }
