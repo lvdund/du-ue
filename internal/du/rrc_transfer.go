@@ -1,6 +1,7 @@
 package du
 
 import (
+	"encoding/binary"
 	"fmt"
 
 	f1ap "github.com/JocelynWS/f1-gen"
@@ -15,13 +16,17 @@ func (du *DU) sendInitialULRRCMessageTransfer(rrcBytes []byte, duUeF1apId int64,
 	du.Info("Sending Initial UL RRC Message Transfer (DU-UE-ID=%d, C-RNTI=%d)", duUeF1apId, cRnti)
 
 	// Convert MCC/MNC to PLMN bytes
-	plmnBytes := convertMccMncToPlmn(du.Config.PLMN.MCC, du.Config.PLMN.MNC)
+	plmnBytes := ConvertMccMncToPlmn(du.Config.PLMN.MCC, du.Config.PLMN.MNC)
 
 	// Create NRCGI
+	// Convert NRCellIdentity uint64 to 5-byte/36-bit BitString
+	cellIdBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(cellIdBytes, du.Config.Cell.NRCellIdentity)
+	
 	nrcgi := ies.NRCGI{
 		PLMNIdentity: plmnBytes,
 		NRCellIdentity: aper.BitString{
-			Bytes:   []byte{0x0F, 0xFF, 0xFF, 0xFF, 0xFF},
+			Bytes:   cellIdBytes[3:], // Last 5 bytes for 36-40 bits
 			NumBits: 36,
 		},
 	}

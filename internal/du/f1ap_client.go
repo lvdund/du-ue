@@ -60,15 +60,15 @@ func (c *F1APClient) Connect() error {
 		return fmt.Errorf("resolve remote SCTP addr: %w", err)
 	}
 
-	// var localAddr *sctp.SCTPAddr
-	// if c.localAddr != "" && c.localPort > 0 {
-	// 	localAddr, err = sctp.ResolveSCTPAddr("sctp", fmt.Sprintf("%s:%d", c.localAddr, c.localPort))
-	// 	if err != nil {
-	// 		return fmt.Errorf("resolve local SCTP addr: %w", err)
-	// 	}
-	// }
+	var localAddr *sctp.SCTPAddr
+	if c.localAddr != "" && c.localPort > 0 {
+		localAddr, err = sctp.ResolveSCTPAddr("sctp", fmt.Sprintf("%s:%d", c.localAddr, c.localPort))
+		if err != nil {
+			return fmt.Errorf("resolve local SCTP addr: %w", err)
+		}
+	}
 
-	conn, err := sctp.DialSCTPExt("sctp", nil, remoteAddr, sctp.InitMsg{
+	conn, err := sctp.DialSCTPExt("sctp", localAddr, remoteAddr, sctp.InitMsg{
 		NumOstreams:    2,
 		MaxInstreams:   2,
 		MaxAttempts:    2,
@@ -118,12 +118,24 @@ func (c *F1APClient) Send(data []byte) error {
 		Stream: 0,
 	}
 
+	// [MOCK-CU] Check if this outgoing message triggers a mock CU response and should be blocked from reaching the real CU
+	if c.interceptOutgoingForMockCu(data) {
+		c.Debug("[MOCK-CU] Outgoing message intercepted and blocked from reaching real CU CP")
+		return nil
+	}
+
 	_, err := c.conn.SCTPWrite(data, info)
 	if err != nil {
 		return fmt.Errorf("SCTP write: %w", err)
 	}
 
 	return nil
+}
+
+// DispatchMockCuPdu pushes a synthetic PDU into the message handler
+func (c *F1APClient) DispatchMockCuPdu(data []byte) {
+	c.Info("[MOCK-CU] Injecting mock CU response into local dispatcher")
+	go c.handleMessage(data)
 }
 
 // ReadLoop reads messages from CU-CP
@@ -176,6 +188,17 @@ func (c *F1APClient) handleMessage(data []byte) error {
 			c.Info("Received F1 Setup Response")
 			if response, ok := pdu.Message.Msg.(*ies.F1SetupResponse); ok {
 				c.handleF1SetupResponse(response)
+			}
+		case ies.ProcedureCode_UEContextModification:
+			// [WORKAROUND] Vendor bug: Procedure 7 and 8 successful outcomes are swapped.
+			// Decoder might return UEContextModificationConfirm for Procedure 7.
+			if _, ok := pdu.Message.Msg.(*ies.UEContextModificationConfirm); ok {
+				c.Info("Received mis-encoded UE Context Modification Confirm (Procedure 7)")
+				if err := c.du.HandleUeContextModificationConfirm(&pdu); err != nil {
+					c.Error("Failed to handle mis-encoded UE Context Modification Confirm: %v", err)
+				}
+			} else {
+				c.Warn("Received SuccessfulOutcome for Procedure 7, but not a Confirm message")
 			}
 		case ies.ProcedureCode_UEContextModificationRequired:
 			c.Info("Received UE Context Modification Confirm (Handover Response)")
@@ -230,7 +253,7 @@ func (c *F1APClient) SendF1SetupRequest() error {
 	cfg := c.du.Config
 
 	// Convert MCC/MNC to PLMN bytes
-	plmnBytes := convertMccMncToPlmn(cfg.PLMN.MCC, cfg.PLMN.MNC)
+	plmnBytes := ConvertMccMncToPlmn(cfg.PLMN.MCC, cfg.PLMN.MNC)
 
 	// Create RRC Version (3 bits: 0x0c = 0b110 = RRC Release 15)
 	rrcVersion := ies.RRCVersion{
@@ -338,7 +361,7 @@ func (c *F1APClient) SendF1SetupRequest() error {
 	return c.Send(buf)
 }
 
-func convertMccMncToPlmn(mcc, mnc string) []byte {
+func ConvertMccMncToPlmn(mcc, mnc string) []byte {
 	// Reverse MCC and MNC (as done in central-unit)
 	reverse := func(s string) string {
 		var aux string

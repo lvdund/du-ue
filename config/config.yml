@@ -1,22 +1,52 @@
 logging:
   level: "info"
+  time_format: "15:04:05"
 
-du:
-  id: 1
-  name: "DU-UE-Simulator"
-  cucp_address: "192.168.10.3"
-  cucp_port: 38472
-  local_address: "192.168.10.1"
-  local_port: 0
-  plmn:
-    mcc: "001"
-    mnc: "01"
-  cell:
-    pci: 1
-    tac: "000001"
+dus:
+  - id: 1
+    ndu: 5
+    interval: "1s"
+    name: "DU-Simulator"
+    cucp_address: "192.168.10.3"
+    cucp_port: 38472
+    local_address: "192.168.10.1"
+    local_port: 0
+    plmn:
+      mcc: "001"
+      mnc: "01"
+    cell:
+      pci: 1
+      tac: "000001"
+      nr_cell_identity: 68719476735 # 0x0FFFFFFFFF
+      band: 78
+      nrarfcn: 632640
+    mock_cu:
+      enabled: true
+      tunnel_ip: "127.0.0.1"
+      teid_start: 1
+      ue_id_start: 1000
+      default_5qi: 9
+      default_rlc: 0 # RLC Mode AM (ies.RLCModeRlcam)
+      snssai_map:
+        - min_5qi: 1
+          max_5qi: 9
+          sst: "1"
+          sd: "000000"
+        - min_5qi: 82
+          max_5qi: 85
+          sst: "2"
+          sd: "000000"
+        - min_5qi: 10
+          max_5qi: 19
+          sst: "3"
+          sd: "000000"
+      dummy_id: 99
+      overloaded_pcis: [999]
 
 ue:
-  nue: 1
+  duid: "DU-Simulator-1" # Attaching to the first auto-generated DU
+  nue: 5
+  interval: "500ms"
   msin: "0000000001"
   key: "465B5CE8B199B49FAA5F0A2EE238A6BC"
   opc: "E8ED289DEBA952E4283B54E88E6183CA"
@@ -34,20 +64,15 @@ ue:
           delay: "2s"
 
         - type: "pdu_establishment"
-          delay: "5s"
+          delay: "10s"
           params:
             dnn: "internet"
         
         - type: "handover"
           delay: "20s"
 
-        # Commented out: PDU sessions won't complete without CU-CP fix
-        # (CU-CP needs to include UEContextRequest in NGAP InitialUEMessage)
-        # - type: "pdu_release"
-        #   delay: "30s"
+        - type: "du_pdu_release"
+          delay: "15s"
 
         - type: "deregistration"
-
-          delay: "32s"
-        
-
+          delay: "40s"

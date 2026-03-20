@@ -17,18 +17,41 @@ type Config struct {
 }
 
 type LoggingConfig struct {
-	Level string `yaml:"level"`
+	Level      string `yaml:"level"`
+	TimeFormat string `yaml:"time_format"`
 }
 
 type DUConfig struct {
 	ID        int64      `yaml:"id"`
+	NDU       int        `yaml:"ndu"`      // Number of DUs to auto-generate from this template
+	Interval  string     `yaml:"interval"` // Interval between auto-generated DUs
 	Name      string     `yaml:"name"`
 	CUCPAddr  string     `yaml:"cucp_address"`
 	CUCPPort  int        `yaml:"cucp_port"`
 	LocalAddr string     `yaml:"local_address"`
 	LocalPort int        `yaml:"local_port"`
-	PLMN      PLMNConfig `yaml:"plmn"`
-	Cell      CellConfig `yaml:"cell"`
+	PLMN      PLMNConfig   `yaml:"plmn"`
+	Cell      CellConfig   `yaml:"cell"`
+	MockCU    MockCUConfig `yaml:"mock_cu"`
+}
+
+type MockCUConfig struct {
+	Enabled    bool            `yaml:"enabled"`
+	TunnelIP   string          `yaml:"tunnel_ip"`
+	TeidStart  uint32          `yaml:"teid_start"`
+	UeIdStart  int64           `yaml:"ue_id_start"`
+	Default5QI int64           `yaml:"default_5qi"`
+	DefaultRLC int64           `yaml:"default_rlc"`
+	SnssaiMap     []SnssaiMapping `yaml:"snssai_map"`
+	DummyID       int64           `yaml:"dummy_id"`
+	OverloadedPCIs []int64         `yaml:"overloaded_pcis"`
+}
+
+type SnssaiMapping struct {
+	Min5QI int64  `yaml:"min_5qi"`
+	Max5QI int64  `yaml:"max_5qi"`
+	SST    string `yaml:"sst"`
+	SD     string `yaml:"sd"`
 }
 
 type PLMNConfig struct {
@@ -38,13 +61,15 @@ type PLMNConfig struct {
 
 type CellConfig struct {
 	PCI     uint16 `yaml:"pci"`
-	TAC     string `yaml:"tac"`
-	NRARFCN uint32 `yaml:"nrarfcn"`
-	Band    int64  `yaml:"band"`
+	TAC            string `yaml:"tac"`
+	NRARFCN        uint32 `yaml:"nrarfcn"`
+	Band           int64  `yaml:"band"`
+	NRCellIdentity uint64 `yaml:"nr_cell_identity"`
 }
 
 type UEConfig struct {
 	NUE        int          `yaml:"nue"`
+	Interval   string       `yaml:"interval"`    // Interval between each UE's scenario start
 	MSIN       string       `yaml:"msin"`        // Base MSIN, will increment for multiple UEs
 	Key        string       `yaml:"key"`         // K in hex
 	OP         string       `yaml:"op"`          // OP in hex (optional)
@@ -124,6 +149,43 @@ func Load(path string) (*Config, error) {
 		return nil, fmt.Errorf("parse config: %w", err)
 	}
 
+	// Expand DUs if NDU is specified
+	var expandedDUs []DUConfig
+	for _, baseDU := range cfg.DUs {
+		if baseDU.NDU <= 1 {
+			expandedDUs = append(expandedDUs, baseDU)
+			continue
+		}
+		for i := 0; i < baseDU.NDU; i++ {
+			newDU := baseDU
+			newDU.ID = baseDU.ID + int64(i)
+			newDU.Name = fmt.Sprintf("%s-%d", baseDU.Name, i+1)
+			newDU.Cell.PCI = uint16(int(baseDU.Cell.PCI) + i)
+			newDU.Cell.NRCellIdentity = baseDU.Cell.NRCellIdentity + uint64(i)
+
+			// Assign distinct explicit local ports (starting from 38400 if base is 0)
+			basePort := baseDU.LocalPort
+			if basePort == 0 {
+				basePort = 38400
+			}
+			newDU.LocalPort = basePort + i
+
+			// Adjust Mock CU ranges to avoid collisions
+			newDU.MockCU.TeidStart = baseDU.MockCU.TeidStart + uint32(i*1000)
+			newDU.MockCU.UeIdStart = baseDU.MockCU.UeIdStart + int64(i*1000)
+
+			expandedDUs = append(expandedDUs, newDU)
+		}
+	}
+	if len(expandedDUs) > 0 {
+		cfg.DUs = expandedDUs
+	}
+
+	// If DUs list is empty but single DU is configured, use it as default
+	if len(cfg.DUs) == 0 && cfg.DU.Name != "" {
+		cfg.DUs = []DUConfig{cfg.DU}
+	}
+
 	// Try to automatically load the crypto keys from etrib5gc generated yaml
 	if generatedUE, err := os.ReadFile("third_party/etrib5gc/util/ue-gen/ue_1.yaml"); err == nil {
 		var uegen struct {
@@ -163,21 +225,28 @@ func Load(path string) (*Config, error) {
 }
 
 func (c *Config) Validate() error {
-	if c.DU.Name == "" {
-		return fmt.Errorf("du.name is required")
+	if len(c.DUs) == 0 {
+		return fmt.Errorf("at least one DU configuration is required in 'dus' or 'du'")
 	}
-	if c.DU.CUCPAddr == "" {
-		return fmt.Errorf("du.cucp_address is required")
+	
+	for i, duCfg := range c.DUs {
+		if duCfg.Name == "" {
+			return fmt.Errorf("dus[%d].name is required", i)
+		}
+		if duCfg.CUCPAddr == "" {
+			return fmt.Errorf("dus[%d].cucp_address is required", i)
+		}
+		if duCfg.CUCPPort == 0 {
+			return fmt.Errorf("dus[%d].cucp_port is required", i)
+		}
+		if duCfg.PLMN.MCC == "" {
+			return fmt.Errorf("dus[%d].plmn.mcc is required", i)
+		}
+		if duCfg.PLMN.MNC == "" {
+			return fmt.Errorf("dus[%d].plmn.mnc is required", i)
+		}
 	}
-	if c.DU.CUCPPort == 0 {
-		return fmt.Errorf("du.cucp_port is required")
-	}
-	if c.DU.PLMN.MCC == "" {
-		return fmt.Errorf("du.plmn.mcc is required")
-	}
-	if c.DU.PLMN.MNC == "" {
-		return fmt.Errorf("du.plmn.mnc is required")
-	}
+
 	if c.UE.MSIN == "" {
 		return fmt.Errorf("ue.msin is required")
 	}

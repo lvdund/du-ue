@@ -19,6 +19,7 @@ type DuUeContext struct {
 	Srb2Active    bool
 	CuToDuRrcInfo []byte        // Cache CU-to-DU RRC constraints
 	SrbPriorities map[int64]int // Maps SRB ID to Scheduling Priority (1=Highest)
+	MockCuActive  bool          // If true, Mock CU handles this UE's F1AP/RRC instead of real CU-CP
 	mu            sync.RWMutex
 }
 

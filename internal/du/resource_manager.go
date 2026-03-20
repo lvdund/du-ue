@@ -80,3 +80,9 @@ func (rm *ResourceManager) AllocateTEID() (uint32, error) {
 	rm.teidCounter++
 	return rm.teidCounter, nil
 }
+// SetTeidCounter sets the starting value for TEID allocation
+func (rm *ResourceManager) SetTeidCounter(val uint32) {
+	rm.teidMu.Lock()
+	defer rm.teidMu.Unlock()
+	rm.teidCounter = val
+}

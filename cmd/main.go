@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	du_logger "du_ue/internal/common/logger"
 	"du_ue/internal/du"
 	"du_ue/pkg/config"
 
@@ -26,8 +27,11 @@ func main() {
 	}
 
 	// Initialize logger
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	if cfg.Logging.TimeFormat != "" {
+		du_logger.SetTimeFormat(cfg.Logging.TimeFormat)
+	}
+	zerolog.TimeFieldFormat = "2006-01-02 15:04:05"
+	log.Logger = log.Output(du_logger.NewConsoleWriter())
 
 	// Set log level from config
 	level, err := zerolog.ParseLevel(cfg.Logging.Level)
@@ -38,27 +42,65 @@ func main() {
 
 	log.Info().Msg("Starting DU-UE Simulator")
 
-	// Create DU simulator
-	duSim, err := du.NewDU(cfg)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create DU simulator")
-	}
+	// Create DU simulators
+	dus := make(map[string]*du.DU)
+	for i, duCfg := range cfg.DUs {
+		duSim, err := du.NewDU(&cfg.DUs[i], &cfg.UE)
+		if err != nil {
+			log.Fatal().Err(err).Msgf("Failed to create DU simulator %s", duCfg.Name)
+		}
+		
+		dus[duCfg.Name] = duSim
 
-	// Start DU simulator
-	if err := duSim.Start(); err != nil {
-		log.Fatal().Err(err).Msg("Failed to start DU simulator")
+		// Start DU simulator
+		if err := duSim.Start(); err != nil {
+			log.Fatal().Err(err).Msgf("Failed to start DU simulator %s", duCfg.Name)
+		}
+
+		// Stagger DU starts if interval is configured
+		if i < len(cfg.DUs)-1 && duCfg.Interval != "" {
+			if interval, err := time.ParseDuration(duCfg.Interval); err == nil && interval > 0 {
+				log.Info().Msgf("Waiting %v before starting next DU...", interval)
+				time.Sleep(interval)
+			}
+		}
 	}
 
 	_, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	go func() {
-		for duSim.State != du.DU_ACTIVE {
+		// Wait for ALL DUs to become Active
+		for {
+			allActive := true
+			for _, duSim := range dus {
+				if duSim.State != du.DU_ACTIVE {
+					allActive = false
+					break
+				}
+			}
+			if allActive {
+				break
+			}
 			time.Sleep(100 * time.Millisecond)
 		}
 
-		log.Info().Msg("DU became ACTIVE. Starting Initial Access for configured UEs...")
-		duSim.StartInitialAccess(cfg)
+		log.Info().Msg("All DUs became ACTIVE. Starting Initial Access for configured UEs...")
+		
+		// Find the initial DU to attach UEs to
+		initialDuName := cfg.UE.DUID
+		initialDu, exists := dus[initialDuName]
+		if !exists {
+			log.Warn().Msgf("Initial DU '%s' not found. Falling back to first available DU.", initialDuName)
+			for _, d := range dus {
+				initialDu = d
+				break
+			}
+		}
+
+		if initialDu != nil {
+			initialDu.StartInitialAccess(&cfg.UE)
+		}
 	}()
 
 	// Wait for interrupt signal
@@ -70,9 +112,11 @@ func main() {
 	// Block until interrupt signal is received
 	<-sigChan
 
-	log.Info().Msg("Shutting down DU-UE Simulator")
+	log.Info().Msg("Shutting down DU-UE Simulators")
 
-	duSim.Stop()
+	for _, duSim := range dus {
+		duSim.Stop()
+	}
 	cancel()
 
 	log.Info().Msg("Shutdown complete")

@@ -39,28 +39,30 @@ type UeChannel struct {
 }
 
 // NewDU creates a new DU simulator instance
-// Update NewDU to initialize handover context:
-func NewDU(cfg *config.Config) (*DU, error) {
+func NewDU(duCfg *config.DUConfig, ueCfg *config.UEConfig) (*DU, error) {
 	du := &DU{
-		ID:       cfg.DU.ID,
-		Name:     cfg.DU.Name,
+		ID:       duCfg.ID,
+		Name:     duCfg.Name,
 		State:    DU_INACTIVE,
-		Config:   &cfg.DU,
-		UEConfig: &cfg.UE,
+		Config:   duCfg,
+		UEConfig: ueCfg,
 		Logger: logger.InitLogger("info", map[string]string{
 			"mod":   "du",
-			"du_id": fmt.Sprintf("%d", cfg.DU.ID),
+			"du_id": fmt.Sprintf("%d", duCfg.ID),
 		}),
 	}
 
 	// Create F1AP client
-	f1Client, err := NewF1APClient(cfg.DU.CUCPAddr, cfg.DU.CUCPPort, cfg.DU.LocalAddr, cfg.DU.LocalPort, du)
+	f1Client, err := NewF1APClient(duCfg.CUCPAddr, duCfg.CUCPPort, duCfg.LocalAddr, duCfg.LocalPort, du)
 	if err != nil {
 		return nil, fmt.Errorf("create F1AP client: %w", err)
 	}
 	du.f1Client = f1Client
 	du.ueMgr = NewUeManager()
 	du.resourceMgr = NewResourceManager()
+	if du.Config.MockCU.TeidStart > 0 {
+		du.resourceMgr.SetTeidCounter(du.Config.MockCU.TeidStart)
+	}
 
 	du.lastDuUeF1apId = 0
 
@@ -178,20 +180,23 @@ func (du *DU) OnF1SetupResponse() {
 }
 
 // StartInitialAccess starts the Multi-UE Initial Access flow asynchronously
-func (du *DU) StartInitialAccess(cfg *config.Config) {
-	nue := cfg.UE.NUE
-	baseMSIN, _ := strconv.ParseUint(cfg.UE.MSIN, 10, 64)
+func (du *DU) StartInitialAccess(ueCfg *config.UEConfig) {
+	nue := ueCfg.NUE
+	baseMSIN, _ := strconv.ParseUint(ueCfg.MSIN, 10, 64)
 
 	du.Info("Starting Initial Access for %d UEs", nue)
 
+	var wg sync.WaitGroup
 	for i := 0; i < nue; i++ {
 		msin := fmt.Sprintf("%010d", baseMSIN+uint64(i))
 
 		// Create a copy of UEConfig for this specific UE
-		ueConf := cfg.UE
+		ueConf := *ueCfg
 		ueConf.MSIN = msin
 
+		wg.Add(1)
 		go func(ueIndex int, conf config.UEConfig) {
+			defer wg.Done()
 			// 1. Allocate DU-UE F1AP ID and C-RNTI
 			duUeF1apId := du.allocateDuUeF1apId()
 			cRnti, _ := du.resourceMgr.AllocateCRNTI()
@@ -232,17 +237,36 @@ func (du *DU) StartInitialAccess(cfg *config.Config) {
 			du.Info("[UE %s] RRC Connection Established successfully", conf.MSIN)
 
 			// 6. Execute Scenarios
-			du.executeScenarios(ueCtx, ueIndex, nue, cfg.UE.Scenarios)
+			du.executeScenarios(ueCtx, ueIndex, nue, ueCfg.Scenarios)
 
 		}(i, ueConf)
 
 		// Stagger UE launches to avoid overwhelming the AMF proxy
 		time.Sleep(1 * time.Second)
 	}
+
+	// Wait for all UEs to finish their scenarios in a separate goroutine
+	// so we don't block the caller of StartInitialAccess (main loop)
+	go func() {
+		wg.Wait()
+		du.Info("=========================================================")
+		du.Info("[SIMULATION] === ALL SCENARIOS COMPLETE FOR ALL UEs ===")
+		du.Info("=========================================================")
+	}()
 }
 
 func (du *DU) executeScenarios(ue *uecontext.UeContext, ueIndex int, totalUEs int, scenarios []config.UEScenario) {
 	msin := ue.GetMsin()
+	var ueWg sync.WaitGroup
+
+	// Find DU-side UE context to get F1AP IDs
+	var duUeCtx *DuUeContext
+	for _, c := range du.ueMgr.GetAllContexts() {
+		if c.UeChannel.UE == ue {
+			duUeCtx = c
+			break
+		}
+	}
 
 	for _, scenario := range scenarios {
 		if !scenario.ShouldApplyToUE(msin, ueIndex, totalUEs) {
@@ -254,7 +278,9 @@ func (du *DU) executeScenarios(ue *uecontext.UeContext, ueIndex int, totalUEs in
 		for _, event := range scenario.Events {
 			delay, _ := event.ParseDelay()
 
+			ueWg.Add(1)
 			go func(ev config.EventEntry, d time.Duration) {
+				defer ueWg.Done()
 				time.Sleep(d)
 				du.Info("[UE %s] Executing delayed event: %s", msin, ev.Type)
 
@@ -267,6 +293,13 @@ func (du *DU) executeScenarios(ue *uecontext.UeContext, ueIndex int, totalUEs in
 					ue.TriggerPduSession()
 				case "pdu_release":
 					ue.TriggerReleaseAllPduSessions()
+				case "du_pdu_release":
+					// DRB ID 1 is the default for the first PDU session
+					if duUeCtx != nil {
+						du.TriggerDuInitiatedModification(duUeCtx.DuUeF1apId, 1)
+					} else {
+						du.Error("[UE %s] Cannot trigger DU-initiated modification: context not found", msin)
+					}
 				case "deregistration":
 					ue.Terminate()
 				case "handover":
@@ -276,6 +309,8 @@ func (du *DU) executeScenarios(ue *uecontext.UeContext, ueIndex int, totalUEs in
 			}(event, delay)
 		}
 	}
+	// Wait for all events for THIS UE to finish before returning
+	ueWg.Wait()
 }
 
 func (du *DU) SetUEChannelForTest(ue *UeChannel) {

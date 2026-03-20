@@ -1,7 +1,6 @@
 package du
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 
@@ -369,61 +368,21 @@ func (du *DU) sendUeContextModificationResponse(cuUeId, duUeId int64, drbsSetupL
 	// Always provide at least one dummy item for list fields if they are empty
 	if len(drbsSetupList) > 0 {
 		msg.DRBsSetupModList = drbsSetupList
-	} else {
-		msg.DRBsSetupModList = []ies.DRBsSetupModItem{
-			{
-				DRBID: 1,
-				DLUPTNLInformationToBeSetupList: []ies.DLUPTNLInformationToBeSetupItem{
-					{
-						DLUPTNLInformation: ies.UPTransportLayerInformation{
-							Choice: ies.UPTransportLayerInformationPresentGTPTunnel,
-							GTPTunnel: &ies.GTPTunnel{
-								TransportLayerAddress: aper.BitString{Bytes: []byte{0, 0, 0, 0}, NumBits: 32},
-								GTPTEID:               []byte{0, 0, 0, 0},
-							},
-						},
-					},
-				},
-			},
-		}
 	}
 
 	if len(drbsModifiedList) > 0 {
 		msg.DRBsModifiedList = drbsModifiedList
-	} else {
-		msg.DRBsModifiedList = []ies.DRBsModifiedItem{
-			{
-				DRBID: 1,
-				DLUPTNLInformationToBeSetupList: []ies.DLUPTNLInformationToBeSetupItem{
-					{
-						DLUPTNLInformation: ies.UPTransportLayerInformation{
-							Choice: ies.UPTransportLayerInformationPresentGTPTunnel,
-							GTPTunnel: &ies.GTPTunnel{
-								TransportLayerAddress: aper.BitString{Bytes: []byte{0, 0, 0, 0}, NumBits: 32},
-								GTPTEID:               []byte{0, 0, 0, 0},
-							},
-						},
-					},
-				},
-			},
-		}
 	}
 
 	if len(srbsSetupList) > 0 {
 		msg.SRBsSetupModList = srbsSetupList
-	} else {
-		msg.SRBsSetupModList = []ies.SRBsSetupModItem{
-			{
-				SRBID: 1,
-			},
-		}
 	}
 
-	var buf bytes.Buffer
-	if err := msg.Encode(&buf); err != nil {
+	// Use manual encoder to workaround vendor bug (Procedure 7/8 swapped)
+	f1apBytes, err := EncodeUEContextModificationResponse(msg)
+	if err != nil {
 		return fmt.Errorf("encode UE Context Modification Response: %w", err)
 	}
-	f1apBytes := buf.Bytes()
 
 	// Send only if f1Client is available (for testing)
 	if du.f1Client != nil {
@@ -511,6 +470,8 @@ func (du *DU) sendUeContextModificationRequired(ctx *DuUeContext, targetPci int6
 	duUeF1apId := ctx.DuUeF1apId
 	ctx.HoCtx.mutex.RUnlock()
 
+	dummyId := du.Config.MockCU.DummyID
+
 	// Create UE Context Modification Required message
 	msg := &ies.UEContextModificationRequired{
 		GNBCUUEF1APID: cuUeF1apId,
@@ -522,21 +483,38 @@ func (du *DU) sendUeContextModificationRequired(ctx *DuUeContext, targetPci int6
 		CellGroupConfig: []byte{},
 	}
 
-	// 2. Mandatory Empty Lists (Satisfying F1AP requirements)
-	msg.DRBsRequiredToBeModifiedList = []ies.DRBsRequiredToBeModifiedItem{{}}
-	msg.SRBsRequiredToBeReleasedList = []ies.SRBsRequiredToBeReleasedItem{{}}
-	msg.DRBsRequiredToBeReleasedList = []ies.DRBsRequiredToBeReleasedItem{{}}
-	msg.BHChannelsRequiredToBeReleasedList = []ies.BHChannelsRequiredToBeReleasedItem{{}}
-	msg.SLDRBsRequiredToBeModifiedList = []ies.SLDRBsRequiredToBeModifiedItem{{}}
-	msg.SLDRBsRequiredToBeReleasedList = []ies.SLDRBsRequiredToBeReleasedItem{{}}
-	msg.TargetCellsToCancel = []ies.TargetCellListItem{{}}
+	// 2. Mandatory Empty Lists (Satisfying F1AP requirements with configured dummy ID)
+	msg.DRBsRequiredToBeModifiedList = []ies.DRBsRequiredToBeModifiedItem{{DRBID: dummyId}}
+	msg.SRBsRequiredToBeReleasedList = []ies.SRBsRequiredToBeReleasedItem{{SRBID: dummyId}}
+	msg.DRBsRequiredToBeReleasedList = []ies.DRBsRequiredToBeReleasedItem{{DRBID: dummyId}}
+	msg.BHChannelsRequiredToBeReleasedList = []ies.BHChannelsRequiredToBeReleasedItem{
+		{BHRLCChannelID: aper.BitString{Bytes: []byte{0x00, 0x00}, NumBits: 16}},
+	}
+	msg.SLDRBsRequiredToBeModifiedList = []ies.SLDRBsRequiredToBeModifiedItem{{SLDRBID: dummyId}}
+	msg.SLDRBsRequiredToBeReleasedList = []ies.SLDRBsRequiredToBeReleasedItem{{SLDRBID: dummyId}}
+	msg.TargetCellsToCancel = []ies.TargetCellListItem{
+		{
+			TargetCell: ies.NRCGI{
+				PLMNIdentity: []byte{0x00, 0x01, 0x01},
+				NRCellIdentity: aper.BitString{
+					Bytes:   []byte{0x00, 0x00, 0x00, 0x00, 0x00},
+					NumBits: 36,
+				},
+			},
+		},
+	}
 
 	// 3. Other Mandatory Fields
-	msg.Cause = ies.Cause{}
-
-	// Note: CandidateSpCellList is currently missing in the generated library, skipping.
+	msg.Cause = ies.Cause{
+		Choice: ies.CausePresentRadioNetwork,
+		RadioNetwork: &ies.CauseRadioNetwork{
+			Value: ies.CauseRadioNetworkNoradioresourcesavailable,
+		},
+	}
 
 	// Encode
+	// We use the library's encoder directly. Previous attempts to manually wrap 
+	// resulted in double-wrapping and decoding errors at the CU-CP.
 	f1apBytes, err := f1ap.F1apEncode(msg)
 	if err != nil {
 		du.Warn("Failed to encode UE Context Modification Required (simulated): %v", err)
@@ -598,3 +576,108 @@ func (du *DU) HandleUeContextModificationConfirm(f1apPdu *f1ap.F1apPdu) error {
 
 	return nil
 }
+
+// TriggerDuInitiatedModification simulates a DU internal decision to modify a UE context (ORAN 6.3.2)
+// Specifically, it triggers the release of a DRB by sending UE Context Modification Required.
+func (du *DU) TriggerDuInitiatedModification(duUeF1apId int64, drbId int64) error {
+	du.Info("[UE %d] Triggering DU-Initiated Modification (Release DRB %d)", duUeF1apId, drbId)
+
+	// Find UE Context
+	ctx := du.ueMgr.GetContextByDuId(duUeF1apId)
+	if ctx == nil {
+		du.Error("UE context not found (DU-UE-ID=%d)", duUeF1apId)
+		return fmt.Errorf("UE context not found")
+	}
+
+	dummyId := du.Config.MockCU.DummyID
+
+	// Create UE Context Modification Required message
+	msg := &ies.UEContextModificationRequired{
+		GNBCUUEF1APID: ctx.CuUeF1apId,
+		GNBDUUEF1APID: ctx.DuUeF1apId,
+	}
+
+	// 1. Mandatory RRC Container (CellGroupConfig)
+	msg.DUtoCURRCInformation = &ies.DUtoCURRCInformation{
+		CellGroupConfig: []byte{0x00},
+	}
+
+	// 2. Populate DRBsRequiredToBeReleasedList
+	msg.DRBsRequiredToBeReleasedList = []ies.DRBsRequiredToBeReleasedItem{
+		{
+			DRBID: drbId,
+		},
+	}
+
+	// 3. Other Mandatory Fields (Satisfying F1AP requirements with configured dummy items)
+	msg.DRBsRequiredToBeModifiedList = []ies.DRBsRequiredToBeModifiedItem{
+		{
+			DRBID: dummyId,
+			DLUPTNLInformationToBeSetupList: []ies.DLUPTNLInformationToBeSetupItem{
+				{
+					DLUPTNLInformation: ies.UPTransportLayerInformation{
+						Choice: ies.UPTransportLayerInformationPresentGTPTunnel,
+						GTPTunnel: &ies.GTPTunnel{
+							TransportLayerAddress: aper.BitString{
+								Bytes:   []byte{127, 0, 0, 1},
+								NumBits: 32,
+							},
+							GTPTEID: []byte{0x00, 0x00, 0x00, 0x01},
+						},
+					},
+				},
+			},
+		},
+	}
+	msg.SRBsRequiredToBeReleasedList = []ies.SRBsRequiredToBeReleasedItem{
+		{SRBID: dummyId},
+	}
+	msg.BHChannelsRequiredToBeReleasedList = []ies.BHChannelsRequiredToBeReleasedItem{
+		{
+			BHRLCChannelID: aper.BitString{
+				Bytes:   []byte{0x00, 0x00},
+				NumBits: 16,
+			},
+		},
+	}
+	msg.SLDRBsRequiredToBeModifiedList = []ies.SLDRBsRequiredToBeModifiedItem{
+		{SLDRBID: dummyId},
+	}
+	msg.SLDRBsRequiredToBeReleasedList = []ies.SLDRBsRequiredToBeReleasedItem{
+		{SLDRBID: dummyId},
+	}
+	msg.TargetCellsToCancel = []ies.TargetCellListItem{
+		{
+			TargetCell: ies.NRCGI{
+				PLMNIdentity: ConvertMccMncToPlmn(du.Config.PLMN.MCC, du.Config.PLMN.MNC),
+				NRCellIdentity: aper.BitString{
+					Bytes:   []byte{0x00, 0x00, 0x00, 0x00, 0x00},
+					NumBits: 36,
+				},
+			},
+		},
+	}
+
+	msg.Cause = ies.Cause{
+		Choice: ies.CausePresentRadioNetwork,
+		RadioNetwork: &ies.CauseRadioNetwork{
+			Value: ies.CauseRadioNetworkNoradioresourcesavailable,
+		},
+	}
+
+	// Encode
+	f1apBytes, err := f1ap.F1apEncode(msg)
+	if err != nil {
+		du.Error("Failed to encode UE Context Modification Required: %v", err)
+		return err
+	}
+
+	// Send
+	if du.f1Client != nil {
+		return du.f1Client.Send(f1apBytes)
+	}
+
+	du.Info("F1 client not available, skipping send (test mode)")
+	return nil
+}
+

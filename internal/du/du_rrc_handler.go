@@ -1,7 +1,6 @@
 package du
 
 import (
-	"github.com/lvdund/rrc"
 	rrcies "github.com/lvdund/rrc/ies"
 )
 
@@ -11,31 +10,25 @@ func (du *DU) HandleRrcFromUE(ctx *DuUeContext) {
 
 	var isInitialMessage bool = true // First message is Initial UL RRC Message Transfer
 
-	for {
-		select {
-		case rrcBytes, ok := <-ctx.UeChannel.ReceiveFromUeChannel:
-			if !ok {
-				du.Warn("[UE %d] ReceiveFromUeChannel closed, stopping RRC handler", ctx.DuUeF1apId)
-				return
+	for rrcBytes := range ctx.UeChannel.ReceiveFromUeChannel {
+		// Intercept and handle specific RRC messages, and determine SRB ID
+		srbID := du.processAndGetSrbID(ctx, rrcBytes)
+
+		if isInitialMessage {
+			// First RRC message (RRCSetupRequest) -> Initial UL RRC Message Transfer
+			if err := du.sendInitialULRRCMessageTransfer(rrcBytes, ctx.DuUeF1apId, ctx.CRnti); err != nil {
+				du.Error("[UE %d] Failed to send Initial UL RRC Message Transfer: %v", ctx.DuUeF1apId, err)
 			}
-
-			// Intercept and handle specific RRC messages, and determine SRB ID
-			srbID := du.processAndGetSrbID(ctx, rrcBytes)
-
-			if isInitialMessage {
-				// First RRC message (RRCSetupRequest) -> Initial UL RRC Message Transfer
-				if err := du.sendInitialULRRCMessageTransfer(rrcBytes, ctx.DuUeF1apId, ctx.CRnti); err != nil {
-					du.Error("[UE %d] Failed to send Initial UL RRC Message Transfer: %v", ctx.DuUeF1apId, err)
-				}
-				isInitialMessage = false
-			} else {
-				// Subsequent RRC messages -> UL RRC Message Transfer
-				if err := du.sendULRRCMessageTransfer(rrcBytes, ctx.CuUeF1apId, ctx.DuUeF1apId, srbID); err != nil {
-					du.Error("[UE %d] Failed to send UL RRC Message Transfer: %v", ctx.DuUeF1apId, err)
-				}
+			isInitialMessage = false
+		} else {
+			// Subsequent RRC messages -> UL RRC Message Transfer
+			if err := du.sendULRRCMessageTransfer(rrcBytes, ctx.CuUeF1apId, ctx.DuUeF1apId, srbID); err != nil {
+				du.Error("[UE %d] Failed to send UL RRC Message Transfer: %v", ctx.DuUeF1apId, err)
 			}
 		}
 	}
+
+	du.Warn("[UE %d] ReceiveFromUeChannel closed, stopping RRC handler", ctx.DuUeF1apId)
 }
 
 // processAndGetSrbID peeks into RRC messages to trigger DU logic and returns the appropriate SRB ID
@@ -45,7 +38,7 @@ func (du *DU) processAndGetSrbID(ctx *DuUeContext, rrcBytes []byte) int64 {
 
 	// Attempt to decode as UL-DCCH (most common for signaling after setup)
 	var ulDcchMsg rrcies.UL_DCCH_Message
-	if err := rrc.Decode(rrcBytes, &ulDcchMsg); err != nil {
+	if err := ManualDecodeULDCCHBuggy(rrcBytes, &ulDcchMsg); err != nil {
 		// Not a DCCH message (likely CCCH/RRCSetupRequest), retain default or handle if needed
 		return srbID
 	}
@@ -69,15 +62,8 @@ func (du *DU) processAndGetSrbID(ctx *DuUeContext, rrcBytes []byte) int64 {
 		du.HandleRrcReconfigurationComplete(ctx)
 		// Reconfig Complete goes on SRB1
 	case rrcies.UL_DCCH_MessageType_C1_Choice_UlInformationTransfer:
-		// piggybacked NAS message -> SRB2 (if AS security is active, which it typically is for this message)
-		// For now, we assume if we see this, we use SRB2
+		// piggybacked NAS message -> SRB2
 		srbID = 2
-
-		// Mock CU-CP: Intercept PDU Session Establishment Requests and inject fake response
-		if c1.UlInformationTransfer != nil {
-			du.Info("[UE %d] Parsing UlInformationTransfer to detect PDU session requests...", ctx.DuUeF1apId)
-			du.detectPduSessionRequest(ctx, c1.UlInformationTransfer)
-		}
 	}
 
 	return srbID
@@ -112,14 +98,14 @@ func (du *DU) handleMeasurementReport(ctx *DuUeContext, report *rrcies.Measureme
 
 	ext := report.CriticalExtensions.MeasurementReport
 	if ext == nil {
-		du.Debug("MeasurementReport extension is nil")
+		du.Info("MeasurementReport extension is nil (Choice: %d)", report.CriticalExtensions.Choice)
 		return
 	}
 
 	// 1. Get Serving Cell RSRP
 	measResults := ext.MeasResults
 	if len(measResults.MeasResultServingMOList.Value) == 0 {
-		du.Debug("No serving cell results")
+		du.Info("No serving cell results")
 		return
 	}
 	servingCell := measResults.MeasResultServingMOList.Value[0]
@@ -129,14 +115,14 @@ func (du *DU) handleMeasurementReport(ctx *DuUeContext, report *rrcies.Measureme
 
 	// 2. Check Neighbor Cells
 	if measResults.MeasResultNeighCells == nil {
-		du.Debug("No neighbor cells")
+		du.Info("No neighbor cells")
 		return
 	}
 
 	// We only support MeasResultListNR for now
 	if measResults.MeasResultNeighCells.Choice != rrcies.MeasResults_measResultNeighCells_Choice_MeasResultListNR ||
 		measResults.MeasResultNeighCells.MeasResultListNR == nil {
-		du.Debug("Neighbors not ListNR format")
+		du.Info("Neighbors not ListNR format (Choice: %d)", measResults.MeasResultNeighCells.Choice)
 		return
 	}
 
@@ -177,9 +163,10 @@ func (du *DU) isValidNeighbor(pci int64) bool {
 
 // checkAdmissionControl simulates load checking on the target cell
 func (du *DU) checkAdmissionControl(pci int64) bool {
-	// Simulate overloaded cell for PCI 999
-	if pci == 999 {
-		return false
+	for _, overloaded := range du.Config.MockCU.OverloadedPCIs {
+		if pci == overloaded {
+			return false
+		}
 	}
 	return true
 }

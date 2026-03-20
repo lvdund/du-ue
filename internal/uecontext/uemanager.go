@@ -124,22 +124,27 @@ func (mgr *UEManager) applyScenarios(ue *UeContext, ueIndex int, totalUEs int) e
 
 		mgr.Info("Applying scenario '%s' to UE %s", scenario.Name, msin)
 
+		interval, _ := time.ParseDuration(mgr.config.UE.Interval)
 		for _, eventEntry := range scenario.Events {
 			delay, err := eventEntry.ParseDelay()
 			if err != nil {
 				return fmt.Errorf("invalid delay for event %s: %w", eventEntry.Type, err)
 			}
 
+			// Add staggered interval based on UE index
+			staggeredDelay := delay + time.Duration(ueIndex)*interval
+
 			eventType := EventType(strings.ToUpper(strings.TrimSpace(eventEntry.Type)))
 
 			eventInfo := EventInfo{
 				EventType: eventType,
-				Delay:     delay,
+				Delay:     staggeredDelay,
 				Params:    eventEntry.Params,
 			}
 
 			ue.TriggerEvents(eventInfo)
-			mgr.Info("Scheduled event '%s' for UE %s with delay %v", eventEntry.Type, msin, delay)
+			mgr.Info("Scheduled event '%s' for UE %s with total delay %v (base: %v + stagger: %v)",
+				eventEntry.Type, msin, staggeredDelay, delay, time.Duration(ueIndex)*interval)
 		}
 	}
 
